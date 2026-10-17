@@ -14,17 +14,17 @@
     ];
 @endphp
 
-<nav aria-label="مسیر صفحه" {{ $attributes->class(['text-sm text-ink-soft']) }}>
-    <ol class="flex flex-wrap items-center gap-1.5">
+<nav aria-label="مسیر صفحه" {{ $attributes->class(['text-[13px]']) }}>
+    <ol class="glass inline-flex max-w-full flex-wrap items-center gap-1 rounded-full px-4 py-2">
         @foreach ($trail as $label => $url)
-            <li class="flex items-center gap-1.5">
+            <li class="flex items-center gap-1">
                 @if (! $loop->first)
-                    <span class="text-line" aria-hidden="true">/</span>
+                    <svg class="size-3 text-subtle" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M12.8 4.2a.75.75 0 0 1 0 1.06L8.06 10l4.74 4.74a.75.75 0 1 1-1.06 1.06l-5.27-5.27a.75.75 0 0 1 0-1.06l5.27-5.27a.75.75 0 0 1 1.06 0Z"/></svg>
                 @endif
                 @if ($url && ! $loop->last)
-                    <a href="{{ $url }}" class="hover:text-glaze">{{ $label }}</a>
+                    <a href="{{ $url }}" class="text-muted transition hover:text-rose">{{ $label }}</a>
                 @else
-                    <span aria-current="page" class="text-ink">{{ $label }}</span>
+                    <span aria-current="page" class="line-clamp-1 font-bold text-navy">{{ $label }}</span>
                 @endif
             </li>
         @endforeach

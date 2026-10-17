@@ -1,99 +1,271 @@
 {{-- Home | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @extends('layouts.app')
 
-@section('title', 'لوازم آشپزخانه و اکسسوری خانه')
-@section('meta_description', 'خرید قابلمه، ماهیتابه، سرویس غذاخوری و اکسسوری خانه از برندهای گلدکیش و ریتون با ارسال به سراسر ایران.')
+@php
+    use App\Core\Support\Money;
+    use App\Core\Support\PersianText;
+    $store = config('khaneh.store');
+@endphp
+
+@section('title', 'لوازم آشپزخانه، سرو و پذیرایی و اکسسوری دکوراتیو')
+@section('meta_description', 'فروشگاه اینترنتی خانه رمانتیک؛ مرجع تخصصی لوازم و اکسسوری خانه و آشپزخانه با ضمانت اصالت کالا و ارسال به سراسر ایران.')
 @section('canonical', url('/'))
 
 @push('head')
     <script type="application/ld+json">{!! json_encode([
         '@context' => 'https://schema.org',
-        '@type' => 'WebSite',
-        'name' => 'خانه رمانتیک',
-        'url' => url('/'),
-        'potentialAction' => [
-            '@type' => 'SearchAction',
-            'target' => route('catalog.search').'?q={search_term_string}',
-            'query-input' => 'required name=search_term_string',
+        '@graph' => [
+            ['@type' => 'WebSite', 'name' => $store['name'], 'url' => url('/'), 'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => route('catalog.search').'?q={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ]],
+            ['@type' => 'Store', 'name' => $store['name'], 'url' => url('/'), 'telephone' => $store['phone'], 'email' => $store['email'],
+             'address' => ['@type' => 'PostalAddress', 'streetAddress' => $store['address'], 'addressLocality' => 'تهران', 'addressCountry' => 'IR']],
         ],
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endpush
 
 @section('content')
-    {{-- Hero: managed banner if one is live, typographic fallback otherwise --}}
-    <section class="mx-auto max-w-7xl px-4 pt-6">
-        <x-placement key="home.hero" />
+    <div class="mx-auto max-w-7xl space-y-20 px-3 pt-5 sm:px-4 sm:pt-6">
 
-        @if (! \Modules\Placement\Models\Placement::hasLive('home.hero'))
-            <div class="relative overflow-hidden rounded-[calc(var(--radius-tile)*1.5)] bg-glaze-deep px-6 py-14 text-white sm:px-12 sm:py-20">
-                <x-khatam class="pointer-events-none absolute -end-16 -top-16 size-80 text-white/10" />
-                <x-khatam class="pointer-events-none absolute end-40 -bottom-24 size-56 text-white/5" />
-                <p class="text-sm font-medium text-mist">گلدکیش · ریتون</p>
-                <h1 class="mt-3 max-w-2xl font-display text-4xl leading-[1.2] sm:text-6xl sm:leading-[1.15]">آشپزخانه‌ای که دلت می‌خواهد در آن بمانی</h1>
-                <p class="mt-5 max-w-xl leading-8 text-white/80">قابلمه، ماهیتابه، سرویس غذاخوری و هر چه برای چیدن یک خانه گرم لازم داری، از برندهایی که سال‌ها در آشپزخانه‌های ایرانی جا افتاده‌اند.</p>
-                @if ($categories->isNotEmpty())
-                    <a href="{{ $categories->first()->url() }}" class="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-bold text-glaze-deep hover:bg-mist">
-                        دیدن {{ $categories->first()->name }}
-                        <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M12.8 4.2a.75.75 0 0 1 0 1.06L8.06 10l4.74 4.74a.75.75 0 1 1-1.06 1.06l-5.27-5.27a.75.75 0 0 1 0-1.06l5.27-5.27a.75.75 0 0 1 1.06 0Z"/></svg>
-                    </a>
-                @endif
-            </div>
+        {{-- ── Hero: banner slider + special offer ─────────────────────── --}}
+        <section @class(['grid gap-4', 'lg:grid-cols-[1fr_20rem]' => $special && $specialVariant]) aria-label="پیشنهادهای ویژه">
+            @if ($heroBanners->isNotEmpty())
+                <div x-data="slider({{ $heroBanners->count() }})" @mouseenter="stop()" @mouseleave="play()" @focusin="stop()"
+                     class="glass relative overflow-hidden rounded-[var(--radius-glass)] p-1.5" aria-roledescription="carousel">
+                    <div class="relative overflow-hidden rounded-[1.2rem]">
+                        @foreach ($heroBanners as $banner)
+                            <a href="{{ $banner->link_url ?? '#' }}" x-show="active === {{ $loop->index }}" @if (! $loop->first) x-cloak @endif
+                               x-transition:enter="transition duration-700 ease-out" x-transition:enter-start="opacity-0 scale-[1.02]"
+                               class="block" aria-roledescription="slide" aria-label="{{ $loop->iteration }} از {{ $loop->count }}">
+                                <picture>
+                                    @if ($banner->mobileMedia)
+                                        <source media="(max-width: 767px)" srcset="{{ $banner->mobileMedia->url() }}">
+                                    @endif
+                                    @if ($banner->desktopMedia)
+                                        <img src="{{ $banner->desktopMedia->url() }}" alt="{{ $banner->alt }}" class="aspect-[4/5] w-full object-cover sm:aspect-[12/5]"
+                                             @if ($banner->desktopMedia->width) width="{{ $banner->desktopMedia->width }}" height="{{ $banner->desktopMedia->height }}" @endif
+                                             loading="{{ $loop->first ? 'eager' : 'lazy' }}" @if ($loop->first) fetchpriority="high" @endif>
+                                    @endif
+                                </picture>
+                            </a>
+                        @endforeach
+                    </div>
+                    @if ($heroBanners->count() > 1)
+                        <div class="glass absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full px-2.5 py-2">
+                            @foreach ($heroBanners as $banner)
+                                <button type="button" @click="go({{ $loop->index }})" class="h-2 rounded-full transition-all"
+                                        :class="active === {{ $loop->index }} ? 'w-6 bg-rose' : 'w-2 bg-navy/25 hover:bg-navy/50'"
+                                        aria-label="اسلاید {{ $loop->iteration }}"></button>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @else
+                {{-- Typographic hero until banners are published from the panel / super-app --}}
+                <div class="glass relative isolate overflow-hidden rounded-[var(--radius-glass)] px-6 py-12 sm:px-12 sm:py-16">
+                    <div class="pointer-events-none absolute -top-24 -end-16 -z-10 size-80 rounded-full bg-gradient-to-br from-rose/30 to-caramel/30 blur-3xl animate-float" aria-hidden="true"></div>
+                    <div class="pointer-events-none absolute -bottom-28 start-1/4 -z-10 size-72 rounded-full bg-navy/10 blur-3xl" aria-hidden="true"></div>
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-1.5 text-xs font-bold text-rose">
+                        <span class="size-1.5 rounded-full bg-rose"></span> کالکشن تازه‌ی فصل
+                    </span>
+                    <h1 class="mt-5 max-w-xl text-4xl leading-[1.35] font-black text-navy sm:text-5xl sm:leading-[1.3]">
+                        هر روز، یک تجربه‌ی <span class="bg-gradient-to-l from-rose to-caramel-600 bg-clip-text text-transparent">تازه</span> در آشپزخانه
+                    </h1>
+                    <p class="mt-5 max-w-md leading-8 text-muted">ظروف سرو و پذیرایی، لوازم آشپزخانه و اکسسوری‌هایی که خانه را گرم‌تر و دلنشین‌تر می‌کنند؛ با ضمانت اصالت کالا.</p>
+                    <div class="mt-8 flex flex-wrap gap-3">
+                        <a href="{{ route('catalog.shop') }}" class="btn-navy">مشاهده محصولات</a>
+                        @if ($amazing->isNotEmpty())
+                            <a href="{{ route('catalog.shop', ['sale' => 1]) }}" class="btn-glass">تخفیف‌های امروز</a>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            {{-- Special offer --}}
+            @if ($special && $specialVariant)
+                @php($until = ($specialVariant->sale_ends_at ?? now()->setTimezone(config('khaneh.display_timezone'))->endOfDay())->toIso8601String())
+                <article class="glass-navy group relative flex flex-col overflow-hidden rounded-[var(--radius-glass)] p-3">
+                    <div class="pointer-events-none absolute -top-20 -start-16 size-56 rounded-full bg-rose/30 blur-3xl" aria-hidden="true"></div>
+                    <div class="relative flex items-center justify-between px-2 pt-1 pb-3">
+                        <span class="text-sm font-black text-caramel">پیشنهاد ویژه</span>
+                        <span class="badge-off">{{ PersianText::toPersianDigits(Money::discountPercent($specialVariant->price, $specialVariant->currentPrice())) }}٪</span>
+                    </div>
+                    <div class="relative aspect-square overflow-hidden rounded-2xl bg-white">
+                        <x-media.picture :media="$special->media->first()" :alt="$special->name" eager class="size-full object-cover transition duration-700 group-hover:scale-105" />
+                    </div>
+                    <h2 class="relative mt-4 line-clamp-2 px-2 text-[15px] leading-7 font-bold">
+                        <a href="{{ $special->url() }}" class="after:absolute after:inset-0">{{ $special->name }}</a>
+                    </h2>
+                    <div class="relative mt-1 flex items-center justify-between px-2">
+                        <del class="text-xs text-white/50">{{ Money::toman($specialVariant->price) }}</del>
+                        <span class="text-lg font-black">{{ Money::toman($specialVariant->currentPrice()) }} <span class="text-xs font-medium text-white/60">تومان</span></span>
+                    </div>
+                    <div x-data="countdown('{{ $until }}')" class="relative mt-4 grid grid-cols-4 gap-1.5 text-center" aria-label="زمان باقی‌مانده">
+                        @foreach (['d' => 'روز', 'h' => 'ساعت', 'm' => 'دقیقه', 's' => 'ثانیه'] as $key => $label)
+                            <span class="rounded-xl bg-white/10 py-2">
+                                <span class="block text-lg leading-none font-black text-white" x-text="parts.{{ $key }}">۰</span>
+                                <span class="mt-1 block text-[10px] text-white/60">{{ $label }}</span>
+                            </span>
+                        @endforeach
+                    </div>
+                </article>
+            @endif
+        </section>
+
+        {{-- ── Category bubbles ─────────────────────────────────────────── --}}
+        @if ($categories->isNotEmpty())
+            <section aria-labelledby="cats-title">
+                <h2 id="cats-title" class="sr-only">دسته‌بندی‌ها</h2>
+                <ul class="rail sm:justify-center">
+                    @foreach ($categories as $category)
+                        <li class="w-24 shrink-0 sm:w-28">
+                            <a href="{{ $category->url() }}" class="group flex flex-col items-center gap-3 text-center">
+                                <span class="glass relative grid size-24 place-items-center overflow-hidden rounded-full p-1.5 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_18px_34px_-18px_rgb(204_51_102/0.6)] sm:size-28">
+                                    <span class="absolute inset-1.5 rounded-full bg-gradient-to-br from-cream to-rose-100"></span>
+                                    <x-media.picture :media="$category->media->first()" :alt="$category->name" class="relative size-full rounded-full object-cover transition duration-500 group-hover:scale-110" />
+                                </span>
+                                <span class="text-[13px] leading-5 font-bold text-navy transition group-hover:text-rose">{{ $category->name }}</span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
         @endif
-    </section>
 
-    {{-- Signature: the category tile wall --}}
-    @if ($categories->isNotEmpty())
-        <section class="mx-auto mt-14 max-w-7xl px-4" aria-labelledby="cats-title">
-            <h2 id="cats-title" class="font-display text-3xl">دسته‌بندی‌ها</h2>
-            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-                @foreach ($categories as $category)
-                    <x-category.tile :category="$category" />
-                @endforeach
-            </div>
-        </section>
-    @endif
+        {{-- ── Amazing offers band ──────────────────────────────────────── --}}
+        @if ($amazing->isNotEmpty())
+            <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-l from-caramel via-[#e89a7f] to-rose p-4 shadow-[0_30px_60px_-30px_rgb(204_51_102/0.6)] sm:p-6"
+                     aria-labelledby="amazing-title" x-data="rail">
+                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(40rem_20rem_at_80%_0%,rgb(255_255_255/0.35),transparent)]" aria-hidden="true"></div>
+                <div class="relative grid items-center gap-5 lg:grid-cols-[13rem_1fr]">
+                    <div class="flex flex-col items-start gap-4 text-white lg:items-center lg:text-center">
+                        <h2 id="amazing-title" class="text-3xl leading-tight font-black drop-shadow-sm">محصولات<br class="max-lg:hidden"> شگفت‌انگیز</h2>
+                        <div x-data="countdown('{{ $dealsEnd->toIso8601String() }}')" class="flex gap-1.5" aria-label="زمان باقی‌مانده تا پایان تخفیف">
+                            @foreach (['h' => 'ساعت', 'm' => 'دقیقه', 's' => 'ثانیه'] as $key => $label)
+                                <span class="w-14 rounded-2xl bg-white/25 py-2 text-center backdrop-blur">
+                                    <span class="block text-xl leading-none font-black" x-text="parts.{{ $key }}">۰۰</span>
+                                    <span class="mt-1 block text-[10px] text-white/80">{{ $label }}</span>
+                                </span>
+                            @endforeach
+                        </div>
+                        <a href="{{ route('catalog.shop', ['sale' => 1, 'sort' => 'discount']) }}" class="btn !bg-white !px-5 !py-2.5 text-navy hover:!bg-cream">مشاهده همه</a>
+                        <div class="hidden gap-2 lg:flex">
+                            <button type="button" @click="scroll(1)" class="grid size-10 place-items-center rounded-full bg-white/25 text-white backdrop-blur hover:bg-white/40" aria-label="قبلی">
+                                <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7.2 4.2a.75.75 0 0 0 0 1.06L11.94 10 7.2 14.74a.75.75 0 1 0 1.06 1.06l5.27-5.27a.75.75 0 0 0 0-1.06L8.26 4.2a.75.75 0 0 0-1.06 0Z"/></svg>
+                            </button>
+                            <button type="button" @click="scroll(-1)" class="grid size-10 place-items-center rounded-full bg-white/25 text-white backdrop-blur hover:bg-white/40" aria-label="بعدی">
+                                <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M12.8 4.2a.75.75 0 0 1 0 1.06L8.06 10l4.74 4.74a.75.75 0 1 1-1.06 1.06l-5.27-5.27a.75.75 0 0 1 0-1.06l5.27-5.27a.75.75 0 0 1 1.06 0Z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <ul class="rail !mx-0 !px-0 !pb-1" x-ref="track">
+                        @foreach ($amazing as $product)
+                            <li class="w-[46%] shrink-0 sm:w-[30%] lg:w-[23%]">
+                                <x-product.card :product="$product" class="!bg-white/85 h-full" />
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </section>
+        @endif
 
-    @if ($products->isNotEmpty())
-        <section class="mx-auto mt-16 max-w-7xl px-4" aria-labelledby="new-title">
-            <div class="flex items-end justify-between">
-                <h2 id="new-title" class="font-display text-3xl">تازه‌های فروشگاه</h2>
-            </div>
-            <div class="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4">
-                @foreach ($products as $product)
-                    <x-product.card :product="$product" />
-                @endforeach
-            </div>
-        </section>
-    @endif
+        {{-- ── Newest ───────────────────────────────────────────────────── --}}
+        @if ($newest->isNotEmpty())
+            <section aria-labelledby="new-title" class="space-y-7">
+                <x-section-title id="new-title" accent="جدیدترین" title="محصولات" ghost="New Arrivals" :link="route('catalog.shop')" />
+                <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
+                    @foreach ($newest as $product)
+                        <x-product.card :product="$product" :class="$loop->index >= 8 ? 'max-lg:hidden' : ''" />
+                    @endforeach
+                </div>
+            </section>
+        @endif
 
-    @if ($brands->isNotEmpty())
-        <section class="mx-auto mt-16 max-w-7xl px-4" aria-labelledby="brands-title">
-            <h2 id="brands-title" class="font-display text-3xl">برندها</h2>
-            <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                @foreach ($brands as $brand)
-                    <a href="{{ $brand->url() }}" class="group flex items-center justify-between rounded-[var(--radius-tile)] border border-line bg-white px-6 py-6 transition hover:border-glaze">
-                        <span>
-                            <span class="block font-display text-3xl group-hover:text-glaze">{{ $brand->name_fa }}</span>
-                            <span class="text-sm text-ink-soft" dir="ltr">{{ $brand->name_en }}</span>
+        {{-- ── Two promo banners ────────────────────────────────────────── --}}
+        @if ($duoBanners->isNotEmpty())
+            <section class="grid gap-4 md:grid-cols-2" aria-label="پیشنهادها">
+                @foreach ($duoBanners->take(2) as $banner)
+                    <a href="{{ $banner->link_url ?? '#' }}" class="glass group block overflow-hidden rounded-[var(--radius-glass)] p-1.5">
+                        <span class="block overflow-hidden rounded-[1.2rem]">
+                            <img src="{{ $banner->desktopMedia?->url() }}" alt="{{ $banner->alt }}" loading="lazy" class="aspect-[2/1] w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+                                 @if ($banner->desktopMedia?->width) width="{{ $banner->desktopMedia->width }}" height="{{ $banner->desktopMedia->height }}" @endif>
                         </span>
-                        <span class="text-sm text-ink-soft">{{ \App\Core\Support\PersianText::toPersianDigits($brand->products_count) }} محصول</span>
                     </a>
                 @endforeach
-            </div>
-        </section>
-    @endif
+            </section>
+        @endif
 
-    @if ($posts->isNotEmpty())
-        <section class="mx-auto mt-16 max-w-7xl px-4" aria-labelledby="posts-title">
-            <div class="flex items-end justify-between">
-                <h2 id="posts-title" class="font-display text-3xl">از مجله</h2>
-                <a href="{{ route('content.blog') }}" class="text-sm font-medium text-glaze">همه مطالب</a>
-            </div>
-            <div class="mt-6 grid gap-6 md:grid-cols-3">
-                @foreach ($posts as $post)
-                    <x-post.card :post="$post" />
+        {{-- ── Brand logos ──────────────────────────────────────────────── --}}
+        @if ($brands->isNotEmpty())
+            <section aria-labelledby="brands-title" class="space-y-7">
+                <x-section-title id="brands-title" accent="برندهای" title="خانه رمانتیک" ghost="Our Brands" />
+                <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                    @foreach ($brands as $brand)
+                        <li>
+                            <a href="{{ $brand->url() }}" class="glass group flex h-24 flex-col items-center justify-center gap-1 rounded-[var(--radius-card)] px-4 text-center transition hover:-translate-y-1 hover:bg-white/85">
+                                @if ($logo = $brand->media->first())
+                                    <x-media.picture :media="$logo" :alt="$brand->name_fa" class="max-h-12 w-auto object-contain opacity-70 grayscale transition group-hover:opacity-100 group-hover:grayscale-0" />
+                                @else
+                                    <span class="text-lg font-black text-navy transition group-hover:text-rose">{{ $brand->name_fa }}</span>
+                                    <span class="font-latin text-[10px] tracking-[0.2em] text-subtle uppercase" dir="ltr">{{ $brand->name_en }}</span>
+                                @endif
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
+        {{-- ── Brand showcase tabs ──────────────────────────────────────── --}}
+        @if ($showcase->isNotEmpty())
+            <section aria-labelledby="showcase-title" class="space-y-7" x-data="{ tab: 0 }">
+                <div class="flex flex-wrap items-end justify-between gap-4">
+                    <x-section-title id="showcase-title" accent="برندهای" title="ویژه" ghost="Featured" />
+                    <div class="glass flex gap-1 rounded-full p-1" role="tablist" aria-label="برندها">
+                        @foreach ($showcase as $item)
+                            <button type="button" role="tab" @click="tab = {{ $loop->index }}" :aria-selected="tab === {{ $loop->index }}"
+                                    class="rounded-full px-4 py-2 text-sm font-bold transition"
+                                    :class="tab === {{ $loop->index }} ? 'bg-navy text-white shadow' : 'text-muted hover:text-navy'">{{ $item['brand']->name_fa }}</button>
+                        @endforeach
+                    </div>
+                </div>
+                @foreach ($showcase as $item)
+                    <div x-show="tab === {{ $loop->index }}" @if (! $loop->first) x-cloak @endif role="tabpanel" class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+                        @foreach ($item['products'] as $product)
+                            <x-product.card :product="$product" />
+                        @endforeach
+                        <a href="{{ $item['brand']->url() }}" class="col-span-full mx-auto mt-2 btn-glass">همه‌ی محصولات {{ $item['brand']->name_fa }}</a>
+                    </div>
                 @endforeach
-            </div>
-        </section>
-    @endif
+            </section>
+        @endif
+
+        {{-- ── Wide banner ──────────────────────────────────────────────── --}}
+        @if ($wide = $wideBanners->first())
+            <a href="{{ $wide->link_url ?? '#' }}" class="glass group block overflow-hidden rounded-[var(--radius-glass)] p-1.5">
+                <span class="block overflow-hidden rounded-[1.2rem]">
+                    <picture>
+                        @if ($wide->mobileMedia)
+                            <source media="(max-width: 767px)" srcset="{{ $wide->mobileMedia->url() }}">
+                        @endif
+                        <img src="{{ $wide->desktopMedia?->url() }}" alt="{{ $wide->alt }}" loading="lazy" class="w-full object-cover transition duration-700 group-hover:scale-[1.02]">
+                    </picture>
+                </span>
+            </a>
+        @endif
+
+        {{-- ── Journal ──────────────────────────────────────────────────── --}}
+        @if ($posts->isNotEmpty())
+            <section aria-labelledby="posts-title" class="space-y-7">
+                <x-section-title id="posts-title" accent="آخرین" title="مقالات" ghost="Journal" :link="route('content.blog')" link-label="همه‌ی مقالات" />
+                <div class="grid gap-4 md:grid-cols-3">
+                    @foreach ($posts as $post)
+                        <x-post.card :post="$post" />
+                    @endforeach
+                </div>
+            </section>
+        @endif
+    </div>
 @endsection

@@ -10,9 +10,12 @@ namespace Modules\Catalog\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Catalog\Support\ProductSlug;
+use Modules\Media\Concerns\HasMedia;
 
 class Brand extends Model
 {
+    use HasMedia;
+
     protected $guarded = ['id'];
 
     protected static function booted(): void

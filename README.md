@@ -24,11 +24,20 @@ php artisan test
 ## فرانت (فروشگاه)
 
 - **Blade + Livewire 4 + Alpine + Tailwind 4**: صفحات کامل سمت سرور رندر می‌شوند (سئو)، تعامل‌ها با Livewire است.
-- فونت‌ها لوکال‌اند (`public/fonts`، Vazirmatn و Lalezar، مجوز OFL). هیچ asset از CDN خارجی لود نمی‌شود.
-- رنگ‌ها و فونت‌ها در `resources/css/app.css` (بلوک `@theme`) تعریف شده‌اند. امضای طراحی دیوار کاشی دسته‌بندی‌هاست (`.kashi-tile`).
-- کامپوننت‌ها در `resources/views/components`: `site.header`، `site.footer`، `product.card`، `price`، `breadcrumbs`، `media.picture`، `category.tile`، `khatam`.
-- Livewire: `catalog.search-box`، `checkout.add-to-cart`، `checkout.mini-cart`، `checkout.cart-page`.
-- فیلتر دسته‌ها فرم GET معمولی است تا لینک‌ها قابل کراول باشند؛ صفحه‌ی فیلترشده `noindex` و canonical به آدرس تمیز دسته دارد.
+- **سبک طراحی: Glassmorphism** با الهام از سایت فعلی؛ پالت برند: سرمه‌ای `#23284f`، رز `#cc3366`، کاراملی `#e4a96c`، کرم `#fff5ed`.
+  توکن‌ها در `resources/css/app.css` (بلوک `@theme`)، ابزارها با `@utility`: `glass`، `glass-strong`، `glass-navy`، `btn-navy`، `btn-rose`، `btn-glass`، `btn-icon`.
+  کلاس‌های کمکی: `.section-title` (تیتر دو رنگ + کلمه‌ی لاتین محو پشتش)، `.rail` (اسلایدر افقی snap)، `.chip`، `.badge-off`، `.prose-fa`.
+- فونت: Vazirmatn لوکال (OFL). فونت سایت فعلی (کلمه) لایسنسی است؛ اگر فایلش را داری در `public/fonts/kalameh/` بگذار و `KHANEH_FONT=kalameh` کن (راهنما: `public/fonts/kalameh/README.md`).
+- لوگو: `public/images/logo.webp` (اگر نباشد، مونوگرام نیلوفر + نام فروشگاه نمایش داده می‌شود).
+- اطلاعات تماس، شبکه‌های اجتماعی، نوار تخفیف بالای سایت: `config/khaneh.php` (کلیدهای `store` و `promo`، قابل تنظیم با `KHANEH_*` در `.env`).
+- کامپوننت‌ها در `resources/views/components`:
+  `site.header` (مگامنو ۳ سطحی + منوی کشویی موبایل)، `site.footer`، `site.promo`، `site.bottom-nav` (نوار پایین موبایل)، `site.whatsapp`،
+  `section-title`، `product.card`، `listing` (فیلتر + گرید مشترک دسته/برند/فروشگاه)، `price`، `breadcrumbs`، `media.picture`، `post.card`، `ui.toast`.
+- Livewire: `catalog.search-box`، `checkout.add-to-cart`، `checkout.quick-add` (افزودن سریع از کارت محصول)، `checkout.mini-cart`، `checkout.cart-page`.
+- صفحه‌ی اصلی: اسلایدر (`home.hero`)، پیشنهاد ویژه با شمارش معکوس، دایره‌های دسته‌بندی، «محصولات شگفت‌انگیز»، جدیدترین‌ها، بنرهای `home.duo` و `home.wide`، برندها، مقاله‌ها.
+  تصویر دایره‌ی دسته‌ها و لوگوی برندها از پنل (فیلد تصویر/لوگو) انتخاب می‌شود.
+- مسیرها: `/shop` (همه‌ی محصولات)، `/brand/{slug}`، `/search`، `/blog`، `/aboutus`، `/contact-us`، `POST /newsletter` (عضویت خبرنامه با ایمیل یا موبایل).
+- فیلترها فرم GET معمولی است تا لینک‌ها قابل کراول باشند؛ صفحه‌ی فیلترشده `noindex` و canonical به آدرس تمیز دسته دارد.
 - قیمت‌ها: `App\Core\Support\Money::toman()`؛ تاریخ: `Jalali::format()`؛ ارقام: `PersianText::toPersianDigits()`.
 
 ## پنل مدیریت (Filament 5)

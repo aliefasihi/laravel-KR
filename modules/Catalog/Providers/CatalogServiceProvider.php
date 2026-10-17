@@ -21,6 +21,6 @@ class CatalogServiceProvider extends ModuleServiceProvider
 
         Livewire::component('catalog.search-box', SearchBox::class);
 
-        View::composer('components.site.header', NavigationComposer::class);
+        View::composer(['components.site.header', 'components.site.footer'], NavigationComposer::class);
     }
 }

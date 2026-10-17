@@ -8,15 +8,22 @@
 namespace Modules\Catalog\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 use Modules\Catalog\Models\Brand;
+use Modules\Catalog\Support\ProductListing;
 
 class BrandController
 {
-    public function show(string $slug): View
+    public function show(Request $request, string $slug, ProductListing $listing): View
     {
-        $brand = Brand::query()->where('slug', $slug)->firstOrFail();
-        $products = $brand->products()->active()->with('variants')->latest()->paginate(24);
+        $brand = Brand::query()->where('slug', $slug)->with('media')->firstOrFail();
+        $filters = $listing->filters($request);
 
-        return view('catalog::brand.show', compact('brand', 'products'));
+        return view('catalog::brand.show', [
+            'brand' => $brand,
+            'products' => $listing->apply($listing->base(brandId: $brand->id), $filters)->paginate(24)->withQueryString(),
+            'filters' => $filters,
+            'sorts' => ProductListing::SORTS,
+        ]);
     }
 }

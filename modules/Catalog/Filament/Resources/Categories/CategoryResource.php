@@ -21,6 +21,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -29,6 +30,7 @@ use Modules\Catalog\Filament\Resources\Categories\Pages\CreateCategory;
 use Modules\Catalog\Filament\Resources\Categories\Pages\EditCategory;
 use Modules\Catalog\Filament\Resources\Categories\Pages\ListCategories;
 use Modules\Catalog\Models\Category;
+use Modules\Media\Models\Media;
 use UnitEnum;
 
 class CategoryResource extends Resource
@@ -75,6 +77,14 @@ class CategoryResource extends Resource
             Section::make('نمایش')->schema([
                 Toggle::make('is_active')->label('فعال')->default(true),
                 TextInput::make('sort')->label('ترتیب')->numeric()->default(0),
+                Select::make('media')
+                    ->label('تصویر دسته')
+                    ->relationship('media', 'path')
+                    ->getOptionLabelFromRecordUsing(fn (Media $record) => $record->title ?: basename($record->path))
+                    ->multiple()
+                    ->maxItems(1)
+                    ->searchable()
+                    ->helperText('در منوی دسته‌بندی‌ها و دایره‌های صفحه‌ی اصلی نمایش داده می‌شود؛ تصویر مربعی با پس‌زمینه‌ی روشن بهترین نتیجه را می‌دهد.'),
             ])->columnSpan(['lg' => 1]),
         ])->columns(3);
     }
@@ -84,6 +94,7 @@ class CategoryResource extends Resource
         return $table
             ->defaultSort('sort')
             ->columns([
+                ImageColumn::make('media.path')->label('')->disk('public')->circular()->limit(1),
                 TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 TextColumn::make('parent.name')->label('والد')->placeholder('—'),
                 TextColumn::make('path')->label('مسیر')->limit(40)->tooltip(fn (Category $record) => $record->path),

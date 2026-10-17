@@ -41,8 +41,8 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('خانه رمانتیک')
             ->favicon(asset('favicon.ico'))
             ->colors([
-                'primary' => Color::hex('#0e7c7b'),
-                'danger' => Color::hex('#b3263e'),
+                'primary' => Color::hex('#cc3366'), // brand rose, same as the storefront
+                'danger' => Color::Red,
                 'gray' => Color::Slate,
             ])
             ->font('Vazirmatn', url: asset('fonts/fonts.css'), provider: LocalFontProvider::class)

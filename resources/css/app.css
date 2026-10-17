@@ -1,9 +1,9 @@
 /*
- * Khaneh Romantic — storefront styles
+ * Khaneh Romantic — storefront design system (glass)
  * نویسنده: علی فصیحی (Ali Fasihi)
  *
- * Palette from Persian kitchen tilework: porcelain white, firouzeh glaze,
- * deep ink, and pomegranate for sale prices only.
+ * Brand colours carried over from the current site: deep navy, rose, caramel and cream.
+ * Surfaces are frosted glass floating over a soft blush/peach/lavender mesh.
  */
 @import 'tailwindcss';
 
@@ -12,31 +12,68 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 @source '../../modules/**/*.blade.php';
+@source '../../app/**/*.php';
 
 @theme {
-    --font-sans: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
-    --font-display: 'Lalezar', 'Vazirmatn', ui-sans-serif, sans-serif;
+    --font-sans: var(--font-brand, 'Vazirmatn'), 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+    --font-latin: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
 
-    --color-porcelain: #f6f8f7;
-    --color-mist: #dfece9;
-    --color-line: #c9d9d6;
-    --color-ink: #18292c;
-    --color-ink-soft: #4b5f62;
-    --color-glaze: #0e7c7b;
-    --color-glaze-deep: #0a5a5a;
-    --color-anar: #b3263e;
+    --color-navy: #23284f;
+    --color-navy-700: #2e3466;
+    --color-navy-500: #4a5190;
+    --color-rose: #cc3366;
+    --color-rose-600: #b32656;
+    --color-rose-100: #fbe3ec;
+    --color-caramel: #e4a96c;
+    --color-caramel-600: #cf8d4c;
+    --color-caramel-100: #fbeedf;
+    --color-cream: #fff5ed;
+    --color-ink: #1c252e;
+    --color-muted: #66717f;
+    --color-subtle: #98a2ae;
+    --color-line: rgb(35 40 79 / 0.09);
 
-    --radius-tile: 1.25rem;
+    --radius-glass: 1.5rem;
+    --radius-card: 1.25rem;
+
+    --shadow-glass: 0 10px 40px -18px rgb(35 40 79 / 0.28), inset 0 1px 0 rgb(255 255 255 / 0.85);
+    --shadow-float: 0 18px 50px -20px rgb(35 40 79 / 0.45);
+
+    --animate-marquee: marquee 38s linear infinite;
+    --animate-float: float 7s ease-in-out infinite;
+}
+
+@keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(50%); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
 }
 
 @layer base {
+    html,
+    body {
+        overflow-x: clip;
+    }
+
     html {
-        font-feature-settings: 'ss01';
         -webkit-tap-highlight-color: transparent;
+        scroll-behavior: smooth;
+        scroll-padding-top: 8rem;
     }
 
     body {
-        @apply bg-porcelain text-ink font-sans antialiased;
+        @apply text-ink font-sans antialiased;
+        background-color: #fbf7f5;
+        background-image:
+            radial-gradient(42rem 32rem at 100% -6%, rgb(204 51 102 / 0.16), transparent 62%),
+            radial-gradient(38rem 30rem at -8% 22%, rgb(228 169 108 / 0.22), transparent 60%),
+            radial-gradient(46rem 36rem at 60% 108%, rgb(110 118 214 / 0.14), transparent 62%),
+            radial-gradient(30rem 24rem at 40% 48%, rgb(255 245 237 / 0.9), transparent 70%);
+        background-attachment: fixed;
     }
 
     [x-cloak] {
@@ -44,30 +81,122 @@
     }
 
     :focus-visible {
-        outline: 2px solid var(--color-glaze);
+        outline: 2px solid var(--color-rose);
         outline-offset: 2px;
+        border-radius: 0.5rem;
+    }
+
+    ::selection {
+        background: var(--color-rose-100);
+        color: var(--color-navy);
     }
 
     @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
         *,
         *::before,
         *::after {
             animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
         }
     }
 }
 
+
+/* ── Glass surfaces & buttons (utilities so they compose with @apply and variants) ── */
+@utility glass {
+    background: rgb(255 255 255 / 0.62);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    backdrop-filter: blur(20px) saturate(170%);
+    border: 1px solid rgb(255 255 255 / 0.75);
+    box-shadow: var(--shadow-glass);
+}
+@utility glass-strong {
+    background: rgb(255 255 255 / 0.84);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgb(255 255 255 / 0.9);
+    box-shadow: var(--shadow-glass);
+}
+@utility glass-navy {
+    background: linear-gradient(150deg, rgb(46 52 102 / 0.92), rgb(35 40 79 / 0.96));
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    box-shadow: var(--shadow-float), inset 0 1px 0 rgb(255 255 255 / 0.12);
+    color: #fff;
+}
+@utility btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    white-space: nowrap;
+    user-select: none;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+    &:active { transform: scale(0.98); }
+    &:disabled { cursor: not-allowed; opacity: 0.5; }
+}
+@utility btn-navy {
+    @apply btn bg-navy text-white shadow-[0_10px_24px_-12px_rgb(35_40_79/0.8)] hover:bg-navy-700;
+}
+@utility btn-rose {
+    @apply btn bg-rose text-white shadow-[0_10px_24px_-12px_rgb(204_51_102/0.8)] hover:bg-rose-600;
+}
+@utility btn-glass {
+    @apply btn glass text-navy hover:bg-white/90;
+}
+@utility btn-icon {
+    @apply inline-flex size-11 items-center justify-center rounded-full transition hover:bg-white/70;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass { background: rgb(255 255 255 / 0.92); }
+    .glass-strong { background: #fff; }
+}
+
 @layer components {
-    /* Long-form content coming from WordPress / ai-platform */
+    /* ── Inputs ────────────────────────────────────────────────── */
+    .field {
+        @apply w-full rounded-2xl border border-white/80 bg-white/70 px-4 py-3 text-sm text-ink shadow-[inset_0_1px_2px_rgb(35_40_79/0.06)] placeholder:text-subtle focus:border-rose/40 focus:bg-white focus:ring-4 focus:ring-rose/10 focus:outline-none;
+    }
+
+    /* ── Section title: two-tone + ghost Latin word (from the current brand) ── */
+    .section-title {
+        @apply relative isolate text-2xl font-black text-navy sm:text-3xl;
+    }
+    .section-title .accent {
+        @apply text-caramel-600;
+    }
+    .section-title .ghost {
+        @apply pointer-events-none absolute -top-5 right-0 -z-10 font-latin text-4xl font-black tracking-widest whitespace-nowrap text-navy/[0.05] uppercase select-none sm:-top-7 sm:text-6xl;
+        direction: ltr;
+    }
+
+    /* ── Chips & badges ────────────────────────────────────────── */
+    .chip {
+        @apply inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/60 px-4 py-2 text-sm text-navy backdrop-blur transition hover:border-rose/30 hover:bg-white hover:text-rose;
+    }
+    .badge-off {
+        @apply inline-flex items-center rounded-full bg-rose px-2.5 py-1 text-[11px] leading-none font-black text-white shadow-[0_6px_14px_-6px_rgb(204_51_102/0.9)];
+    }
+
+    /* ── Long-form content (WordPress / ai-platform) ───────────── */
     .prose-fa {
-        @apply text-ink-soft leading-8;
+        @apply text-[15px] leading-8 text-muted;
     }
     .prose-fa h2 {
-        @apply font-display text-ink mt-10 mb-3 text-2xl;
+        @apply mt-10 mb-3 text-xl font-black text-navy;
     }
     .prose-fa h3 {
-        @apply text-ink mt-8 mb-2 text-lg font-bold;
+        @apply mt-8 mb-2 text-lg font-bold text-navy;
     }
     .prose-fa p,
     .prose-fa ul,
@@ -75,64 +204,45 @@
         @apply mb-4;
     }
     .prose-fa ul {
-        @apply list-disc ps-6;
+        @apply list-disc ps-6 marker:text-rose;
     }
     .prose-fa ol {
-        @apply list-decimal ps-6;
+        @apply list-decimal ps-6 marker:text-rose;
+    }
+    .prose-fa strong {
+        @apply text-ink;
     }
     .prose-fa a {
-        @apply text-glaze underline decoration-1 underline-offset-4;
+        @apply text-rose underline decoration-rose/30 underline-offset-4 hover:decoration-rose;
     }
     .prose-fa img {
         @apply my-6 h-auto max-w-full rounded-2xl;
     }
     .prose-fa table {
-        @apply my-6 w-full border-collapse text-sm;
+        @apply my-6 w-full overflow-hidden rounded-2xl text-sm;
     }
     .prose-fa th,
     .prose-fa td {
-        @apply border-line border p-2 text-start;
+        @apply border-b border-line p-3 text-start;
+    }
+    .prose-fa th {
+        @apply bg-white/60 font-bold text-navy;
     }
 
-    /* Signature: glazed tile with an 8-point star (khatam) */
-    .kashi-tile {
-        @apply relative isolate flex aspect-square flex-col items-center justify-center overflow-hidden text-center;
-        border-radius: var(--radius-tile);
-        background:
-            radial-gradient(120% 90% at 30% 15%, rgb(255 255 255 / 0.28), transparent 55%),
-            linear-gradient(160deg, var(--color-glaze), var(--color-glaze-deep));
-        box-shadow:
-            inset 0 0 0 1px rgb(255 255 255 / 0.18),
-            0 1px 0 rgb(0 0 0 / 0.05);
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    /* ── Horizontal rails (carousels without JS) ───────────────── */
+    .rail {
+        @apply -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pb-4;
+        scrollbar-width: none;
     }
-    .kashi-tile:hover {
-        transform: translateY(-3px);
-        box-shadow:
-            inset 0 0 0 1px rgb(255 255 255 / 0.3),
-            0 12px 24px -12px rgb(10 90 90 / 0.55);
+    .rail::-webkit-scrollbar {
+        display: none;
     }
-    /* Alternate glaze firing like a real tile wall (checkerboard at 2 and 4 columns) */
-    .kashi-tile:nth-child(8n + 2),
-    .kashi-tile:nth-child(8n + 4),
-    .kashi-tile:nth-child(8n + 5),
-    .kashi-tile:nth-child(8n + 7) {
-        background:
-            radial-gradient(120% 90% at 70% 15%, rgb(255 255 255 / 0.16), transparent 55%),
-            linear-gradient(200deg, var(--color-glaze-deep), var(--color-ink));
-    }
-    .kashi-tile .khatam {
-        @apply pointer-events-none absolute -inset-[6%] -z-10 text-white/15;
-        transition: transform 0.6s ease;
-    }
-    .kashi-tile:hover .khatam {
-        transform: rotate(22.5deg);
+    .rail > * {
+        @apply snap-start;
     }
 
-    /* Repeating star band (footer edge) */
-    .kashi-band {
-        height: 18px;
-        background-color: var(--color-glaze);
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M9 1.5l2.2 3.3 3.8-.8-.8 3.8L17.5 9l-3.3 2.2.8 3.8-3.8-.8L9 16.5l-2.2-3.3-3.8.8.8-3.8L.5 9l3.3-2.2-.8-3.8 3.8.8z' fill='none' stroke='%23ffffff' stroke-opacity='.35'/%3E%3C/svg%3E");
+    /* ── Logo marquee ──────────────────────────────────────────── */
+    .marquee-mask {
+        mask-image: linear-gradient(to left, transparent, #000 10%, #000 90%, transparent);
     }
 }

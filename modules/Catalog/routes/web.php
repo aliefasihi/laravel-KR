@@ -7,6 +7,7 @@
  * /product-category/{path}/  ← preserved WordPress URL, trailing slash kept
  * /p/{brand}-{sku}           ← new product URL, ASCII only
  * /brand/{slug}
+ * /shop                     ← all products (same slug as WordPress)
  * /search?q=
  */
 
@@ -15,6 +16,7 @@ use Modules\Catalog\Http\Controllers\BrandController;
 use Modules\Catalog\Http\Controllers\CategoryController;
 use Modules\Catalog\Http\Controllers\ProductController;
 use Modules\Catalog\Http\Controllers\SearchController;
+use Modules\Catalog\Http\Controllers\ShopController;
 
 $urls = config('khaneh.urls');
 
@@ -31,5 +33,7 @@ Route::get($urls['product_prefix'].'/{slug}', [ProductController::class, 'show']
 Route::get($urls['brand_prefix'].'/{slug}', [BrandController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('catalog.brand');
+
+Route::get('shop', ShopController::class)->name('catalog.shop');
 
 Route::get('search', SearchController::class)->name('catalog.search');

@@ -1,0 +1,9 @@
+/*
+ * Khaneh Romantic — Kalameh (licensed font used on the current site)
+ * نویسنده: علی فصیحی (Ali Fasihi)
+ * Loaded only when KHANEH_FONT=kalameh. Files are NOT in the repo (commercial licence).
+ */
+@font-face { font-family: 'Kalameh'; font-display: swap; font-weight: 400; src: url('/fonts/kalameh/kalameh-regular.woff2') format('woff2'); }
+@font-face { font-family: 'Kalameh'; font-display: swap; font-weight: 500; src: url('/fonts/kalameh/kalameh-medium.woff2') format('woff2'); }
+@font-face { font-family: 'Kalameh'; font-display: swap; font-weight: 700; src: url('/fonts/kalameh/kalameh-bold.woff2') format('woff2'); }
+@font-face { font-family: 'Kalameh'; font-display: swap; font-weight: 900; src: url('/fonts/kalameh/kalameh-black.woff2') format('woff2'); }

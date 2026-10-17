@@ -1,11 +1,12 @@
-{{-- Khaneh Romantic — storefront layout (RTL) | نویسنده: علی فصیحی (Ali Fasihi) --}}
+{{-- Khaneh Romantic — storefront layout (RTL, glass) | نویسنده: علی فصیحی (Ali Fasihi) --}}
+@php($store = config('khaneh.store'))
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" @if (config('khaneh.font') === 'kalameh') style="--font-brand: 'Kalameh'" @endif>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#0e7c7b">
-    <title>@yield('title', 'خانه رمانتیک') | خانه رمانتیک</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#23284f">
+    <title>@yield('title', $store['tagline']) | {{ $store['name'] }}</title>
     @hasSection('meta_description')
         <meta name="description" content="@yield('meta_description')">
     @endif
@@ -15,18 +16,25 @@
     @hasSection('robots')
         <meta name="robots" content="@yield('robots')">
     @endif
-    <meta property="og:site_name" content="خانه رمانتیک">
+    <meta property="og:site_name" content="{{ $store['name'] }}">
     <meta property="og:locale" content="fa_IR">
-    <meta property="og:title" content="@yield('title', 'خانه رمانتیک')">
+    <meta property="og:title" content="@yield('title', $store['name'])">
+    @hasSection('og_image')
+        <meta property="og:image" content="@yield('og_image')">
+    @endif
     @stack('head')
 
     <link rel="preload" href="/fonts/vazirmatn/vazirmatn-arabic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="/fonts/fonts.css">
+    @if (config('khaneh.font') === 'kalameh')
+        <link rel="stylesheet" href="/fonts/kalameh/kalameh.css">
+    @endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="flex min-h-dvh flex-col">
-    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2">پرش به محتوا</a>
+<body @class(['flex min-h-dvh flex-col lg:pb-0', 'pb-24' => ! View::hasSection('buy_bar'), 'pb-44' => View::hasSection('buy_bar')])>
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-[60] focus:rounded-full focus:bg-white focus:px-5 focus:py-2.5 focus:shadow-lg">پرش به محتوا</a>
 
+    <x-site.promo />
     <x-site.header />
 
     <main id="main" class="flex-1">
@@ -34,6 +42,9 @@
     </main>
 
     <x-site.footer />
+    <x-site.bottom-nav />
+    <x-site.whatsapp :raised="View::hasSection('buy_bar')" />
+    <x-ui.toast />
 
     @stack('scripts')
 </body>

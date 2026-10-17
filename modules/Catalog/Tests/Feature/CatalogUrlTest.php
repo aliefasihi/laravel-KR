@@ -41,14 +41,16 @@ class CatalogUrlTest extends TestCase
 
         $this->assertSame(url('product-category/%d8%b8%d8%b1%d9%88%d9%81-%d8%a2%d8%b4%d9%be%d8%b2%d8%ae%d8%a7%d9%86%d9%87').'/', $category->url());
 
-        $this->get($category->url())->assertOk()->assertSee('ظروف آشپزخانه');
+        $this->getRaw('/product-category/'.rawurlencode('ظروف-آشپزخانه').'/')->assertOk()->assertSee('ظروف آشپزخانه');
     }
 
     public function test_category_without_trailing_slash_redirects_once(): void
     {
         $category = Category::create(['name' => 'قابلمه', 'path' => 'قابلمه']);
 
-        $this->get(rtrim($category->url(), '/'))->assertRedirect($category->url())->assertStatus(301);
+        $this->getRaw('/product-category/'.rawurlencode('قابلمه'))
+            ->assertStatus(301)
+            ->assertHeader('Location', $category->url());
     }
 
     public function test_changing_category_path_redirects_old_url_in_one_hop(): void
@@ -58,8 +60,8 @@ class CatalogUrlTest extends TestCase
 
         $category->update(['path' => 'ظروف/قابلمه']);
 
-        $this->get($old)->assertStatus(301)->assertRedirect($category->url());
-        $this->get($category->url())->assertOk();
+        $this->getRaw(parse_url($old, PHP_URL_PATH))->assertStatus(301)->assertHeader('Location', $category->url());
+        $this->getRaw(parse_url($category->url(), PHP_URL_PATH))->assertOk();
     }
 
     public function test_product_slug_is_brand_dash_sku(): void
@@ -76,7 +78,7 @@ class CatalogUrlTest extends TestCase
         $this->product();
 
         $this->get('/p/Goldkish-GK-1024')->assertStatus(301)->assertRedirect(url('p/goldkish-gk-1024'));
-        $this->get('/p/goldkish-gk-1024/')->assertStatus(301)->assertRedirect(url('p/goldkish-gk-1024'));
+        $this->getRaw('/p/goldkish-gk-1024/')->assertStatus(301)->assertRedirect(url('p/goldkish-gk-1024'));
     }
 
     public function test_changing_sku_keeps_old_url_alive(): void

@@ -28,3 +28,7 @@ Thumbs.db
 *.sql.gz
 /storage/import
 /data
+
+# Licensed fonts are installed per server, never committed
+/public/fonts/kalameh/*.woff2
+/public/fonts/kalameh/*.woff

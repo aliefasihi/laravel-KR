@@ -9,18 +9,25 @@
 @endphp
 
 @if ($variant)
-    <div {{ $attributes->class(['flex flex-wrap items-baseline gap-x-2 gap-y-1']) }}>
-        @if ($percent > 0)
-            <span class="rounded-full bg-anar px-2 py-0.5 text-xs font-bold text-white">{{ \App\Core\Support\PersianText::toPersianDigits($percent) }}٪</span>
-        @endif
-        <span @class(['font-bold text-ink', 'text-2xl' => $big, 'text-base' => ! $big])>
-            {{ Money::toman($current) }}
-            <span @class(['font-normal text-ink-soft', 'text-sm' => $big, 'text-xs' => ! $big])>تومان</span>
-        </span>
-        @if ($percent > 0)
-            <del class="text-sm text-ink-soft/70">{{ Money::toman($regular) }}</del>
+    <div {{ $attributes->class(['flex flex-wrap items-end gap-x-2 gap-y-0.5']) }}>
+        <div class="flex flex-col">
+            @if ($percent > 0)
+                <span class="flex items-center gap-1.5">
+                    <del @class(['text-subtle decoration-rose/40', 'text-sm' => $big, 'text-xs' => ! $big])>{{ Money::toman($regular) }}</del>
+                    @unless ($big)
+                        <span class="badge-off !px-1.5 !py-0.5 !text-[10px]">{{ \App\Core\Support\PersianText::toPersianDigits($percent) }}٪</span>
+                    @endunless
+                </span>
+            @endif
+            <span @class(['font-black', 'text-rose' => $percent > 0, 'text-navy' => $percent === 0, 'text-3xl' => $big, 'text-[15px]' => ! $big])>
+                {{ Money::toman($current) }}
+                <span @class(['font-medium text-muted', 'text-sm' => $big, 'text-[11px]' => ! $big])>تومان</span>
+            </span>
+        </div>
+        @if ($percent > 0 && $big)
+            <span class="badge-off mb-1.5">{{ \App\Core\Support\PersianText::toPersianDigits($percent) }}٪ تخفیف</span>
         @endif
     </div>
 @else
-    <div {{ $attributes->class(['text-sm text-ink-soft']) }}>ناموجود</div>
+    <div {{ $attributes->class(['text-sm font-bold text-subtle']) }}>ناموجود</div>
 @endif
