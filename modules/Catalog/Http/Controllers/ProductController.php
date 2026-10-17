@@ -25,9 +25,20 @@ class ProductController
         $product = Product::query()
             ->active()
             ->where('slug', $canonical)
-            ->with(['brand', 'categories', 'variants', 'media'])
+            ->with(['brand', 'categories.parent', 'variants', 'media'])
             ->firstOrFail();
 
-        return view('catalog::product.show', compact('product'));
+        $category = $product->primaryCategory();
+
+        $related = $category === null ? collect() : Product::query()
+            ->active()
+            ->whereKeyNot($product->id)
+            ->whereHas('categories', fn ($q) => $q->whereKey($category->id))
+            ->with(['brand', 'variants', 'media'])
+            ->inRandomOrder()
+            ->limit(4)
+            ->get();
+
+        return view('catalog::product.show', compact('product', 'category', 'related'));
     }
 }

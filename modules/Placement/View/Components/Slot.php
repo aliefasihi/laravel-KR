@@ -18,9 +18,7 @@ class Slot extends Component
 
     public function __construct(public string $key, public ?int $contextId = null)
     {
-        $placement = Placement::query()->where('key', $key)->where('is_active', true)->first();
-
-        $this->banners = $placement?->liveBanners($contextId) ?? collect();
+        $this->banners = Placement::liveFor($key, $contextId);
     }
 
     public function shouldRender(): bool

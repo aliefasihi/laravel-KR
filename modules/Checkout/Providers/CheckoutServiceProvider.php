@@ -1,17 +1,34 @@
 <?php
 
 /**
- * Khaneh Romantic — Checkout module (cart, shipping, coupons)
+ * Khaneh Romantic — Checkout module (session cart now; shipping, coupons and order placement next)
  * نویسنده: علی فصیحی (Ali Fasihi)
- *
- * Skeleton: routes/, database/migrations/, Models/ are added when this module is built.
  */
 
 namespace Modules\Checkout\Providers;
 
 use App\Core\Modules\ModuleServiceProvider;
+use Livewire\Livewire;
+use Modules\Checkout\Livewire\AddToCart;
+use Modules\Checkout\Livewire\CartPage;
+use Modules\Checkout\Livewire\MiniCart;
+use Modules\Checkout\Support\Cart;
 
 class CheckoutServiceProvider extends ModuleServiceProvider
 {
-    //
+    public function register(): void
+    {
+        parent::register();
+
+        $this->app->scoped(Cart::class);
+    }
+
+    public function boot(): void
+    {
+        parent::boot();
+
+        Livewire::component('checkout.add-to-cart', AddToCart::class);
+        Livewire::component('checkout.mini-cart', MiniCart::class);
+        Livewire::component('checkout.cart-page', CartPage::class);
+    }
 }

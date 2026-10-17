@@ -37,6 +37,21 @@ class Placement extends Model
             ->get();
     }
 
+    /** Live banners for a slot key, memoized for the request. */
+    public static function liveFor(string $key, ?int $contextId = null): Collection
+    {
+        return once(fn () => static::query()
+            ->where('key', $key)
+            ->where('is_active', true)
+            ->first()
+            ?->liveBanners($contextId) ?? collect());
+    }
+
+    public static function hasLive(string $key, ?int $contextId = null): bool
+    {
+        return static::liveFor($key, $contextId)->isNotEmpty();
+    }
+
     /** Spec handed to the super-app / graphics API. */
     public function spec(): array
     {
