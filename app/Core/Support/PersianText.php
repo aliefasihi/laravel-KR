@@ -35,6 +35,12 @@ final class PersianText
         return strtr($text, self::DIGITS);
     }
 
+    /** ASCII digits → Persian digits (display only; never store the result). */
+    public static function toPersianDigits(string|int $text): string
+    {
+        return strtr((string) $text, ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']);
+    }
+
     /** Full normalization for search/matching: letters, digits, whitespace. */
     public static function normalize(string $text): string
     {
