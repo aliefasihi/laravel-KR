@@ -19,7 +19,11 @@ final class UrlPath
      */
     public static function normalize(string $path): string
     {
-        $path = parse_url($path, PHP_URL_PATH) ?? $path;
+        if (preg_match('#^[a-z][a-z0-9+.-]*://#i', $path)) {
+            $path = parse_url($path, PHP_URL_PATH) ?? '/';    // full URL from an export → its path
+        } elseif (! str_starts_with($path, '?')) {
+            $path = preg_replace('/[?#].*$/s', '', $path) ?? $path; // "?p=123" keys stay intact
+        }
 
         // Decode repeatedly to undo double-encoding seen in some WordPress exports.
         for ($i = 0; $i < 3 && str_contains($path, '%'); $i++) {
@@ -34,6 +38,24 @@ final class UrlPath
         $path = preg_replace('#/+#', '/', $path) ?? $path;
 
         return mb_strtolower(trim($path, '/'));
+    }
+
+    /**
+     * Encode a decoded path the way WordPress does: each segment percent-encoded
+     * with lowercase hex ("ظروف" → "%d8%b8%d8%b1%d9%88%d9%81"), slashes kept.
+     */
+    public static function encode(string $path): string
+    {
+        $segments = array_map(
+            fn (string $segment) => preg_replace_callback(
+                '/%[0-9A-F]{2}/',
+                fn (array $m) => strtolower($m[0]),
+                rawurlencode($segment),
+            ),
+            explode('/', trim($path, '/')),
+        );
+
+        return implode('/', $segments);
     }
 
     /** Stable fixed-length key for unique indexes on long paths. */
