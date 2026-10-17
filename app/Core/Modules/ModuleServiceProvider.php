@@ -20,8 +20,8 @@ use ReflectionClass;
 
 abstract class ModuleServiceProvider extends ServiceProvider
 {
-    /** Module name, e.g. "Catalog". Defaults to the namespace segment after "Modules\". */
-    protected string $name;
+    /** Module name, e.g. "Catalog" — the namespace segment after "Modules\". */
+    protected string $moduleName;
 
     public function register(): void
     {
@@ -56,15 +56,15 @@ abstract class ModuleServiceProvider extends ServiceProvider
         }
     }
 
-    public function name(): string
+    public function moduleName(): string
     {
-        return $this->name ??= explode('\\', static::class)[1];
+        return $this->moduleName ??= explode('\\', static::class)[1];
     }
 
     /** Lowercase key used for views and config, e.g. "catalog". */
     public function key(): string
     {
-        return strtolower($this->name());
+        return strtolower($this->moduleName());
     }
 
     protected function modulePath(string $path = ''): string

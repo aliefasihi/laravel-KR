@@ -16,7 +16,7 @@ class Redirect extends Model
 
     protected function casts(): array
     {
-        return ['last_hit_at' => 'datetime'];
+        return ['status_code' => 'integer', 'hits' => 'integer', 'last_hit_at' => 'datetime'];
     }
 
     /**

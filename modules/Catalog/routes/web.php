@@ -17,7 +17,7 @@ use Modules\Catalog\Http\Controllers\ProductController;
 $urls = config('khaneh.urls');
 
 Route::get($urls['category_prefix'].'/{path}', [
-    'uses' => [CategoryController::class, 'show'],
+    'uses' => CategoryController::class.'@show',
     'trailing_slash' => true,
 ])->where('path', '.+')->name('catalog.category');
 

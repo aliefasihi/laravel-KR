@@ -37,7 +37,10 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
             "Modules\\": "modules/"
-        }
+        },
+        "exclude-from-classmap": [
+            "modules/*/Tests/"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
