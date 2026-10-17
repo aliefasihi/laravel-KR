@@ -29,6 +29,7 @@ class RedirectResolver
             return new HttpResponse('Gone', 410);
         }
 
-        return redirect($redirect->to_path, $redirect->status_code);
+        // away(): keep the target byte-for-byte (url()->to() would strip a category's trailing slash).
+        return redirect()->away(rtrim(url('/'), '/').$redirect->to_path, $redirect->status_code);
     }
 }

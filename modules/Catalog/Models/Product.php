@@ -27,6 +27,12 @@ class Product extends Model
 
     public const STATUS_ARCHIVED = 'archived';
 
+    public const STATUSES = [
+        self::STATUS_DRAFT => 'پیش‌نویس',
+        self::STATUS_ACTIVE => 'منتشرشده',
+        self::STATUS_ARCHIVED => 'بایگانی',
+    ];
+
     protected $guarded = ['id', 'slug'];
 
     protected function casts(): array

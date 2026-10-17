@@ -14,6 +14,8 @@ use Modules\Media\Models\Media;
 
 class Banner extends Model
 {
+    public const STATUSES = ['draft' => 'پیش‌نویس', 'approved' => 'تأییدشده (نمایش)', 'archived' => 'بایگانی'];
+
     protected $guarded = ['id'];
 
     protected function casts(): array

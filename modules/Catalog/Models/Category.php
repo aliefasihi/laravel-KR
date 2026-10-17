@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
+use Modules\Catalog\Events\CategoryUrlChanged;
 use Modules\Catalog\View\Composers\NavigationComposer;
 use Modules\Media\Concerns\HasMedia;
 
@@ -33,6 +34,16 @@ class Category extends Model
         static::saving(function (Category $category) {
             $category->path = trim($category->path, '/');
             $category->path_hash = UrlPath::hash($category->path);
+        });
+
+        static::updated(function (Category $category) {
+            if ($category->wasChanged('path')) {
+                CategoryUrlChanged::dispatch(
+                    $category->getKey(),
+                    self::pathFor($category->getOriginal('path')),
+                    self::pathFor($category->path),
+                );
+            }
         });
 
         static::saved(fn () => Cache::forget(NavigationComposer::CACHE_KEY));
@@ -83,6 +94,12 @@ class Category extends Model
     public function scopeByPath(Builder $query, string $path): Builder
     {
         return $query->where('path_hash', UrlPath::hash($path));
+    }
+
+    /** Site-relative path: /product-category/{encoded-path}/ */
+    public static function pathFor(string $path): string
+    {
+        return '/'.config('khaneh.urls.category_prefix').'/'.UrlPath::encode($path).'/';
     }
 
     /** Exact WordPress URL: /product-category/{encoded-path}/ (trailing slash kept). */

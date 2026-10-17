@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('from_path');                    // normalized (UrlPath::normalize)
             $table->char('from_hash', 64)->unique();      // UrlPath::hash — the lookup key
             $table->text('to_path');                      // absolute path on this site, e.g. /p/goldkish-gk1024
+            $table->char('to_hash', 64)->index();         // UrlPath::hash(to_path) — used to collapse chains
             $table->unsignedSmallInteger('status_code')->default(301); // 301 | 302 | 410
             $table->string('source', 32)->default('manual'); // import | slug_change | manual
             $table->unsignedInteger('hits')->default(0);

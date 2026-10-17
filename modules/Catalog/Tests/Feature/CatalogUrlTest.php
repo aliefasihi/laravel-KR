@@ -51,6 +51,17 @@ class CatalogUrlTest extends TestCase
         $this->get(rtrim($category->url(), '/'))->assertRedirect($category->url())->assertStatus(301);
     }
 
+    public function test_changing_category_path_redirects_old_url_in_one_hop(): void
+    {
+        $category = Category::create(['name' => 'قابلمه', 'path' => 'قابلمه']);
+        $old = $category->url();
+
+        $category->update(['path' => 'ظروف/قابلمه']);
+
+        $this->get($old)->assertStatus(301)->assertRedirect($category->url());
+        $this->get($category->url())->assertOk();
+    }
+
     public function test_product_slug_is_brand_dash_sku(): void
     {
         $product = $this->product();

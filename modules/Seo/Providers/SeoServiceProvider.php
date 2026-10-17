@@ -11,6 +11,7 @@ use App\Core\Modules\ModuleServiceProvider;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Modules\Catalog\Events\CategoryUrlChanged;
 use Modules\Catalog\Events\ProductUrlChanged;
 use Modules\Seo\Http\Middleware\LegacyQueryStringRedirect;
 use Modules\Seo\Listeners\CreateRedirectForChangedUrl;
@@ -23,7 +24,7 @@ class SeoServiceProvider extends ModuleServiceProvider
     {
         parent::boot();
 
-        Event::listen(ProductUrlChanged::class, CreateRedirectForChangedUrl::class);
+        Event::listen([ProductUrlChanged::class, CategoryUrlChanged::class], CreateRedirectForChangedUrl::class);
 
         $this->app['router']->pushMiddlewareToGroup('web', LegacyQueryStringRedirect::class);
 

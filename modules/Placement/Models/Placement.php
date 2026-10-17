@@ -13,6 +13,8 @@ use Illuminate\Support\Collection;
 
 class Placement extends Model
 {
+    public const CONTEXTS = ['category' => 'دسته‌بندی', 'product' => 'محصول', 'brand' => 'برند'];
+
     protected $guarded = ['id'];
 
     protected function casts(): array
