@@ -19,6 +19,9 @@ return [
         'brand_prefix' => 'brand',   // /brand/{slug}
     ],
 
+    // Timestamps are stored in UTC (config/app.php); shown to customers in Tehran time.
+    'display_timezone' => 'Asia/Tehran',
+
     // Money is stored as integer Rials everywhere; this only affects display.
     'currency' => [
         'storage' => 'IRR',
