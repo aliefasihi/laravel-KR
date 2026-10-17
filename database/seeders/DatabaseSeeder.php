@@ -1,25 +1,25 @@
 <?php
 
+/**
+ * Khaneh Romantic — Seeders
+ * نویسنده: علی فصیحی (Ali Fasihi)
+ *
+ *   php artisan db:seed                       → standard banner slots (safe in production)
+ *   php artisan db:seed --class=DemoSeeder    → sample brands/categories/products (local only)
+ */
+
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call(PlacementSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        if (app()->isLocal()) {
+            $this->call(DemoSeeder::class);
+        }
     }
 }

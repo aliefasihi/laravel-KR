@@ -1,5 +1,5 @@
 {{-- Placement slot | نویسنده: علی فصیحی (Ali Fasihi) --}}
-<div class="placement placement--{{ str_replace('.', '-', $key) }} grid gap-4">
+<div {{ $attributes->class(['placement placement--'.str_replace('.', '-', $key), 'grid gap-4']) }}>
     @foreach ($banners as $banner)
         <a href="{{ $banner->link_url ?? '#' }}" class="block overflow-hidden rounded-[calc(var(--radius-tile)*1.5)]" @if ($banner->variant) data-variant="{{ $banner->variant }}" @endif>
             <picture>

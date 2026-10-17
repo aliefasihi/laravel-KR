@@ -18,6 +18,8 @@
     <div class="mx-auto max-w-7xl px-4 pt-6">
         <x-breadcrumbs :items="array_slice($category->trail(), 0, -1, true) + [$category->name => null]" />
 
+        <x-placement key="category.header" :context-id="$category->id" class="mt-6" />
+
         <header class="mt-6 flex flex-wrap items-end justify-between gap-4">
             <div>
                 <h1 class="font-display text-4xl leading-tight sm:text-5xl">{{ $category->name }}</h1>

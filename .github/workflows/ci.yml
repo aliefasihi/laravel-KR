@@ -19,8 +19,18 @@ jobs:
           extensions: mbstring, intl, pdo_sqlite
           coverage: none
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          npm ci
+
+      - name: Build assets
+        run: npm run build
 
       - name: Code style
         run: vendor/bin/pint --test

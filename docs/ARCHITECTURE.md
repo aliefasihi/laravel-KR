@@ -37,7 +37,7 @@
 ## قدم‌های بعدی
 
 1. ایمپورتر WordPress: برند و دسته، تصاویر، محصول، مقاله، بازنویسی لینک‌ها، ریدایرکت‌ها
-2. Customer، Checkout، Order و Payment (درگاه‌های ایرانی)
+2. Customer (ورود OTP)، ثبت سفارش، Order و Payment (درگاه‌های ایرانی)
 3. `php artisan install:api` (Sanctum) و abilityهای Store API
 4. dispatcher صف برای Outbox با وب‌هوک‌های امضاشده‌ی HMAC
-5. پنل Filament برای عملیات روزمره
+5. کش کامل صفحه برای کاربر مهمان + نسخه‌های avif/webp تصاویر

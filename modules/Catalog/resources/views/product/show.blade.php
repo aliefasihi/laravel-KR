@@ -75,6 +75,8 @@
                 <div class="mt-8 rounded-[var(--radius-tile)] bg-white p-5 ring-1 ring-line/70">
                     <livewire:checkout.add-to-cart :product="$product" />
                 </div>
+
+                <x-placement key="product.sidebar" class="mt-6" />
             </div>
         </div>
 
