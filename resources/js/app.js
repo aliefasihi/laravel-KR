@@ -95,6 +95,152 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    // Infinite, auto-playing product rail (HomeSliders). The items are rendered once; the browser
+    // copies them before and after so scrolling never hits an end, and quietly jumps back by one
+    // set once a scroll settles (same picture, so the jump is invisible). RTL-aware.
+    // Autoplay: one card every `interval` ms, only while on screen, never while the shopper is
+    // touching/hovering/focusing it, and never with "reduce motion".
+    Alpine.data('loopRail', (interval = 4000, autoplay = true) => ({
+        timer: null,
+        held: false,
+        paused: false,
+        visible: false,
+        count: 0,
+        sign: 1,
+        init() {
+            const track = this.$refs.track;
+            const items = [...track.children];
+            // everything already fits on screen: a plain row, nothing to loop
+            if (items.length < 2 || track.scrollWidth <= track.clientWidth + 8) return;
+
+            const copy = (el) => {
+                const clone = el.cloneNode(true);
+                clone.setAttribute('aria-hidden', 'true');
+                clone.setAttribute('data-clone', '');
+                clone.querySelectorAll('a, button, input, [tabindex]').forEach((n) => n.setAttribute('tabindex', '-1'));
+                clone.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+                return clone;
+            };
+            items.forEach((el) => track.append(copy(el)));
+            [...items].reverse().forEach((el) => track.prepend(copy(el)));
+            this.count = items.length;
+            this.sign = getComputedStyle(track).direction === 'rtl' ? -1 : 1;
+
+            // start on the real items (middle set)
+            requestAnimationFrame(() => this.jump(this.setWidth()));
+
+            let settle;
+            track.addEventListener('scroll', () => {
+                clearTimeout(settle);
+                settle = setTimeout(() => this.normalize(), 140);
+            }, { passive: true });
+
+            const hold = () => { this.held = true; this.stop(); };
+            const release = () => { this.held = false; this.play(); };
+            track.addEventListener('pointerdown', hold, { passive: true });
+            track.addEventListener('touchstart', hold, { passive: true });
+            track.addEventListener('touchend', () => setTimeout(release, 3000), { passive: true });
+            track.addEventListener('pointerup', (e) => e.pointerType === 'mouse' || setTimeout(release, 3000));
+
+            new IntersectionObserver(([entry]) => {
+                this.visible = entry.isIntersecting;
+                this.visible ? this.play() : this.stop();
+            }, { threshold: 0.25 }).observe(track);
+            document.addEventListener('visibilitychange', () => (document.hidden ? this.stop() : this.play()));
+            window.addEventListener('resize', () => this.normalize(), { passive: true });
+        },
+        // width of one full set of items (incl. gaps): distance between item 0 and its next copy
+        setWidth() {
+            const kids = this.$refs.track.children;
+            return Math.abs(kids[this.count * 2].offsetLeft - kids[this.count].offsetLeft);
+        },
+        itemWidth() {
+            const kids = this.$refs.track.children;
+            return Math.abs(kids[this.count + 1].offsetLeft - kids[this.count].offsetLeft);
+        },
+        position() {
+            return Math.abs(this.$refs.track.scrollLeft);
+        },
+        jump(to) {
+            const track = this.$refs.track;
+            track.style.scrollBehavior = 'auto';
+            track.style.scrollSnapType = 'none';
+            track.scrollLeft = this.sign * to;
+            track.offsetHeight; // apply before restoring snap/smooth
+            track.style.scrollSnapType = '';
+            track.style.scrollBehavior = '';
+        },
+        normalize() {
+            const w = this.setWidth();
+            if (!w) return;
+            const p = this.position();
+            if (p < w * 0.5) this.jump(p + w);
+            else if (p >= w * 1.5) this.jump(p - w);
+        },
+        step(dir = 1) {
+            this.$refs.track.scrollBy({ left: this.sign * dir * this.itemWidth(), behavior: 'smooth' });
+        },
+        play() {
+            this.stop();
+            if (!autoplay || this.held || !this.visible || this.paused || !this.count) return;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            this.timer = setInterval(() => this.step(1), interval);
+        },
+        stop() {
+            clearInterval(this.timer);
+            this.timer = null;
+        },
+        pause() {
+            this.paused = true;
+            this.stop();
+        },
+        resume() {
+            this.paused = false;
+            this.play();
+        },
+    }));
+
+    // OTP login (Customer module): resend countdown, auto-submit when the code is complete,
+    // and WebOTP — Chrome on Android fills the code from the SMS (its last line "@domain #code").
+    Alpine.data('otpLogin', (retryIn = 0, length = 5) => ({
+        left: retryIn,
+        timer: null,
+        get clock() {
+            const s = Math.max(0, this.left);
+            return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+        },
+        init() {
+            if (this.left > 0) this.start(this.left);
+        },
+        start(seconds) {
+            this.left = seconds ?? 0;
+            clearInterval(this.timer);
+            this.timer = setInterval(() => --this.left <= 0 && clearInterval(this.timer), 1000);
+            this.webOtp();
+        },
+        autoSubmit(input) {
+            const digits = input.value.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\D/g, '');
+            if (digits.length === length) {
+                this.$wire.set('code', digits, false);
+                this.$wire.verify();
+            }
+        },
+        webOtp() {
+            if (!('OTPCredential' in window) || this.otpPending) return;
+            this.otpPending = true;
+            const ac = new AbortController();
+            setTimeout(() => ac.abort(), 120000);
+            navigator.credentials.get({ otp: { transport: ['sms'] }, signal: ac.signal })
+                .then((otp) => {
+                    if (!otp?.code) return;
+                    this.$wire.set('code', otp.code, false);
+                    this.$wire.verify();
+                })
+                .catch(() => {})
+                .finally(() => (this.otpPending = false));
+        },
+    }));
+
     // Auto-submit filter forms (category listing) without a JS framework
     Alpine.data('autoSubmit', () => ({
         submit() {

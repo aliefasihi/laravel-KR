@@ -1,7 +1,7 @@
 {{-- Journal post card (glass) | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @props(['post'])
 
-<article {{ $attributes->class(['group glass relative flex flex-col rounded-[var(--radius-glass)] p-2 transition duration-300 hover:-translate-y-1 hover:bg-white/80']) }}>
+<article {{ $attributes->class(['group glass relative flex flex-col rounded-[var(--radius-glass)] p-2 transition duration-300 hover:-translate-y-1 hover:bg-surface/80']) }}>
     <div class="relative overflow-hidden rounded-[1.15rem]">
         <x-media.picture :media="$post->media->first()" :alt="$post->title" sizes="(min-width: 768px) 33vw, 100vw" class="aspect-[16/10] w-full object-cover transition duration-700 group-hover:scale-105" />
         @if ($post->published_at)

@@ -1,10 +1,11 @@
 {
     "title": "حساب کاربری مشتریان",
-    "description": "ورود و ثبت‌نام با موبایل و کد پیامکی، آدرس‌ها و پروفایل.",
+    "description": "ورود و ثبت‌نام با موبایل و کد پیامکی، پروفایل و نشانی‌ها، فهرست مشتریان در پنل.",
     "version": "1.0.0",
     "core": false,
     "requires": [
-        "Catalog"
+        "Catalog",
+        "Sms"
     ],
     "default": true,
     "icon": "user-circle"

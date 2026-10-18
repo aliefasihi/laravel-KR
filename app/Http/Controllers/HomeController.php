@@ -11,6 +11,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Core\Modules\Modules;
 use App\Core\Support\StoreCache;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
@@ -58,7 +59,11 @@ class HomeController
             ->where(fn ($w) => $w->whereNull('sale_starts_at')->orWhere('sale_starts_at', '<=', $now))
             ->where(fn ($w) => $w->whereNull('sale_ends_at')->orWhere('sale_ends_at', '>', $now));
 
-        $amazing = $listing->apply($listing->base(), $listing->filters(request()->duplicate(['sale' => 1, 'sort' => 'discount'])))
+        // With the HomeSliders module on, product rows come from the admin's sliders (rendered into
+        // the home.* slots of the template); the built-in offers band and newest grid step aside.
+        $sliders = Modules::enabled('HomeSliders');
+
+        $amazing = $sliders ? null : $listing->apply($listing->base(), $listing->filters(request()->duplicate(['sale' => 1, 'sort' => 'discount'])))
             ->limit(12)->get();
 
         // The hero's "special offer": the sale ending soonest (falls back to the biggest discount).
@@ -96,8 +101,9 @@ class HomeController
             'categories' => Category::query()->whereNull('parent_id')->where('is_active', true)
                 ->with('media')->orderBy('sort')->limit(8)->get(),
             'amazing' => $amazing,
+            'hasSale' => $specialVariant !== null, // «تخفیف‌های امروز» button
             'dealsEnd' => $dealsEnd,
-            'newest' => Product::query()->active()->with(['brand', 'variants', 'media'])->latest('id')->limit(10)->get(),
+            'newest' => $sliders ? null : Product::query()->active()->with(['brand', 'variants', 'media'])->latest('id')->limit(10)->get(),
             'brands' => $brands,
             'showcase' => $showcase,
             'posts' => Post::query()->published()->with('media')->latest('published_at')->limit(3)->get(),

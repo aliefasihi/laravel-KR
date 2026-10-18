@@ -17,3 +17,11 @@
     --color-caramel: #e4a96c;
     --color-cream: #fff5ed;
 }
+
+/* ── Login (App\Filament\Auth\Login) ───────────────────────────────── */
+.kr-auth .fi-simple-header { align-items: flex-start; text-align: start; }
+.kr-auth .fi-simple-header-heading { font-size: 1.6rem; font-weight: 900; color: var(--color-navy); }
+.dark .kr-auth .fi-simple-header-heading { color: #fff; }
+.kr-auth .fi-simple-page-content { gap: 1.75rem; }
+.kr-auth .fi-input-wrp { border-radius: 0.9rem; }
+.kr-auth .fi-btn { border-radius: 9999px; padding-block: 0.7rem; }

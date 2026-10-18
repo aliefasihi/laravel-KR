@@ -13,7 +13,7 @@
             <div class="blob -top-24 end-10 -z-10 size-80 text-rose/30" aria-hidden="true"></div>
             <div class="flex flex-wrap items-center gap-6">
                 @if ($logo = $brand->media->first())
-                    <span class="grid size-24 place-items-center rounded-3xl bg-white p-3"><x-media.picture :media="$logo" :alt="$brand->name_fa" sizes="96px" class="max-h-full w-auto object-contain" /></span>
+                    <span class="grid size-24 place-items-center rounded-3xl bg-surface p-3"><x-media.picture :media="$logo" :alt="$brand->name_fa" sizes="96px" class="max-h-full w-auto object-contain" /></span>
                 @endif
                 <div>
                     <h1 class="text-3xl font-black sm:text-4xl">{{ $brand->name_fa }}</h1>

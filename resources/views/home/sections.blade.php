@@ -25,7 +25,7 @@
                         <div class="glass absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full px-2.5 py-2">
                             @foreach ($heroBanners as $banner)
                                 <button type="button" @click="go({{ $loop->index }})" class="h-2 rounded-full transition-all"
-                                        :class="active === {{ $loop->index }} ? 'w-6 bg-rose' : 'w-2 bg-navy/25 hover:bg-navy/50'"
+                                        :class="active === {{ $loop->index }} ? 'w-6 bg-rose' : 'w-2 bg-deep/25 hover:bg-deep/50'"
                                         aria-label="اسلاید {{ $loop->iteration }}"></button>
                             @endforeach
                         </div>
@@ -36,7 +36,7 @@
                 <div class="glass relative isolate overflow-hidden rounded-[var(--radius-glass)] px-6 py-12 sm:px-12 sm:py-16">
                     <div class="blob-duo -top-24 -end-16 -z-10 size-80 animate-float" aria-hidden="true"></div>
                     <div class="blob -bottom-28 start-1/4 -z-10 size-72 text-navy/10" aria-hidden="true"></div>
-                    <span class="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-1.5 text-xs font-bold text-rose">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-surface/70 px-4 py-1.5 text-xs font-bold text-rose">
                         <span class="size-1.5 rounded-full bg-rose"></span> کالکشن تازه‌ی فصل
                     </span>
                     <h1 class="mt-5 max-w-xl text-4xl leading-[1.35] font-black text-navy sm:text-5xl sm:leading-[1.3]">
@@ -45,7 +45,7 @@
                     <p class="mt-5 max-w-md leading-8 text-muted">ظروف سرو و پذیرایی، لوازم آشپزخانه و اکسسوری‌هایی که خانه را گرم‌تر و دلنشین‌تر می‌کنند؛ با ضمانت اصالت کالا.</p>
                     <div class="mt-8 flex flex-wrap gap-3">
                         <a href="{{ route('catalog.shop') }}" class="btn-navy">مشاهده محصولات</a>
-                        @if ($amazing->isNotEmpty())
+                        @if ($hasSale)
                             <a href="{{ route('catalog.shop', ['sale' => 1]) }}" class="btn-glass">تخفیف‌های امروز</a>
                         @endif
                     </div>
@@ -61,7 +61,7 @@
                         <span class="text-sm font-black text-caramel">پیشنهاد ویژه</span>
                         <span class="badge-off">{{ PersianText::toPersianDigits(Money::discountPercent($specialVariant->price, $specialVariant->currentPrice())) }}٪</span>
                     </div>
-                    <div class="relative aspect-square overflow-hidden rounded-2xl bg-white">
+                    <div class="relative aspect-square overflow-hidden rounded-2xl bg-surface">
                         <x-media.picture :media="$special->media->first()" :alt="$special->name" eager sizes="(min-width: 1024px) 320px, 100vw" class="size-full object-cover transition duration-700 group-hover:scale-105" />
                     </div>
                     <h2 class="relative mt-4 line-clamp-2 px-2 text-[15px] leading-7 font-bold">
@@ -83,6 +83,8 @@
             @endif
         </section>
 
+        @storefrontHook('home.after_hero')
+
         {{-- ── Category bubbles ─────────────────────────────────────────── --}}
         @if ($categories->isNotEmpty())
             <section aria-labelledby="cats-title">
@@ -103,8 +105,10 @@
             </section>
         @endif
 
+        @storefrontHook('home.after_categories')
+
         {{-- ── Amazing offers band ──────────────────────────────────────── --}}
-        @if ($amazing->isNotEmpty())
+        @if ($amazing?->isNotEmpty())
             <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-l from-caramel via-[#e89a7f] to-rose p-4 shadow-[0_30px_60px_-30px_rgb(204_51_102/0.6)] sm:p-6"
                      aria-labelledby="amazing-title" x-data="rail">
                 <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(40rem_20rem_at_80%_0%,rgb(255_255_255/0.35),transparent)]" aria-hidden="true"></div>
@@ -119,12 +123,12 @@
                                 </span>
                             @endforeach
                         </div>
-                        <a href="{{ route('catalog.shop', ['sale' => 1, 'sort' => 'discount']) }}" class="btn !bg-white !px-5 !py-2.5 text-navy hover:!bg-cream">مشاهده همه</a>
+                        <a href="{{ route('catalog.shop', ['sale' => 1, 'sort' => 'discount']) }}" class="btn !bg-surface !px-5 !py-2.5 text-navy hover:!bg-cream">مشاهده همه</a>
                         <div class="hidden gap-2 lg:flex">
-                            <button type="button" @click="scroll(1)" class="grid size-10 place-items-center rounded-full bg-white/25 text-white hover:bg-white/40" aria-label="قبلی">
+                            <button type="button" @click="scroll(1)" class="grid size-10 place-items-center rounded-full bg-white/25 text-white hover:bg-surface/40" aria-label="قبلی">
                                 <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7.2 4.2a.75.75 0 0 0 0 1.06L11.94 10 7.2 14.74a.75.75 0 1 0 1.06 1.06l5.27-5.27a.75.75 0 0 0 0-1.06L8.26 4.2a.75.75 0 0 0-1.06 0Z"/></svg>
                             </button>
-                            <button type="button" @click="scroll(-1)" class="grid size-10 place-items-center rounded-full bg-white/25 text-white hover:bg-white/40" aria-label="بعدی">
+                            <button type="button" @click="scroll(-1)" class="grid size-10 place-items-center rounded-full bg-white/25 text-white hover:bg-surface/40" aria-label="بعدی">
                                 <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M12.8 4.2a.75.75 0 0 1 0 1.06L8.06 10l4.74 4.74a.75.75 0 1 1-1.06 1.06l-5.27-5.27a.75.75 0 0 1 0-1.06l5.27-5.27a.75.75 0 0 1 1.06 0Z"/></svg>
                             </button>
                         </div>
@@ -132,7 +136,7 @@
                     <ul class="rail !mx-0 !px-0 !pb-1" x-ref="track">
                         @foreach ($amazing as $product)
                             <li class="w-[46%] shrink-0 sm:w-[30%] lg:w-[23%]">
-                                <x-product.card :product="$product" class="!bg-white/85 h-full" />
+                                <x-product.card :product="$product" class="!bg-surface/85 h-full" />
                             </li>
                         @endforeach
                     </ul>
@@ -141,7 +145,7 @@
         @endif
 
         {{-- ── Newest ───────────────────────────────────────────────────── --}}
-        @if ($newest->isNotEmpty())
+        @if ($newest?->isNotEmpty())
             <section aria-labelledby="new-title" class="space-y-7">
                 <x-section-title id="new-title" accent="جدیدترین" title="محصولات" ghost="New Arrivals" :link="route('catalog.shop')" />
                 <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
@@ -166,6 +170,8 @@
             </section>
         @endif
 
+        @storefrontHook('home.after_banners')
+
         {{-- ── Brand logos ──────────────────────────────────────────────── --}}
         @if ($brands->isNotEmpty())
             <section aria-labelledby="brands-title" class="space-y-7">
@@ -173,7 +179,7 @@
                 <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                     @foreach ($brands as $brand)
                         <li>
-                            <a href="{{ $brand->url() }}" class="glass group flex h-24 flex-col items-center justify-center gap-1 rounded-[var(--radius-card)] px-4 text-center transition hover:-translate-y-1 hover:bg-white/85">
+                            <a href="{{ $brand->url() }}" class="glass group flex h-24 flex-col items-center justify-center gap-1 rounded-[var(--radius-card)] px-4 text-center transition hover:-translate-y-1 hover:bg-surface/85">
                                 @if ($logo = $brand->media->first())
                                     <x-media.picture :media="$logo" :alt="$brand->name_fa" sizes="160px" class="max-h-12 w-auto object-contain opacity-70 grayscale transition group-hover:opacity-100 group-hover:grayscale-0" />
                                 @else
@@ -187,6 +193,8 @@
             </section>
         @endif
 
+        @storefrontHook('home.after_brands')
+
         {{-- ── Brand showcase tabs ──────────────────────────────────────── --}}
         @if ($showcase->isNotEmpty())
             <section aria-labelledby="showcase-title" class="space-y-7" x-data="{ tab: 0 }">
@@ -196,7 +204,7 @@
                         @foreach ($showcase as $item)
                             <button type="button" role="tab" @click="tab = {{ $loop->index }}" :aria-selected="tab === {{ $loop->index }}"
                                     class="rounded-full px-4 py-2 text-sm font-bold transition"
-                                    :class="tab === {{ $loop->index }} ? 'bg-navy text-white shadow' : 'text-muted hover:text-navy'">{{ $item['brand']->name_fa }}</button>
+                                    :class="tab === {{ $loop->index }} ? 'bg-deep text-white shadow' : 'text-muted hover:text-navy'">{{ $item['brand']->name_fa }}</button>
                         @endforeach
                     </div>
                 </div>
@@ -220,6 +228,8 @@
                 </span>
             </a>
         @endif
+
+        @storefrontHook('home.before_journal')
 
         {{-- ── Journal ──────────────────────────────────────────────────── --}}
         @if ($posts->isNotEmpty())

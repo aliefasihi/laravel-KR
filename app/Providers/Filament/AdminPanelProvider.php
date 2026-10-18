@@ -11,6 +11,7 @@
 namespace App\Providers\Filament;
 
 use App\Core\Modules\ModuleRegistry;
+use App\Filament\Auth\Login;
 use App\Filament\AvatarProviders\InitialsAvatarProvider;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
@@ -37,13 +38,19 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(Login::class)
             ->passwordReset()
             ->profile()
             ->brandName('خانه رمانتیک')
             ->favicon(asset('favicon.ico'))
             ->colors([
-                'primary' => Color::hex('#cc3366'), // brand rose, same as the storefront
+                // brand rose; 500–700 a little deeper than Filament's generated shades so primary
+                // buttons get white text (AA contrast) instead of a pale pink fill
+                'primary' => array_replace(Color::hex('#cc3366'), [
+                    500 => 'oklch(0.6 0.19 6)',
+                    600 => 'oklch(0.545 0.185 6)',
+                    700 => 'oklch(0.48 0.165 6)',
+                ]),
                 'danger' => Color::Red,
                 'gray' => Color::Slate,
             ])
@@ -55,6 +62,7 @@ class AdminPanelProvider extends PanelProvider
             // and links are prefetched on hover so most clicks open instantly.
             ->spa(hasPrefetching: true)
             ->navigationGroups([
+                'فروش',
                 'کاتالوگ',
                 'محتوا',
                 'بازاریابی',

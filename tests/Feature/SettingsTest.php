@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * Store settings: defaults, saving from the admin page, storefront hooks.
+ * نویسنده: علی فصیحی (Ali Fasihi)
+ */
+
+namespace Tests\Feature;
+
+use App\Core\Settings\Settings;
+use App\Core\Support\StorefrontHooks;
+use App\Filament\Pages\SettingsPage;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Tests\TestCase;
+
+class SettingsTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_defaults_values_and_cache(): void
+    {
+        $this->assertSame('system', Settings::get('appearance.default'));        // section default
+        $this->assertSame('x', Settings::get('nothing.here', 'x'));             // caller default
+        $this->assertSame('y', Settings::get('nothing.here', fn () => 'y'));
+
+        Settings::set(['appearance.default' => 'dark', 'appearance.toggle' => false]);
+        $this->assertSame('dark', Settings::get('appearance.default'));
+        $this->assertFalse(Settings::get('appearance.toggle'));
+        $this->assertDatabaseHas('settings', ['key' => 'appearance.default', 'value' => '"dark"']);
+    }
+
+    public function test_admin_settings_page_saves_every_section(): void
+    {
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+
+        $this->get('/admin/settings')->assertOk()->assertSee('ظاهر سایت')->assertSee('پیامک');
+
+        Livewire::test(SettingsPage::class)
+            ->assertSet('data.appearance.default', 'system')
+            ->set('data.appearance.default', 'light')
+            ->set('data.sms.driver', 'smsir')
+            ->set('data.sms.smsir_key', 'secret-key')
+            ->set('data.sms.smsir_otp_template', '123456')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('light', Settings::get('appearance.default'));
+        $this->assertSame('smsir', Settings::get('sms.driver'));
+        $this->assertSame('123456', (string) Settings::get('sms.smsir_otp_template'));
+    }
+
+    public function test_storefront_hooks_render_in_order(): void
+    {
+        StorefrontHooks::add('test.slot', fn () => 'B', 20);
+        StorefrontHooks::add('test.slot', fn () => 'A', 10);
+        StorefrontHooks::add('test.slot', fn () => null, 30);
+
+        $this->assertSame('AB', StorefrontHooks::render('test.slot')->toHtml());
+        $this->assertSame('', StorefrontHooks::render('test.empty')->toHtml());
+    }
+}

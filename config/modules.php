@@ -1,11 +1,13 @@
 <?php
 
+use Modules\Appearance\Providers\AppearanceServiceProvider;
 use Modules\Attributes\Providers\AttributesServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
 use Modules\Checkout\Providers\CheckoutServiceProvider;
 use Modules\Content\Providers\ContentServiceProvider;
 use Modules\Customer\Providers\CustomerServiceProvider;
 use Modules\FileManager\Providers\FileManagerServiceProvider;
+use Modules\HomeSliders\Providers\HomeSlidersServiceProvider;
 use Modules\Integration\Providers\IntegrationServiceProvider;
 use Modules\Media\Providers\MediaServiceProvider;
 use Modules\Order\Providers\OrderServiceProvider;
@@ -13,6 +15,7 @@ use Modules\Payment\Providers\PaymentServiceProvider;
 use Modules\Placement\Providers\PlacementServiceProvider;
 use Modules\Search\Providers\SearchServiceProvider;
 use Modules\Seo\Providers\SeoServiceProvider;
+use Modules\Sms\Providers\SmsServiceProvider;
 use Modules\WordPressImport\Providers\WordPressImportServiceProvider;
 
 /**
@@ -31,7 +34,10 @@ return [
         FileManagerServiceProvider::class,
         AttributesServiceProvider::class,
         ContentServiceProvider::class,
+        AppearanceServiceProvider::class,
+        HomeSlidersServiceProvider::class,
         PlacementServiceProvider::class,
+        SmsServiceProvider::class,
         CustomerServiceProvider::class,
         CheckoutServiceProvider::class,
         OrderServiceProvider::class,

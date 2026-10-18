@@ -23,6 +23,7 @@
         <meta property="og:image" content="@yield('og_image')">
     @endif
     @stack('head')
+    @storefrontHook('head.end')
 
     <link rel="preload" href="/fonts/vazirmatn/vazirmatn-arabic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     @if (config('khaneh.font') === 'kalameh')
@@ -43,8 +44,9 @@
     </script>
 </head>
 <body @class(['flex min-h-dvh flex-col lg:pb-0', 'pb-24' => ! View::hasSection('buy_bar'), 'pb-44' => View::hasSection('buy_bar')])>
-    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-[60] focus:rounded-full focus:bg-white focus:px-5 focus:py-2.5 focus:shadow-lg">پرش به محتوا</a>
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-[60] focus:rounded-full focus:bg-surface focus:px-5 focus:py-2.5 focus:shadow-lg">پرش به محتوا</a>
 
+    @storefrontHook('body.start')
     <x-site.promo />
     <x-site.header />
 
@@ -57,6 +59,7 @@
     <x-site.whatsapp :raised="View::hasSection('buy_bar')" />
     <x-ui.toast />
 
+    @storefrontHook('body.end')
     @stack('scripts')
 </body>
 </html>

@@ -23,16 +23,16 @@
         <div class="rail min-w-0 flex-1 !mx-0 !gap-2 !px-0 !pb-0">
             @foreach ($sorts as $key => $label)
                 <a href="{{ $action.'?'.http_build_query(array_filter(['sort' => $key] + request()->except('sort', 'page'))) }}"
-                   @class(['shrink-0 rounded-full px-4 py-2 text-sm font-bold transition', 'bg-navy text-white' => $filters['sort'] === $key, 'glass text-muted' => $filters['sort'] !== $key])>{{ $label }}</a>
+                   @class(['shrink-0 rounded-full px-4 py-2 text-sm font-bold transition', 'bg-deep text-white' => $filters['sort'] === $key, 'glass text-muted' => $filters['sort'] !== $key])>{{ $label }}</a>
             @endforeach
         </div>
     </div>
 
     {{-- Filters --}}
     <aside :class="sheet ? 'max-lg:fixed max-lg:inset-0 max-lg:z-[60] max-lg:flex max-lg:items-end' : 'max-lg:hidden'">
-        <div class="absolute inset-0 bg-navy/30 backdrop-blur-sm lg:hidden" @click="sheet = false" aria-hidden="true"></div>
+        <div class="absolute inset-0 bg-deep/30 backdrop-blur-sm lg:hidden" @click="sheet = false" aria-hidden="true"></div>
         <form method="get" action="{{ $action }}" x-data="autoSubmit" @change="if (window.innerWidth >= 1024) submit()"
-              class="glass-strong relative max-h-[85vh] w-full space-y-6 overflow-y-auto rounded-t-[1.75rem] p-5 lg:sticky lg:top-40 lg:max-h-none lg:rounded-[var(--radius-glass)] lg:bg-white/60">
+              class="glass-strong relative max-h-[85vh] w-full space-y-6 overflow-y-auto rounded-t-[1.75rem] p-5 lg:sticky lg:top-40 lg:max-h-none lg:rounded-[var(--radius-glass)] lg:bg-surface/60">
             @foreach ($hidden as $name => $value)
                 <input type="hidden" name="{{ $name }}" value="{{ $value }}">
             @endforeach
@@ -50,7 +50,7 @@
                     @foreach ($sorts as $key => $label)
                         <label class="cursor-pointer">
                             <input type="radio" name="sort" value="{{ $key }}" class="peer sr-only" @checked($filters['sort'] === $key)>
-                            <span class="block rounded-xl bg-white/60 px-3 py-2 text-center text-[13px] text-muted transition peer-checked:bg-navy peer-checked:font-bold peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-rose hover:text-navy">{{ $label }}</span>
+                            <span class="block rounded-xl bg-surface/60 px-3 py-2 text-center text-[13px] text-muted transition peer-checked:bg-deep peer-checked:font-bold peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-rose hover:text-navy">{{ $label }}</span>
                         </label>
                     @endforeach
                 </div>
@@ -58,10 +58,10 @@
 
             <div class="space-y-2.5">
                 @foreach (['sale' => 'فقط کالاهای تخفیف‌دار', 'in_stock' => 'فقط کالاهای موجود'] as $name => $label)
-                    <label class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl bg-white/60 px-4 py-3">
+                    <label class="flex cursor-pointer items-center justify-between gap-3 rounded-2xl bg-surface/60 px-4 py-3">
                         <span class="text-sm font-medium text-navy">{{ $label }}</span>
                         <input type="checkbox" name="{{ $name }}" value="1" class="peer sr-only" @checked($filters[$name])>
-                        <span class="relative h-6 w-11 shrink-0 rounded-full bg-navy/15 transition peer-checked:bg-rose peer-focus-visible:ring-2 peer-focus-visible:ring-rose/40 after:absolute after:top-0.5 after:start-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:-translate-x-5" aria-hidden="true"></span>
+                        <span class="relative h-6 w-11 shrink-0 rounded-full bg-navy/15 transition peer-checked:bg-rose peer-focus-visible:ring-2 peer-focus-visible:ring-rose/40 after:absolute after:top-0.5 after:start-0.5 after:size-5 after:rounded-full after:bg-surface after:shadow after:transition peer-checked:after:-translate-x-5" aria-hidden="true"></span>
                     </label>
                 @endforeach
             </div>
@@ -74,7 +74,7 @@
                     <label class="sr-only" for="f-max">تا</label>
                     <input id="f-max" name="max" type="text" inputmode="numeric" value="{{ $filters['max'] }}" placeholder="{{ $priceRange ? 'تا '.Money::toman($priceRange['max']) : 'تا' }}" class="field !py-2.5 text-center" @change.stop>
                 </div>
-                <button class="mt-2 hidden w-full rounded-xl bg-navy/5 py-2 text-xs font-bold text-navy hover:bg-navy hover:text-white lg:block">اعمال قیمت</button>
+                <button class="mt-2 hidden w-full rounded-xl bg-navy/5 py-2 text-xs font-bold text-navy hover:bg-deep hover:text-white lg:block">اعمال قیمت</button>
             </fieldset>
 
             @if ($brands->count() > 1 || $filters['brand'] !== [])
@@ -83,7 +83,7 @@
                     <div class="space-y-1.5">
                         @foreach ($brands as $brand)
                             @php($n = $counts[$brand->id] ?? null)
-                            <label @class(['flex cursor-pointer items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-white/60', 'opacity-50' => $n === 0])>
+                            <label @class(['flex cursor-pointer items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-surface/60', 'opacity-50' => $n === 0])>
                                 <input type="checkbox" name="brand[]" value="{{ $brand->slug }}" @checked(in_array($brand->slug, $filters['brand'], true)) class="size-[18px] rounded-md accent-rose">
                                 <span class="flex-1 text-sm text-navy">{{ $brand->name_fa }}</span>
                                 @if ($n !== null)
@@ -110,7 +110,7 @@
                                 @foreach ($options as $value)
                                     <label class="group cursor-pointer" title="{{ $value->value }}">
                                         <input type="checkbox" name="attr[{{ $attribute->slug }}][]" value="{{ $value->id }}" class="peer sr-only" @checked(in_array($value->id, $chosen, true))>
-                                        <span class="flex items-center gap-1.5 rounded-full bg-white/60 py-1 ps-1 pe-3 text-xs text-navy ring-1 ring-line transition peer-checked:bg-white peer-checked:ring-2 peer-checked:ring-rose peer-focus-visible:ring-2 peer-focus-visible:ring-rose/50">
+                                        <span class="flex items-center gap-1.5 rounded-full bg-surface/60 py-1 ps-1 pe-3 text-xs text-navy ring-1 ring-line transition peer-checked:bg-surface peer-checked:ring-2 peer-checked:ring-rose peer-focus-visible:ring-2 peer-focus-visible:ring-rose/50">
                                             <span class="size-5 rounded-full ring-1 ring-black/10" style="background: {{ $value->color ?: '#ddd' }}"></span>
                                             {{ $value->value }}
                                         </span>
@@ -121,7 +121,7 @@
                             <div class="space-y-1.5">
                                 @foreach ($options as $value)
                                     @php($n = $valueCounts[$value->id] ?? 0)
-                                    <label @class(['flex cursor-pointer items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-white/60', 'opacity-50' => $n === 0])
+                                    <label @class(['flex cursor-pointer items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-surface/60', 'opacity-50' => $n === 0])
                                            @if ($loop->index >= 6 && ! in_array($value->id, $chosen, true)) x-show="more" x-cloak @endif>
                                         <input type="checkbox" name="attr[{{ $attribute->slug }}][]" value="{{ $value->id }}" @checked(in_array($value->id, $chosen, true)) class="size-[18px] rounded-md accent-rose">
                                         <span class="flex-1 text-sm text-navy">{{ $attribute->format($value->value) }}</span>

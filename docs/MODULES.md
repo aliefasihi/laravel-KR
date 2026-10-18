@@ -23,6 +23,29 @@
 - `storage/app/modules.json` در گیت نیست. روی سرور بعد از دیپلوی باقی می‌ماند، پس وضعیت ماژول‌ها با هر دیپلوی ریست نمی‌شود.
 - ریسورس‌ها، صفحه‌ها و ویجت‌های Filament فقط برای ماژول‌های روشن کشف می‌شوند. منوی پنل هم با خاموش شدن ماژول جمع می‌شود.
 
+## تنظیمات فروشگاه
+**پنل ← تنظیمات ← تنظیمات فروشگاه** (`/admin/settings`)
+- هر ماژول روشن تب خودش را دارد: ظاهر سایت، پیامک و بعدها پرداخت و ارسال.
+- مقدارها در جدول `settings` ذخیره می‌شوند. در کد: `Settings::get('sms.driver')`.
+- پیش‌فرض‌ها از `.env` یا config خود ماژول می‌آیند.
+- ماژول تازه با `Settings::section(new SettingsSection(...))` در provider تب اضافه می‌کند.
+
+## جای ماژول‌ها در قالب سایت
+هر ماژول تکه‌ی خودش را در جاهای مشخص قالب می‌گذارد (`StorefrontHooks`):
+
+| جا | کجا | استفاده‌ی فعلی |
+|---|---|---|
+| `head.end` | انتهای `<head>` | اسکریپت حالت تاریک |
+| `header.actions` | کنار سبد خرید | دکمه‌ی ماه/خورشید، ورود/حساب |
+| `drawer.footer` | پایین منوی موبایل | ورود، انتخاب ظاهر |
+| `home.after_hero` … `home.before_journal` | صفحه‌ی اصلی | اسلایدرهای محصولات |
+| `body.start`، `body.end` | ابتدا و انتهای `<body>` | — |
+
+```php
+StorefrontHooks::add('header.actions', 'mymodule::partials.button', sort: 30);
+```
+خاموش شدن ماژول = provider بوت نمی‌شود = تکه‌اش نیست.
+
 ## ماژول تازه
 1. پوشه‌ی `modules/{Name}` با `Providers/{Name}ServiceProvider.php` که از `App\Core\Modules\ModuleServiceProvider` ارث می‌برد.
 2. `module.json` کنار آن.

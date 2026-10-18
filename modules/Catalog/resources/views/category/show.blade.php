@@ -26,7 +26,7 @@
                     <p class="mt-2 text-sm text-muted">{{ PersianText::toPersianDigits($products->total()) }} محصول با ضمانت اصالت کالا</p>
                 </div>
                 @if ($image = $category->media->first())
-                    <x-media.picture :media="$image" :alt="$category->name" sizes="112px" class="size-24 rounded-full object-cover ring-4 ring-white/80 sm:size-28" />
+                    <x-media.picture :media="$image" :alt="$category->name" sizes="112px" class="size-24 rounded-full object-cover ring-4 ring-glint/80 sm:size-28" />
                 @endif
             </div>
 
@@ -56,7 +56,7 @@
             <section class="glass rounded-[var(--radius-glass)] p-6 sm:p-10" x-data="{ more: false }" aria-label="درباره {{ $category->name }}">
                 <div class="prose-fa relative overflow-hidden transition-[max-height] duration-500" :class="more ? 'max-h-none' : 'max-h-56'">
                     {!! $category->description !!}
-                    <div x-show="!more" class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/95 to-transparent"></div>
+                    <div x-show="!more" class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-surface/95 to-transparent"></div>
                 </div>
                 <button type="button" @click="more = !more" class="mt-4 text-sm font-bold text-rose" x-text="more ? 'بستن' : 'ادامه مطلب'">ادامه مطلب</button>
             </section>

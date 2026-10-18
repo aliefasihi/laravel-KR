@@ -19,7 +19,7 @@
         @keydown.escape.window="mega = false; menu = false">
 
     <div class="glass frost mx-auto max-w-7xl rounded-[1.75rem] transition-[background-color,box-shadow] duration-300"
-         :class="scrolled && '!bg-white/80 shadow-[0_16px_40px_-20px_rgb(35_40_79/0.35)]'"
+         :class="scrolled && '!bg-surface/80 shadow-[0_16px_40px_-20px_rgb(35_40_79/0.35)]'"
          @mouseleave="mega = false">
 
         {{-- Row 1 --}}
@@ -38,20 +38,16 @@
                 <a href="{{ route('catalog.search') }}" class="btn-icon text-navy md:hidden" aria-label="جستجو">
                     <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4" stroke-linecap="round"/></svg>
                 </a>
-                @if (Route::has('customer.login'))
-                    <a href="{{ route('customer.login') }}" class="btn-navy hidden !px-5 !py-2.5 lg:inline-flex">
-                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0" stroke-linecap="round"/></svg>
-                        ورود | ثبت‌نام
-                    </a>
-                @endif
+                {{-- theme switch (Appearance), account (Customer)… --}}
+                @storefrontHook('header.actions')
                 <livewire:checkout.mini-cart />
             </div>
         </div>
 
         {{-- Row 2 (desktop) --}}
-        <nav class="hidden items-center gap-1 border-t border-white/70 px-4 lg:flex" aria-label="منوی اصلی">
-            <button type="button" class="my-1.5 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-navy transition hover:bg-white/80"
-                    :class="mega && 'bg-white/90 text-rose'"
+        <nav class="hidden items-center gap-1 border-t border-glint/70 px-4 lg:flex" aria-label="منوی اصلی">
+            <button type="button" class="my-1.5 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-navy transition hover:bg-surface/80"
+                    :class="mega && 'bg-surface/90 text-rose'"
                     @mouseenter="mega = true" @click="mega = $event.detail === 0 ? !mega : true" :aria-expanded="mega" aria-controls="mega-menu">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
                 دسته‌بندی محصولات
@@ -63,8 +59,8 @@
                     <li>
                         <a href="{{ $link['url'] }}" @class([
                             'inline-block rounded-full px-4 py-2 font-medium transition',
-                            'bg-white/90 text-rose shadow-sm' => $link['active'],
-                            'text-muted hover:bg-white/70 hover:text-navy' => ! $link['active'],
+                            'bg-surface/90 text-rose shadow-sm' => $link['active'],
+                            'text-muted hover:bg-surface/70 hover:text-navy' => ! $link['active'],
                         ]) @if ($link['active']) aria-current="page" @endif>{{ $link['label'] }}</a>
                     </li>
                 @endforeach
@@ -79,7 +75,7 @@
              x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="opacity-0 -translate-y-2"
              x-transition:leave="transition duration-150" x-transition:leave-end="opacity-0"
              class="hidden px-3 pb-3 lg:block">
-            <div class="grid grid-cols-[15rem_1fr] gap-3 rounded-[1.4rem] bg-white/80 p-3 shadow-[inset_0_1px_0_white]">
+            <div class="grid grid-cols-[15rem_1fr] gap-3 rounded-[1.4rem] bg-surface/80 p-3 shadow-[inset_0_1px_0_white]">
                 <ul class="space-y-0.5 border-e border-navy/5 pe-3">
                     @foreach ($navCategories as $category)
                         <li>
@@ -115,7 +111,7 @@
                             </div>
                             <a href="{{ $category->url() }}" class="group relative hidden overflow-hidden rounded-2xl bg-gradient-to-br from-cream to-rose-100 xl:block">
                                 <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="208px" class="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-                                <span class="absolute inset-x-3 bottom-3 rounded-xl bg-white/80 px-3 py-2 text-center text-sm font-bold text-navy backdrop-blur">{{ $category->name }}</span>
+                                <span class="absolute inset-x-3 bottom-3 rounded-xl bg-surface/80 px-3 py-2 text-center text-sm font-bold text-navy backdrop-blur">{{ $category->name }}</span>
                             </a>
                         </div>
                     @endforeach
@@ -126,7 +122,7 @@
 
     {{-- Mobile drawer --}}
     <div x-show="menu" x-cloak class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="منو">
-        <div class="absolute inset-0 bg-navy/30 backdrop-blur-sm" @click="menu = false" x-show="menu" x-transition.opacity></div>
+        <div class="absolute inset-0 bg-deep/30 backdrop-blur-sm" @click="menu = false" x-show="menu" x-transition.opacity></div>
         <div class="glass-strong frost absolute inset-y-2 start-2 flex w-[22rem] max-w-[88vw] flex-col overflow-hidden rounded-[1.75rem]"
              x-show="menu" x-trap.noscroll="menu"
              x-transition:enter="transition duration-300 ease-out" x-transition:enter-start="translate-x-[110%]"
@@ -144,7 +140,7 @@
             <nav class="flex-1 overflow-y-auto px-3 pb-4" aria-label="دسته‌بندی محصولات">
                 <p class="px-2 pb-2 text-xs font-bold text-subtle">دسته‌بندی‌ها</p>
                 @foreach ($navCategories as $category)
-                    <div x-data="{ open: false }" class="mb-1 rounded-2xl" :class="open && 'bg-white/70'">
+                    <div x-data="{ open: false }" class="mb-1 rounded-2xl" :class="open && 'bg-surface/70'">
                         <div class="flex items-center">
                             <a href="{{ $category->url() }}" class="flex-1 px-3 py-3 text-[15px] font-bold text-navy">{{ $category->name }}</a>
                             @if ($category->children->isNotEmpty())
@@ -164,10 +160,11 @@
                 @endforeach
                 <p class="mt-4 px-2 pb-2 text-xs font-bold text-subtle">صفحه‌ها</p>
                 @foreach ($links as $link)
-                    <a href="{{ $link['url'] }}" @class(['block rounded-2xl px-3 py-2.5 text-[15px]', 'bg-white/80 font-bold text-rose' => $link['active'], 'text-navy' => ! $link['active']])>{{ $link['label'] }}</a>
+                    <a href="{{ $link['url'] }}" @class(['block rounded-2xl px-3 py-2.5 text-[15px]', 'bg-surface/80 font-bold text-rose' => $link['active'], 'text-navy' => ! $link['active']])>{{ $link['label'] }}</a>
                 @endforeach
             </nav>
-            <div class="flex items-center justify-between border-t border-white/80 px-5 py-3 text-navy/70">
+            @storefrontHook('drawer.footer')
+            <div class="flex items-center justify-between border-t border-glint/80 px-5 py-3 text-navy/70">
                 <a href="tel:{{ $store['phone'] }}" class="text-sm font-bold text-navy" dir="ltr">{{ \App\Core\Support\PersianText::toPersianDigits($store['phone']) }}</a>
                 <div class="flex"><x-site.socials /></div>
             </div>

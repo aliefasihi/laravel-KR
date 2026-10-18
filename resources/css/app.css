@@ -12,6 +12,14 @@
  *    drawers, sheets, dropdowns, toasts, sticky bars.
  *  - The mesh lives on a fixed, composited layer (no background-attachment: fixed repaints).
  *  - Decorative blobs are radial gradients (`blob`, `blob-duo`), never filter: blur().
+ *
+ * Light / dark (Appearance module): every colour is a theme variable; `html.dark` swaps them.
+ *  - navy   = brand text colour (dark mode: soft lavender-white)
+ *  - deep   = solid navy fills (buttons, active chips); stays a deep indigo in dark mode
+ *  - surface= card/glass fill (white → night blue); use `text-white` only on rose/deep fills
+ *  - glint  = glass borders & highlights (white → faint light)
+ *  Low-opacity whites (`bg-white/10`, `border-white/15`) are for overlays on photos and on
+ *  always-dark panels (footer, glass-navy) and stay white in both modes.
  */
 @import 'tailwindcss';
 
@@ -43,6 +51,8 @@
 @source not '../../app/Filament';
 @source '../../app/**/*.php';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
     --font-sans: var(--font-brand, 'Vazirmatn'), 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
     --font-latin: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
@@ -50,6 +60,12 @@
     --color-navy: #23284f;
     --color-navy-700: #2e3466;
     --color-navy-500: #4a5190;
+    --color-deep: #23284f;
+    --color-deep-700: #2e3466;
+    --color-surface: #ffffff;
+    --color-glint: #ffffff;
+    --color-page: #fbf7f5;
+    --color-ok: #1a9e4a;
     --color-rose: #cc3366;
     --color-rose-600: #b32656;
     --color-rose-100: #fbe3ec;
@@ -66,6 +82,7 @@
     --radius-card: 1.25rem;
 
     --shadow-glass: 0 10px 40px -18px rgb(35 40 79 / 0.28), inset 0 1px 0 rgb(255 255 255 / 0.85);
+    --shadow-glass-dark: 0 12px 40px -18px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.05);
     --shadow-float: 0 18px 50px -20px rgb(35 40 79 / 0.45);
 
     --animate-marquee: marquee 38s linear infinite;
@@ -82,6 +99,32 @@
     50% { transform: translateY(-8px); }
 }
 
+/* ── Dark mode: same classes, night palette ─────────────────────────────── */
+:root.dark {
+    color-scheme: dark;
+    --color-navy: #e7e9fb;
+    --color-navy-700: #d3d6f3;
+    --color-navy-500: #aab0e2;
+    --color-deep: #343c86;
+    --color-deep-700: #414a9e;
+    --color-surface: #1b1f3c;
+    --color-glint: rgb(170 178 240 / 0.16);
+    --color-page: #101226;
+    --color-ok: #4cd081;
+    --color-rose: #e2547f;
+    --color-rose-600: #cc3366;
+    --color-rose-100: #3d1d34;
+    --color-caramel-600: #e8b47e;
+    --color-caramel-100: #392b26;
+    --color-cream: #221f38;
+    --color-ink: #eef0f8;
+    --color-muted: #a6aec6;
+    --color-subtle: #7b84a0;
+    --color-line: rgb(231 233 251 / 0.1);
+    --shadow-glass: var(--shadow-glass-dark);
+    --shadow-float: 0 18px 50px -20px rgb(0 0 0 / 0.8);
+}
+
 @layer base {
     html,
     body {
@@ -96,7 +139,7 @@
 
     body {
         @apply text-ink font-sans antialiased;
-        background-color: #fbf7f5;
+        background-color: var(--color-page);
     }
 
     /* The mesh: a fixed layer the compositor just keeps in place while scrolling (no repaints). */
@@ -112,6 +155,16 @@
             radial-gradient(46rem 36rem at 60% 108%, rgb(110 118 214 / 0.14), transparent 62%),
             radial-gradient(30rem 24rem at 40% 48%, rgb(255 245 237 / 0.9), transparent 70%);
         transform: translateZ(0);
+    }
+    .dark body::before {
+        background-image:
+            radial-gradient(42rem 32rem at 100% -6%, rgb(204 51 102 / 0.18), transparent 62%),
+            radial-gradient(38rem 30rem at -8% 22%, rgb(228 169 108 / 0.1), transparent 60%),
+            radial-gradient(46rem 36rem at 60% 108%, rgb(90 100 214 / 0.2), transparent 62%);
+    }
+    /* photos are shot on white: soften them a touch at night */
+    .dark img:not([data-keep-bright]) {
+        filter: brightness(0.94);
     }
 
     [x-cloak] {
@@ -146,13 +199,13 @@
 
 /* ── Glass surfaces & buttons (utilities so they compose with @apply and variants) ── */
 @utility glass {
-    background: rgb(255 255 255 / 0.66);
-    border: 1px solid rgb(255 255 255 / 0.8);
+    background: color-mix(in oklab, var(--color-surface) 66%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-glint) 80%, transparent);
     box-shadow: var(--shadow-glass);
 }
 @utility glass-strong {
-    background: rgb(255 255 255 / 0.86);
-    border: 1px solid rgb(255 255 255 / 0.92);
+    background: color-mix(in oklab, var(--color-surface) 86%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-glint) 92%, transparent);
     box-shadow: var(--shadow-glass);
 }
 @utility glass-navy {
@@ -167,7 +220,7 @@
     backdrop-filter: blur(18px) saturate(170%);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .frost { background-color: rgb(255 255 255 / 0.94); }
+    .frost { background-color: color-mix(in oklab, var(--color-surface) 94%, transparent); }
 }
 /* Soft colour blobs (cheap radial gradients; colour from text-*: `blob text-rose/30`). */
 @utility blob {
@@ -202,23 +255,23 @@
     &:disabled { cursor: not-allowed; opacity: 0.5; }
 }
 @utility btn-navy {
-    @apply btn bg-navy text-white shadow-[0_10px_24px_-12px_rgb(35_40_79/0.8)] hover:bg-navy-700;
+    @apply btn bg-deep text-white shadow-[0_10px_24px_-12px_rgb(35_40_79/0.8)] hover:bg-deep-700;
 }
 @utility btn-rose {
     @apply btn bg-rose text-white shadow-[0_10px_24px_-12px_rgb(204_51_102/0.8)] hover:bg-rose-600;
 }
 @utility btn-glass {
-    @apply btn glass text-navy hover:bg-white/90;
+    @apply btn glass text-navy hover:bg-surface/90;
 }
 @utility btn-icon {
-    @apply inline-flex size-11 items-center justify-center rounded-full transition hover:bg-white/70;
+    @apply inline-flex size-11 items-center justify-center rounded-full transition hover:bg-surface/70;
 }
 
 
 @layer components {
     /* ── Inputs ────────────────────────────────────────────────── */
     .field {
-        @apply w-full rounded-2xl border border-white/80 bg-white/70 px-4 py-3 text-sm text-ink shadow-[inset_0_1px_2px_rgb(35_40_79/0.06)] placeholder:text-subtle focus:border-rose/40 focus:bg-white focus:ring-4 focus:ring-rose/10 focus:outline-none;
+        @apply w-full rounded-2xl border border-glint/80 bg-surface/70 px-4 py-3 text-sm text-ink shadow-[inset_0_1px_2px_rgb(35_40_79/0.06)] placeholder:text-subtle focus:border-rose/40 focus:bg-surface focus:ring-4 focus:ring-rose/10 focus:outline-none;
     }
 
     /* ── Section title: two-tone + ghost Latin word (from the current brand) ── */
@@ -235,7 +288,7 @@
 
     /* ── Chips & badges ────────────────────────────────────────── */
     .chip {
-        @apply inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/70 px-4 py-2 text-sm text-navy transition hover:border-rose/30 hover:bg-white hover:text-rose;
+        @apply inline-flex items-center gap-1.5 rounded-full border border-glint/80 bg-surface/70 px-4 py-2 text-sm text-navy transition hover:border-rose/30 hover:bg-surface hover:text-rose;
     }
     .badge-off {
         @apply inline-flex items-center rounded-full bg-rose px-2.5 py-1 text-[11px] leading-none font-black text-white shadow-[0_6px_14px_-6px_rgb(204_51_102/0.9)];
@@ -279,7 +332,7 @@
         @apply border-b border-line p-3 text-start;
     }
     .prose-fa th {
-        @apply bg-white/60 font-bold text-navy;
+        @apply bg-surface/60 font-bold text-navy;
     }
 
     /* ── Horizontal rails (carousels without JS) ───────────────── */

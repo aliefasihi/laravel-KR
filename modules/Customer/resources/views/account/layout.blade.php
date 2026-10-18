@@ -1,0 +1,57 @@
+{{-- Account area shell: sidebar + content | نویسنده: علی فصیحی (Ali Fasihi) --}}
+@extends('layouts.app')
+
+@section('robots', 'noindex, nofollow')
+
+@php
+    $customer = auth('customer')->user();
+    $menu = array_filter([
+        ['label' => 'پیشخوان', 'route' => 'customer.account', 'icon' => 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1v-9.5Z'],
+        Route::has('customer.orders') ? ['label' => 'سفارش‌ها', 'route' => 'customer.orders', 'icon' => 'M5 8h14l-1.2 10.2A2 2 0 0 1 15.8 20H8.2a2 2 0 0 1-2-1.8L5 8Zm4 2V6a3 3 0 0 1 6 0v4'] : null,
+        ['label' => 'نشانی‌ها', 'route' => 'customer.addresses', 'icon' => 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Zm0-9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z'],
+    ]);
+@endphp
+
+@section('content')
+    <div class="mx-auto max-w-6xl space-y-6 px-3 pt-5 sm:px-4 sm:pt-6">
+        <x-breadcrumbs :items="['حساب کاربری' => route('customer.account')] + (View::hasSection('crumb') ? [trim(View::getSection('crumb')) => null] : [])" />
+
+        <div class="grid gap-6 lg:grid-cols-[17rem_1fr]">
+            <aside class="glass h-fit rounded-[var(--radius-glass)] p-4 lg:sticky lg:top-36">
+                <div class="flex items-center gap-3 border-b border-line px-2 pb-4">
+                    <span class="grid size-12 place-items-center rounded-full bg-gradient-to-br from-rose to-caramel text-lg font-black text-white">
+                        {{ mb_substr($customer->first_name ?: 'خ', 0, 1) }}
+                    </span>
+                    <div class="min-w-0">
+                        <p class="truncate font-black text-navy">{{ $customer->fullName() ?: 'مشتری عزیز' }}</p>
+                        <p class="text-xs text-muted" dir="ltr">{{ \App\Core\Support\PersianText::toPersianDigits($customer->mobile) }}</p>
+                    </div>
+                </div>
+                <nav class="mt-3 flex gap-1 overflow-x-auto lg:flex-col" aria-label="حساب کاربری">
+                    @foreach ($menu as $item)
+                        @php($active = request()->routeIs($item['route']))
+                        <a href="{{ route($item['route']) }}" @class([
+                            'flex shrink-0 items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-bold transition',
+                            'bg-surface/90 text-rose shadow-sm' => $active,
+                            'text-muted hover:bg-surface/60 hover:text-navy' => ! $active,
+                        ]) @if ($active) aria-current="page" @endif>
+                            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="{{ $item['icon'] }}"/></svg>
+                            {{ $item['label'] }}
+                        </a>
+                    @endforeach
+                    <form method="post" action="{{ route('customer.logout') }}" class="shrink-0 lg:mt-2 lg:border-t lg:border-line lg:pt-2">
+                        @csrf
+                        <button type="submit" class="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-bold text-muted transition hover:bg-rose-100 hover:text-rose">
+                            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10"/></svg>
+                            خروج
+                        </button>
+                    </form>
+                </nav>
+            </aside>
+
+            <div class="min-w-0 space-y-6">
+                @yield('account')
+            </div>
+        </div>
+    </div>
+@endsection

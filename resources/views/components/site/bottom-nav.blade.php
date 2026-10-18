@@ -6,7 +6,10 @@
         ['label' => 'دسته‌بندی', 'url' => null, 'active' => request()->routeIs('catalog.category'), 'icon' => 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'],
         ['label' => 'جستجو', 'url' => route('catalog.search'), 'active' => request()->routeIs('catalog.search'), 'icon' => 'M11 4.5a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13ZM20 20l-4-4'],
         ['label' => 'سبد خرید', 'url' => route('checkout.cart'), 'active' => request()->routeIs('checkout.cart'), 'icon' => 'M5 8h14l-1.2 10.2A2 2 0 0 1 15.8 20H8.2a2 2 0 0 1-2-1.8L5 8Zm4 2V6a3 3 0 0 1 6 0v4', 'badge' => $count],
-        ['label' => 'مجله', 'url' => route('content.blog'), 'active' => request()->routeIs('content.*'), 'icon' => 'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Zm3 4h8M8 12h8M8 16h5'],
+        // the account tab when the Customer module is on, otherwise the journal
+        Route::has('customer.login')
+            ? ['label' => auth('customer')->check() ? 'حساب من' : 'ورود', 'url' => route(auth('customer')->check() ? 'customer.account' : 'customer.login'), 'active' => request()->routeIs('customer.*'), 'icon' => 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 9a8 8 0 0 1 16 0']
+            : ['label' => 'مجله', 'url' => route('content.blog'), 'active' => request()->routeIs('content.*'), 'icon' => 'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Zm3 4h8M8 12h8M8 16h5'],
     ];
 @endphp
 

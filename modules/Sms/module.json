@@ -1,0 +1,9 @@
+{
+    "title": "پیامک",
+    "description": "ارسال پیامک با کاوه‌نگار یا sms.ir (کد ورود، اطلاع‌رسانی سفارش). بدون پنل پیامک، کدها در لاگ نوشته می‌شوند.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": [],
+    "default": true,
+    "icon": "chat-bubble-left-right"
+}

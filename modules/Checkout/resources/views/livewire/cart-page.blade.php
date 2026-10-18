@@ -32,7 +32,7 @@
                             <p class="mt-1 text-xs text-muted">قیمت واحد: {{ Money::toman($line->unitPrice()) }} تومان</p>
                         </div>
                         <div class="flex w-full items-center justify-between gap-4 sm:w-auto">
-                            <div class="flex items-center rounded-full border border-white/80 bg-white/80 p-1">
+                            <div class="flex items-center rounded-full border border-glint/80 bg-surface/80 p-1">
                                 <button type="button" class="grid size-9 place-items-center rounded-full font-bold text-navy hover:bg-cream" wire:click="setQuantity({{ $line->variant->id }}, {{ $line->quantity + 1 }})" aria-label="افزایش">+</button>
                                 <span class="w-7 text-center font-black text-navy">{{ PersianText::toPersianDigits($line->quantity) }}</span>
                                 <button type="button" class="grid size-9 place-items-center rounded-full font-bold text-navy hover:bg-cream" wire:click="setQuantity({{ $line->variant->id }}, {{ $line->quantity - 1 }})" aria-label="کاهش">−</button>

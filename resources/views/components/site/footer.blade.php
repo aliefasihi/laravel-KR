@@ -30,7 +30,7 @@
         </ul>
 
         {{-- Newsletter --}}
-        <section class="relative overflow-hidden rounded-[var(--radius-glass)] bg-gradient-to-l from-cream via-[#fde8ee] to-caramel-100 p-6 shadow-[var(--shadow-glass)] sm:p-10" aria-labelledby="newsletter-title">
+        <section class="relative overflow-hidden rounded-[var(--radius-glass)] bg-gradient-to-l from-cream via-rose-100 to-caramel-100 p-6 shadow-[var(--shadow-glass)] sm:p-10" aria-labelledby="newsletter-title">
             <div class="blob -top-16 -start-10 size-56 text-rose/15" aria-hidden="true"></div>
             <div class="blob -bottom-20 end-10 size-64 text-caramel/25" aria-hidden="true"></div>
             <div class="relative grid items-center gap-6 lg:grid-cols-[1fr_28rem]">
@@ -92,8 +92,8 @@
                     </ul>
                     @if ($store['enamad_url'])
                         <a href="{{ $store['enamad_url'] }}" target="_blank" rel="noopener" referrerpolicy="origin"
-                           class="mt-5 inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-xs font-bold text-navy transition hover:scale-[1.02]">
-                            <svg class="size-6 text-[#1a9e4a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 4.4 3.4 8.4 8 9 4.6-.6 8-4.6 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                           class="mt-5 inline-flex items-center gap-2 rounded-2xl bg-surface px-4 py-3 text-xs font-bold text-navy transition hover:scale-[1.02]">
+                            <svg class="size-6 text-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 4.4 3.4 8.4 8 9 4.6-.6 8-4.6 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             نماد اعتماد الکترونیکی
                         </a>
                     @endif

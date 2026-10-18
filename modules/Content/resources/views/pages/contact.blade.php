@@ -29,7 +29,7 @@
         <div class="grid gap-4 sm:grid-cols-2">
             @foreach ($cards as $card)
                 <a href="{{ $card['href'] }}" @if (str_starts_with($card['href'], 'http')) target="_blank" rel="noopener" @endif
-                   class="glass group flex items-center justify-between rounded-[var(--radius-card)] p-6 transition hover:-translate-y-0.5 hover:bg-white/85">
+                   class="glass group flex items-center justify-between rounded-[var(--radius-card)] p-6 transition hover:-translate-y-0.5 hover:bg-surface/85">
                     <span class="text-sm text-muted">{{ $card['label'] }}</span>
                     <span class="text-lg font-black text-navy group-hover:text-rose" @if ($card['ltr']) dir="ltr" @endif>{{ $card['value'] }}</span>
                 </a>

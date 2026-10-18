@@ -65,7 +65,7 @@
             {{-- Gallery --}}
             <div x-data="gallery({{ max(1, $images->count()) }})" class="lg:sticky lg:top-40 lg:self-start">
                 <div class="glass rounded-[var(--radius-glass)] p-2">
-                    <div class="relative aspect-square overflow-hidden rounded-[1.2rem] bg-gradient-to-br from-white to-cream"
+                    <div class="relative aspect-square overflow-hidden rounded-[1.2rem] bg-gradient-to-br from-surface to-cream"
                          @touchstart.passive="touchStart" @touchend="touchEnd"
                          @keydown.arrow-left.prevent="next()" @keydown.arrow-right.prevent="prev()" tabindex="0" aria-label="تصاویر محصول؛ با کلیدهای جهت جابه‌جا شوید">
                         @forelse ($images as $image)
@@ -111,7 +111,7 @@
                     <h1 class="mt-4 text-2xl leading-[2.6rem] font-black text-navy sm:text-[1.7rem]">{{ $product->name }}</h1>
                     <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted">
                         <span>شناسه محصول: <span class="font-latin font-bold text-navy" dir="ltr">{{ $product->sku }}</span></span>
-                        <span class="inline-flex items-center gap-1 text-[#1a9e4a]">
+                        <span class="inline-flex items-center gap-1 text-ok">
                             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 4.4 3.4 8.4 8 9 4.6-.6 8-4.6 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             {{ $store['warranty'] }}
                         </span>
@@ -144,9 +144,9 @@
                     </a>
                     <button type="button" @click="copy" class="btn-icon size-9 hover:text-rose" aria-label="کپی لینک">
                         <svg x-show="!copied" class="size-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
-                        <svg x-show="copied" x-cloak class="size-[18px] text-[#1a9e4a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
+                        <svg x-show="copied" x-cloak class="size-[18px] text-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
                     </button>
-                    <span x-show="copied" x-cloak x-transition class="text-xs text-[#1a9e4a]">لینک کپی شد</span>
+                    <span x-show="copied" x-cloak x-transition class="text-xs text-ok">لینک کپی شد</span>
                 </div>
             </div>
         </div>
@@ -154,7 +154,7 @@
         {{-- Section tabs (anchor navigation) --}}
         <nav class="glass frost sticky top-36 z-20 mx-auto flex w-fit max-w-full gap-1 overflow-x-auto rounded-full p-1.5 lg:top-40" aria-label="بخش‌های صفحه محصول">
             @foreach ($tabs as $id => $label)
-                <a href="#{{ $id }}" class="shrink-0 rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-white hover:text-navy">{{ $label }}</a>
+                <a href="#{{ $id }}" class="shrink-0 rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface hover:text-navy">{{ $label }}</a>
             @endforeach
         </nav>
 
