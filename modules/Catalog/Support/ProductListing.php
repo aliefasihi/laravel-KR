@@ -47,12 +47,33 @@ class ProductListing
             'min' => $toman('min'),
             'max' => $toman('max'),
             'sort' => array_key_exists((string) $request->query('sort'), $sorts) ? (string) $request->query('sort') : array_key_first($sorts),
+            // ?attr[material][]=12&attr[color][]=31 — attribute slug => value ids (Attributes module)
+            'attr' => collect((array) $request->query('attr', []))
+                ->filter(fn ($ids, $slug) => is_string($slug) && is_array($ids))
+                ->map(fn ($ids) => array_values(array_unique(array_filter(array_map('intval', $ids)))))
+                ->filter()
+                ->all(),
         ];
     }
 
     /** URL filters → engine query (brand slugs resolved to ids, Toman → Rials). */
-    public function query(array $filters, Request $request, string $term = '', ?array $categoryIds = null, ?int $scopeBrandId = null, int $perPage = 24): SearchQuery
+    /**
+     * @param  Collection<int, mixed>|null  $attributes  filterable attributes of the page (with their values), keyed by id
+     */
+    public function query(array $filters, Request $request, string $term = '', ?array $categoryIds = null, ?int $scopeBrandId = null, int $perPage = 24, ?Collection $attributes = null): SearchQuery
     {
+        $attributes ??= collect();
+        $bySlug = $attributes->keyBy('slug');
+        $attributeFilters = [];
+        foreach ($filters['attr'] ?? [] as $slug => $valueIds) {
+            if ($attribute = $bySlug->get($slug)) {
+                $valid = array_values(array_intersect($valueIds, $attribute->values->modelKeys()));
+                if ($valid) {
+                    $attributeFilters[$attribute->id] = $valid;
+                }
+            }
+        }
+
         return new SearchQuery(
             term: $term,
             brandIds: $filters['brand'] ? Brand::query()->whereIn('slug', $filters['brand'])->pluck('id')->all() : [],
@@ -65,6 +86,8 @@ class ProductListing
             sort: $filters['sort'],
             page: max(1, (int) $request->query('page', 1)),
             perPage: $perPage,
+            attributeFilters: $attributeFilters,
+            facetAttributes: $attributes->mapWithKeys(fn ($a) => [$a->id => $a->values->modelKeys()])->all(),
         );
     }
 
@@ -80,7 +103,7 @@ class ProductListing
 
     public function isFiltered(array $filters, string $defaultSort = 'newest'): bool
     {
-        return $filters['brand'] !== [] || $filters['in_stock'] || $filters['sale']
+        return $filters['brand'] !== [] || $filters['in_stock'] || $filters['sale'] || ! empty($filters['attr'])
             || $filters['min'] !== null || $filters['max'] !== null || $filters['sort'] !== $defaultSort;
     }
 

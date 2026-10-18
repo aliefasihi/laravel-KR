@@ -1,10 +1,12 @@
 {{-- Product listing: glass filter panel (sidebar on desktop, bottom sheet on mobile) + grid | نویسنده: علی فصیحی (Ali Fasihi) --}}
 {{-- counts: brand_id => products (from the search engine's facets); priceRange: Rials; hidden: extra GET params to keep (e.g. q) --}}
-@props(['products', 'filters', 'sorts', 'action', 'brands' => collect(), 'filtered' => false, 'counts' => [], 'priceRange' => null, 'hidden' => []])
+{{-- filterAttributes: the category's filterable attributes (Attributes module); valueCounts: value id => products --}}
+@props(['products', 'filters', 'sorts', 'action', 'brands' => collect(), 'filtered' => false, 'counts' => [], 'priceRange' => null, 'hidden' => [], 'filterAttributes' => collect(), 'valueCounts' => []])
 @php
     use App\Core\Support\Money;
     use App\Core\Support\PersianText;
-    $activeCount = count($filters['brand']) + (int) $filters['in_stock'] + (int) $filters['sale'] + (int) ($filters['min'] !== null || $filters['max'] !== null);
+    $activeCount = count($filters['brand']) + (int) $filters['in_stock'] + (int) $filters['sale'] + (int) ($filters['min'] !== null || $filters['max'] !== null)
+        + array_sum(array_map('count', $filters['attr'] ?? []));
     $reset = $action.($hidden ? '?'.http_build_query($hidden) : '');
 @endphp
 
@@ -94,6 +96,46 @@
                     </div>
                 </fieldset>
             @endif
+
+            {{-- category-specific filters (attributes) --}}
+            @foreach ($filterAttributes as $attribute)
+                {{-- inline php directives only: a block one here would swallow the inline ones above it --}}
+                @php($chosen = $filters['attr'][$attribute->slug] ?? [])
+                @php($options = $attribute->values->filter(fn ($v) => ($valueCounts[$v->id] ?? 0) > 0 || in_array($v->id, $chosen, true))->values())
+                @if ($options->isNotEmpty())
+                    <fieldset x-data="{ more: false }">
+                        <legend class="mb-3 text-sm font-bold text-navy">{{ $attribute->name }}@if ($attribute->unit) <span class="font-normal text-muted">({{ $attribute->unit }})</span>@endif</legend>
+                        @if ($attribute->display === 'color')
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($options as $value)
+                                    <label class="group cursor-pointer" title="{{ $value->value }}">
+                                        <input type="checkbox" name="attr[{{ $attribute->slug }}][]" value="{{ $value->id }}" class="peer sr-only" @checked(in_array($value->id, $chosen, true))>
+                                        <span class="flex items-center gap-1.5 rounded-full bg-white/60 py-1 ps-1 pe-3 text-xs text-navy ring-1 ring-line transition peer-checked:bg-white peer-checked:ring-2 peer-checked:ring-rose peer-focus-visible:ring-2 peer-focus-visible:ring-rose/50">
+                                            <span class="size-5 rounded-full ring-1 ring-black/10" style="background: {{ $value->color ?: '#ddd' }}"></span>
+                                            {{ $value->value }}
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="space-y-1.5">
+                                @foreach ($options as $value)
+                                    @php($n = $valueCounts[$value->id] ?? 0)
+                                    <label @class(['flex cursor-pointer items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-white/60', 'opacity-50' => $n === 0])
+                                           @if ($loop->index >= 6 && ! in_array($value->id, $chosen, true)) x-show="more" x-cloak @endif>
+                                        <input type="checkbox" name="attr[{{ $attribute->slug }}][]" value="{{ $value->id }}" @checked(in_array($value->id, $chosen, true)) class="size-[18px] rounded-md accent-rose">
+                                        <span class="flex-1 text-sm text-navy">{{ $attribute->format($value->value) }}</span>
+                                        <span class="rounded-full bg-navy/5 px-2 py-0.5 text-[11px] font-bold text-muted">{{ PersianText::toPersianDigits($n) }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            @if ($options->count() > 6)
+                                <button type="button" class="mt-1 px-2 text-xs font-bold text-rose" x-on:click="more = ! more" x-text="more ? 'نمایش کمتر' : 'نمایش همه ({{ PersianText::toPersianDigits($options->count()) }})'"></button>
+                            @endif
+                        @endif
+                    </fieldset>
+                @endif
+            @endforeach
 
             <button class="btn-navy w-full lg:hidden">نمایش {{ PersianText::toPersianDigits($products->total()) }} محصول</button>
             <noscript><button class="btn-navy w-full">اعمال فیلترها</button></noscript>

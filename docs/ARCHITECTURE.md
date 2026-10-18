@@ -24,6 +24,9 @@
   - همه به `App\Core`
   - Catalog، Content و Placement به Media
   - Seo به رویدادهای Catalog
+  - FileManager به Media و Catalog
+  - Attributes به Catalog و Search (فیلدهای سند جستجو را با `ProductDocuments::extend()` اضافه می‌کند)
+- ماژول‌های غیرهسته از پنل روشن و خاموش می‌شوند (`docs/MODULES.md`). هرجا ماژول دیگری از آن‌ها استفاده می‌کند، پشت `Modules::enabled()` است.
 
 ## قراردادهای داده
 

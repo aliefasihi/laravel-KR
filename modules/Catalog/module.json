@@ -1,0 +1,12 @@
+{
+    "title": "کاتالوگ محصولات",
+    "description": "برندها، دسته‌بندی‌ها، محصولات و مدل‌ها.",
+    "version": "1.0.0",
+    "core": true,
+    "requires": [
+        "Media",
+        "Seo"
+    ],
+    "default": true,
+    "icon": "shopping-bag"
+}

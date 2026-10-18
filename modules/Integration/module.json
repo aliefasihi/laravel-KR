@@ -1,0 +1,9 @@
+{
+    "title": "اتصال ai-platform",
+    "description": "API برای همگام‌سازی محتوا با سیستم تولید محتوا و سوپراپ.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": [],
+    "default": true,
+    "icon": "arrows-right-left"
+}

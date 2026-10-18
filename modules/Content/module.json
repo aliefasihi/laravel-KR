@@ -1,0 +1,9 @@
+{
+    "title": "مجله و صفحات",
+    "description": "مقاله‌ها، صفحه‌های درباره ما و تماس و خبرنامه.",
+    "version": "1.0.0",
+    "core": true,
+    "requires": [],
+    "default": true,
+    "icon": "document-text"
+}

@@ -1,0 +1,11 @@
+{
+    "title": "جستجو و فیلتر",
+    "description": "جستجوی لحظه‌ای با غلط‌یابی، فیلترهای صفحه‌ی دسته‌ها و گزارش جستجو.",
+    "version": "1.0.0",
+    "core": true,
+    "requires": [
+        "Catalog"
+    ],
+    "default": true,
+    "icon": "magnifying-glass"
+}

@@ -7,6 +7,7 @@
 
 namespace Modules\Catalog\Filament\Resources\Products\RelationManagers;
 
+use App\Core\Modules\Modules;
 use App\Core\Support\Money;
 use App\Filament\Forms\TomanInput;
 use Filament\Actions\CreateAction;
@@ -22,6 +23,7 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Modules\Attributes\Filament\Forms\VariationFields;
 use Modules\Catalog\Models\ProductVariant;
 
 class VariantsRelationManager extends RelationManager
@@ -34,6 +36,9 @@ class VariantsRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
+        // «تنوع‌ساز» attributes of the product's category template (Attributes module) replace free-text options
+        $variation = $this->variationModule() ? VariationFields::for($this->getOwnerRecord()) : [];
+
         return $schema->components([
             TextInput::make('sku')->label('SKU مدل')->required()->maxLength(64)->unique(ignoreRecord: true)->extraInputAttributes(['dir' => 'ltr']),
             TextInput::make('stock')->label('موجودی')->numeric()->required()->default(0),
@@ -41,9 +46,15 @@ class VariantsRelationManager extends RelationManager
             TomanInput::make('sale_price')->label('قیمت حراج')->lt('price'),
             DateTimePicker::make('sale_starts_at')->label('شروع حراج'),
             DateTimePicker::make('sale_ends_at')->label('پایان حراج'),
-            KeyValue::make('options')->label('ویژگی‌ها')->keyLabel('ویژگی (مثلاً رنگ)')->valueLabel('مقدار')->columnSpanFull(),
+            ...$variation,
+            ...($variation === [] ? [KeyValue::make('options')->label('ویژگی‌ها')->keyLabel('ویژگی (مثلاً رنگ)')->valueLabel('مقدار')->columnSpanFull()] : []),
             Toggle::make('is_active')->label('فعال')->default(true),
         ])->columns(2);
+    }
+
+    private function variationModule(): bool
+    {
+        return Modules::enabled('Attributes') && VariationFields::attributes($this->getOwnerRecord()) !== [];
     }
 
     public function table(Table $table): Table
@@ -61,7 +72,18 @@ class VariantsRelationManager extends RelationManager
                 TextColumn::make('stock')->label('موجودی')->color(fn ($state) => $state < 1 ? 'danger' : null),
                 IconColumn::make('is_active')->label('فعال')->boolean(),
             ])
-            ->headerActions([CreateAction::make()])
-            ->recordActions([EditAction::make(), DeleteAction::make()]);
+            ->headerActions([
+                CreateAction::make()
+                    ->mutateDataUsing(fn (array $data) => $this->variationModule() ? VariationFields::toOptions($data, $this->getOwnerRecord()) : $data)
+                    ->after(fn () => $this->variationModule() && VariationFields::syncProduct($this->getOwnerRecord())),
+            ])
+            ->recordActions([
+                EditAction::make()
+                    ->mutateRecordDataUsing(fn (array $data) => $this->variationModule() ? VariationFields::fromOptions($data, $this->getOwnerRecord()) : $data)
+                    ->mutateDataUsing(fn (array $data) => $this->variationModule() ? VariationFields::toOptions($data, $this->getOwnerRecord()) : $data)
+                    ->after(fn () => $this->variationModule() && VariationFields::syncProduct($this->getOwnerRecord())),
+                DeleteAction::make()
+                    ->after(fn () => $this->variationModule() && VariationFields::syncProduct($this->getOwnerRecord())),
+            ]);
     }
 }

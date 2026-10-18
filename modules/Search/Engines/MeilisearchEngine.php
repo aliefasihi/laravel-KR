@@ -49,13 +49,37 @@ class MeilisearchEngine implements SearchEngine
             $queries[] = $this->facetRequest($query->withoutPriceFilter(), 'price');
         }
 
+        // attributes the shopper filtered on are counted without their own filter
+        $splitAttributes = $query->withFacets
+            ? array_values(array_intersect(array_keys($query->facetAttributes), array_keys($query->attributeFilters)))
+            : [];
+        foreach ($splitAttributes as $attributeId) {
+            $queries[] = $this->facetRequest($query->withoutAttributeFilter($attributeId), 'attr_values');
+        }
+
         $results = $this->http()->post('/multi-search', ['queries' => $queries])->throw()->json('results');
 
         $main = $results[0];
-        $brandSource = $splitBrands ? $results[1] : $main;
-        $priceSource = $splitPrice ? $results[$splitBrands ? 2 : 1] : $main;
+        $next = 1;
+        $brandSource = $splitBrands ? $results[$next++] : $main;
+        $priceSource = $splitPrice ? $results[$next++] : $main;
 
         $stats = $priceSource['facetStats']['price'] ?? null;
+
+        $valueCounts = [];
+        if ($query->withFacets && $query->facetAttributes !== []) {
+            $all = array_map('intval', $main['facetDistribution']['attr_values'] ?? []);
+            foreach ($query->facetAttributes as $attributeId => $valueIds) {
+                $source = in_array($attributeId, $splitAttributes, true)
+                    ? array_map('intval', $results[$next++]['facetDistribution']['attr_values'] ?? [])
+                    : $all;
+                foreach ($valueIds as $valueId) {
+                    if (isset($source[$valueId])) {
+                        $valueCounts[$valueId] = $source[$valueId];
+                    }
+                }
+            }
+        }
 
         return new SearchResult(
             array_map(fn (array $hit) => (int) $hit['id'], $main['hits'] ?? []),
@@ -63,6 +87,7 @@ class MeilisearchEngine implements SearchEngine
             $query->withFacets ? array_map('intval', $brandSource['facetDistribution']['brand_id'] ?? []) : [],
             $query->withFacets && $stats ? ['min' => (int) $stats['min'], 'max' => (int) $stats['max']] : null,
             $this->name(),
+            $valueCounts,
         );
     }
 
@@ -141,8 +166,8 @@ class MeilisearchEngine implements SearchEngine
         }
 
         return [
-            'searchableAttributes' => ['name', 'brand', 'sku', 'sku_compact', 'categories', 'description'],
-            'filterableAttributes' => ['brand_id', 'category_ids', 'in_stock', 'on_sale', 'price'],
+            'searchableAttributes' => ['name', 'brand', 'sku', 'sku_compact', 'categories', 'attributes', 'description'],
+            'filterableAttributes' => ['brand_id', 'category_ids', 'in_stock', 'on_sale', 'price', 'attr_values'],
             'sortableAttributes' => ['price', 'created_at', 'discount'],
             // Matching words in the name beat the description; among those, in-stock before sold-out.
             'rankingRules' => ['words', 'typo', 'proximity', 'attributeRank', 'in_stock:desc', 'sort', 'wordPosition', 'exactness', 'created_at:desc'],
@@ -154,7 +179,7 @@ class MeilisearchEngine implements SearchEngine
                 'disableOnAttributes' => ['sku', 'sku_compact'],
             ],
             'pagination' => ['maxTotalHits' => 20000],
-            'faceting' => ['maxValuesPerFacet' => 200],
+            'faceting' => ['maxValuesPerFacet' => 1000],
             'displayedAttributes' => ['id'],
         ];
     }
@@ -176,7 +201,7 @@ class MeilisearchEngine implements SearchEngine
         }
 
         if ($main && $query->withFacets) {
-            $body['facets'] = ['brand_id', 'price'];
+            $body['facets'] = $query->facetAttributes !== [] ? ['brand_id', 'price', 'attr_values'] : ['brand_id', 'price'];
         }
 
         return $body;
@@ -219,6 +244,9 @@ class MeilisearchEngine implements SearchEngine
         }
         if ($query->maxPrice !== null) {
             $filters[] = 'price <= '.(int) $query->maxPrice;
+        }
+        foreach ($query->attributeFilters as $valueIds) {
+            $filters[] = 'attr_values IN ['.implode(', ', $valueIds).']';
         }
 
         return $filters;

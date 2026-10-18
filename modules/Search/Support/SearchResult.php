@@ -13,6 +13,7 @@ final class SearchResult
      * @param  list<int>  $ids  product ids in display order (current page only)
      * @param  array<int, int>  $brandCounts  brand_id => products (ignoring the brand filter itself)
      * @param  array{min: int, max: int}|null  $priceRange  Rials (ignoring the price filter itself)
+     * @param  array<int, int>  $valueCounts  attribute value id => products (each attribute ignoring its own filter)
      */
     public function __construct(
         public readonly array $ids,
@@ -20,5 +21,6 @@ final class SearchResult
         public readonly array $brandCounts = [],
         public readonly ?array $priceRange = null,
         public readonly string $engine = 'database',
+        public readonly array $valueCounts = [],
     ) {}
 }

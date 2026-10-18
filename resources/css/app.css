@@ -38,6 +38,9 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 @source '../../modules/**/*.blade.php';
+@source not '../views/filament';
+@source not '../../modules/*/resources/views/filament';
+@source not '../../app/Filament';
 @source '../../app/**/*.php';
 
 @theme {

@@ -1,0 +1,19 @@
+/*
+ * Khaneh Romantic — admin panel theme (Filament 5 + Tailwind 4)
+ * نویسنده: علی فصیحی (Ali Fasihi)
+ *
+ * Lets our own admin views (module manager, file manager, login) use Tailwind classes.
+ */
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../modules/*/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../modules/*/resources/views/filament/**/*';
+
+@theme {
+    --color-navy: #23284f;
+    --color-rose: #cc3366;
+    --color-caramel: #e4a96c;
+    --color-cream: #fff5ed;
+}

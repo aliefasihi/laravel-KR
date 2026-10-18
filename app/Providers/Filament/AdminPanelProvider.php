@@ -10,6 +10,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Core\Modules\ModuleRegistry;
 use App\Filament\AvatarProviders\InitialsAvatarProvider;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
@@ -48,6 +49,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('Vazirmatn', url: asset('fonts/fonts.css'), provider: LocalFontProvider::class)
             ->defaultAvatarProvider(InitialsAvatarProvider::class) // no ui-avatars.com request on every page
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->sidebarCollapsibleOnDesktop()
             // SPA navigation: page changes swap only the content (no full reload of Filament's CSS/JS),
             // and links are prefetched on hover so most clicks open instantly.
@@ -61,6 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Dashboard::class,
             ])
@@ -82,10 +85,17 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ]);
 
-        // Every module may ship its own resources: modules/{Name}/Filament/Resources
-        foreach (glob(base_path('modules/*/Filament/Resources'), GLOB_ONLYDIR) ?: [] as $dir) {
-            $module = basename(dirname($dir, 2));
-            $panel->discoverResources(in: $dir, for: "Modules\\{$module}\\Filament\\Resources");
+        // Every switched-on module may ship resources, pages and widgets: modules/{Name}/Filament/…
+        $registry = app(ModuleRegistry::class);
+        foreach ($registry->all() as $module => $meta) {
+            if (! $registry->enabled($module)) {
+                continue;
+            }
+            foreach (['Resources' => 'discoverResources', 'Pages' => 'discoverPages', 'Widgets' => 'discoverWidgets'] as $kind => $discover) {
+                if (is_dir($dir = $meta['path'].'/Filament/'.$kind)) {
+                    $panel->{$discover}(in: $dir, for: "Modules\\{$module}\\Filament\\{$kind}");
+                }
+            }
         }
 
         return $panel;

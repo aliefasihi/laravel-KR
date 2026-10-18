@@ -42,6 +42,7 @@ class ElasticsearchEngine implements SearchEngine
         $scope = $this->scopeFilters($query);
         $brand = $this->brandFilter($query);
         $price = $this->priceFilters($query);
+        $attributes = array_map(fn (array $ids) => ['terms' => ['attr_values' => $ids]], $query->attributeFilters); // attribute id => filter
 
         $body = [
             'from' => $query->offset(),
@@ -58,22 +59,37 @@ class ElasticsearchEngine implements SearchEngine
             'sort' => $this->sort($query),
         ];
 
-        // Shopper's own brand/price choices filter the hits, but not the facet counts.
-        if ($post = array_values(array_filter([$brand, ...$price]))) {
-            $body['post_filter'] = ['bool' => ['filter' => $post]];
+        // Shopper's own brand/price/attribute choices filter the hits, but each facet is counted
+        // with every choice except its own.
+        $all = array_values(array_filter([$brand, ...$price, ...array_values($attributes)]));
+        if ($all) {
+            $body['post_filter'] = ['bool' => ['filter' => $all]];
         }
+        $except = fn (array $skip) => ['bool' => ['filter' => array_values(array_filter(
+            [$brand, ...$price, ...array_values($attributes)],
+            fn ($f) => $f !== null && $f !== [] && ! in_array($f, $skip, true), // no brand chosen = null, never sent to ES
+        ))]];
 
         if ($query->withFacets) {
             $body['aggs'] = [
                 'brands_scope' => [
-                    'filter' => ['bool' => ['filter' => $price]],
+                    'filter' => $except([$brand]),
                     'aggs' => ['brands' => ['terms' => ['field' => 'brand_id', 'size' => 200]]],
                 ],
                 'price_scope' => [
-                    'filter' => ['bool' => ['filter' => array_values(array_filter([$brand]))]],
+                    'filter' => $except($price),
                     'aggs' => ['price' => ['stats' => ['field' => 'price']]],
                 ],
             ];
+            foreach ($query->facetAttributes as $attributeId => $valueIds) {
+                if ($valueIds === []) {
+                    continue;
+                }
+                $body['aggs']['attr_'.$attributeId] = [
+                    'filter' => $except(isset($attributes[$attributeId]) ? [$attributes[$attributeId]] : []),
+                    'aggs' => ['values' => ['terms' => ['field' => 'attr_values', 'include' => $valueIds, 'size' => count($valueIds)]]],
+                ];
+            }
         }
 
         $response = $this->http()->post("/{$this->index}/_search", $body)->throw()->json();
@@ -81,6 +97,13 @@ class ElasticsearchEngine implements SearchEngine
         $brandCounts = [];
         foreach ($response['aggregations']['brands_scope']['brands']['buckets'] ?? [] as $bucket) {
             $brandCounts[(int) $bucket['key']] = (int) $bucket['doc_count'];
+        }
+
+        $valueCounts = [];
+        foreach (array_keys($query->facetAttributes) as $attributeId) {
+            foreach ($response['aggregations']['attr_'.$attributeId]['values']['buckets'] ?? [] as $bucket) {
+                $valueCounts[(int) $bucket['key']] = (int) $bucket['doc_count'];
+            }
         }
 
         $stats = $response['aggregations']['price_scope']['price'] ?? null;
@@ -92,6 +115,7 @@ class ElasticsearchEngine implements SearchEngine
             $brandCounts,
             $stats && ($stats['count'] ?? 0) > 0 ? ['min' => (int) $stats['min'], 'max' => (int) $stats['max']] : null,
             $this->name(),
+            $valueCounts,
         );
     }
 
@@ -207,6 +231,8 @@ class ElasticsearchEngine implements SearchEngine
                     'name' => $text(),
                     'brand' => $text(),
                     'categories' => ['type' => 'text', 'analyzer' => 'fa_text', 'search_analyzer' => 'fa_search'],
+                    'attributes' => ['type' => 'text', 'analyzer' => 'fa_text', 'search_analyzer' => 'fa_search'],
+                    'attr_values' => ['type' => 'integer'],
                     'description' => ['type' => 'text', 'analyzer' => 'fa_text', 'search_analyzer' => 'fa_search'],
                     'sku' => ['type' => 'keyword', 'normalizer' => 'lower'],
                     'sku_compact' => ['type' => 'keyword', 'normalizer' => 'lower'],
@@ -227,7 +253,7 @@ class ElasticsearchEngine implements SearchEngine
     /** Exact words + synonyms first, typo-tolerant matches second, SKU exact on top. */
     private function textQuery(string $term): array
     {
-        $fields = ['name^4', 'brand^3', 'categories^2', 'description'];
+        $fields = ['name^4', 'brand^3', 'categories^2', 'attributes^2', 'description'];
 
         return ['bool' => [
             'should' => [

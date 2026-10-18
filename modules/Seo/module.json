@@ -1,0 +1,9 @@
+{
+    "title": "سئو و ریدایرکت",
+    "description": "ریدایرکت آدرس‌های قدیمی وردپرس، پیشنهاد ریدایرکت برای ۴۰۴ها و متای صفحات.",
+    "version": "1.0.0",
+    "core": true,
+    "requires": [],
+    "default": true,
+    "icon": "arrow-uturn-right"
+}

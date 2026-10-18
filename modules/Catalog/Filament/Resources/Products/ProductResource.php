@@ -7,6 +7,7 @@
 
 namespace Modules\Catalog\Filament\Resources\Products;
 
+use App\Core\Modules\Modules;
 use App\Core\Support\Money;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -32,11 +33,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Modules\Attributes\Filament\Forms\ProductAttributesSection;
 use Modules\Catalog\Filament\Resources\Products\Pages\CreateProduct;
 use Modules\Catalog\Filament\Resources\Products\Pages\EditProduct;
 use Modules\Catalog\Filament\Resources\Products\Pages\ListProducts;
 use Modules\Catalog\Filament\Resources\Products\RelationManagers\VariantsRelationManager;
 use Modules\Catalog\Models\Product;
+use Modules\FileManager\Filament\Forms\ProductImages;
 use Modules\Media\Models\Media;
 use UnitEnum;
 
@@ -81,6 +84,7 @@ class ProductResource extends Resource
                     Textarea::make('short_description')->label('خلاصه (کنار قیمت)')->rows(3),
                     RichEditor::make('description')->label('معرفی کامل'),
                 ]),
+                ...(Modules::enabled('Attributes') ? [ProductAttributesSection::make()] : []),
                 Section::make('سئو')->schema([
                     TextInput::make('meta_title')->label('عنوان سئو')->maxLength(70),
                     Textarea::make('meta_description')->label('توضیحات متا')->maxLength(160)->rows(2),
@@ -104,16 +108,20 @@ class ProductResource extends Resource
                         ->relationship('categories', 'name')
                         ->multiple()
                         ->searchable()
-                        ->preload(),
+                        ->preload()
+                        ->live(), // «مشخصات فنی» fields follow the category template
                 ]),
                 Section::make('تصاویر')->schema([
-                    Select::make('media')
-                        ->hiddenLabel()
-                        ->relationship('media', 'path')
-                        ->getOptionLabelFromRecordUsing(fn (Media $record) => $record->title ?: basename($record->path))
-                        ->multiple()
-                        ->searchable()
-                        ->helperText('اول از «کتابخانه تصاویر» آپلود کن. اولین تصویر، تصویر اصلی است.'),
+                    // File manager on: the product's own folder opens in a picker (upload, multi-select in order).
+                    Modules::enabled('FileManager')
+                        ? ProductImages::make('media_ids')->hiddenLabel()
+                        : Select::make('media')
+                            ->hiddenLabel()
+                            ->relationship('media', 'path')
+                            ->getOptionLabelFromRecordUsing(fn (Media $record) => $record->title ?: basename($record->path))
+                            ->multiple()
+                            ->searchable()
+                            ->helperText('اول از «کتابخانه تصاویر» آپلود کن. اولین تصویر، تصویر اصلی است.'),
                 ]),
             ])->columnSpan(['lg' => 1]),
         ])->columns(3);

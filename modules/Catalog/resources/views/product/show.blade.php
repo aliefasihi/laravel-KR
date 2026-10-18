@@ -32,6 +32,13 @@
         'دسته‌بندی' => $category?->name,
         'گارانتی' => $store['warranty'],
     ]) + collect($offers->first()?->options ?? [])->all();
+    // full specs from the Attributes module (if switched on), in the category template's order
+    foreach ($attributeSpecs ?? [] as $row) {
+        $specs[$row['name']] = $row['value'];
+    }
+    if (! empty($attributeSpecs)) {
+        $schema['additionalProperty'] = array_map(fn ($row) => ['@type' => 'PropertyValue', 'name' => $row['name'], 'value' => $row['value']], $attributeSpecs);
+    }
     $tabs = array_filter([
         'description' => $product->description ? 'معرفی محصول' : null,
         'specs' => 'مشخصات',
@@ -160,7 +167,7 @@
                     </section>
                 @endif
             </div>
-            <section id="specs" class="glass h-fit rounded-[var(--radius-glass)] p-6 lg:sticky lg:top-56" aria-labelledby="specs-title">
+            <section id="specs" @class(['glass h-fit rounded-[var(--radius-glass)] p-6', 'lg:sticky lg:top-56' => count($specs) <= 8]) aria-labelledby="specs-title">
                 <h2 id="specs-title" class="mb-4 text-lg font-black text-navy">مشخصات</h2>
                 <dl class="divide-y divide-line text-sm">
                     @foreach ($specs as $label => $value)

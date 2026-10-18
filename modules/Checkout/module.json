@@ -1,0 +1,11 @@
+{
+    "title": "سبد خرید",
+    "description": "سبد خرید و افزودن سریع از کارت محصول.",
+    "version": "1.0.0",
+    "core": true,
+    "requires": [
+        "Catalog"
+    ],
+    "default": true,
+    "icon": "shopping-cart"
+}

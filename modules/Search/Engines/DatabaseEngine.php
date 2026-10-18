@@ -87,7 +87,42 @@ class DatabaseEngine implements SearchEngine
             $brandCounts,
             $range && $range->min_price !== null ? ['min' => (int) $range->min_price, 'max' => (int) $range->max_price] : null,
             $this->name(),
+            $this->valueCounts($query, $units, $matchAll),
         );
+    }
+
+    /**
+     * Products per attribute value for the attributes the page shows. Each attribute is counted
+     * without its own filter (so ticking «استیل» doesn't hide «چینی»'s count): one query for all
+     * attributes without an active filter, plus one per attribute that has one.
+     *
+     * @return array<int, int>
+     */
+    private function valueCounts(SearchQuery $query, array $units, bool $matchAll): array
+    {
+        if ($query->facetAttributes === []) {
+            return [];
+        }
+
+        $count = fn (SearchQuery $scope, array $attributeIds) => DB::table('product_attribute_values')
+            ->whereIn('attribute_id', $attributeIds)
+            ->whereIn('product_id', $this->filtered($scope, $units, $matchAll)->toBase()->select('products.id'))
+            ->selectRaw('attribute_value_id, COUNT(DISTINCT product_id) as aggregate')
+            ->groupBy('attribute_value_id')
+            ->pluck('aggregate', 'attribute_value_id')
+            ->map(fn ($n) => (int) $n)
+            ->all();
+
+        $wanted = array_keys($query->facetAttributes);
+        $filtered = array_keys($query->attributeFilters);
+        $plain = array_values(array_diff($wanted, $filtered));
+
+        $counts = $plain ? $count($query, $plain) : [];
+        foreach (array_intersect($wanted, $filtered) as $attributeId) {
+            $counts += $count($query->withoutAttributeFilter($attributeId), [$attributeId]);
+        }
+
+        return $counts;
     }
 
     public function suggest(string $term, int $limit = 6): array
@@ -191,6 +226,15 @@ class DatabaseEngine implements SearchEngine
                 ->where(fn ($w) => $w->whereNull('sale_ends_at')->orWhere('sale_ends_at', '>', $now))))
             ->when($query->minPrice, fn ($q, $min) => $q->whereHas('variants', fn ($v) => $variant($v)->whereRaw('('.self::CURRENT_PRICE.') >= ?', [$now, $now, $min])))
             ->when($query->maxPrice, fn ($q, $max) => $q->whereHas('variants', fn ($v) => $variant($v)->whereRaw('('.self::CURRENT_PRICE.') <= ?', [$now, $now, $max])))
+            // attribute filters: any of the chosen values, for every attribute chosen
+            ->when($query->attributeFilters, function ($q, $filters) {
+                foreach ($filters as $attributeId => $valueIds) {
+                    $q->whereExists(fn ($e) => $e->selectRaw('1')->from('product_attribute_values as pav')
+                        ->whereColumn('pav.product_id', 'products.id')
+                        ->where('pav.attribute_id', $attributeId)
+                        ->whereIn('pav.attribute_value_id', $valueIds));
+                }
+            })
             ->when($units !== [], fn ($q) => $q->whereIn('products.id', function ($sub) use ($units, $matchAll) {
                 $sub->select('product_id')->from(self::TABLE)->where(function ($w) use ($units, $matchAll) {
                     foreach ($units as $alternatives) {

@@ -1,0 +1,9 @@
+{
+    "title": "ویژگی‌ها و فیلترها",
+    "description": "کتابخانه‌ی ویژگی‌ها و مقادیرشان، گروه ویژگی برای هر دسته‌بندی (با ارث‌بری)، فیلترهای اختصاصی صفحه‌ی دسته‌ها و جدول مشخصات کامل محصول.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": ["Catalog", "Search"],
+    "default": true,
+    "icon": "adjustments-horizontal"
+}

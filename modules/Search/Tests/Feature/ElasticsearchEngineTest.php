@@ -74,6 +74,36 @@ class ElasticsearchEngineTest extends TestCase
         });
     }
 
+    public function test_attribute_filters_and_value_counts(): void
+    {
+        Http::fake(['es.test:9200/products/_search' => Http::response([
+            'hits' => ['total' => ['value' => 1, 'relation' => 'eq'], 'hits' => [['_id' => '4']]],
+            'aggregations' => [
+                'attr_1' => ['doc_count' => 3, 'values' => ['buckets' => [['key' => 11, 'doc_count' => 2], ['key' => 12, 'doc_count' => 1]]]],
+                'attr_2' => ['doc_count' => 1, 'values' => ['buckets' => [['key' => 21, 'doc_count' => 1]]]],
+            ],
+        ])]);
+
+        $result = $this->engine()->search(new SearchQuery(
+            categoryIds: [5], attributeFilters: [1 => [11, 12]], facetAttributes: [1 => [11, 12, 13], 2 => [21, 22]],
+        ));
+
+        $this->assertSame([4], $result->ids);
+        $this->assertSame([11 => 2, 12 => 1, 21 => 1], $result->valueCounts);
+
+        Http::assertSent(function (Request $request) {
+            $body = $request->data();
+            $own = ['terms' => ['attr_values' => [11, 12]]];
+
+            return $body['post_filter']['bool']['filter'] === [$own]
+                // an attribute's own choice doesn't narrow its counts; it narrows every other attribute's
+                && $body['aggs']['attr_1']['filter']['bool']['filter'] === []
+                && $body['aggs']['attr_2']['filter']['bool']['filter'] === [$own]
+                && $body['aggs']['attr_1']['aggs']['values']['terms']['include'] === [11, 12, 13]
+                && $body['aggs']['brands_scope']['filter']['bool']['filter'] === [$own]; // no brand chosen: no null filter
+        });
+    }
+
     public function test_bulk_upsert_and_errors(): void
     {
         Http::fake(['es.test:9200/_bulk' => Http::sequence()

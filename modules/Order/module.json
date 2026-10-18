@@ -1,0 +1,12 @@
+{
+    "title": "سفارش‌ها و تسویه‌حساب",
+    "description": "صفحه‌ی تسویه‌حساب، ثبت و مدیریت سفارش‌ها و گزارش فروش.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": [
+        "Customer",
+        "Checkout"
+    ],
+    "default": true,
+    "icon": "clipboard-document-list"
+}

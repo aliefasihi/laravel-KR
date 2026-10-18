@@ -7,6 +7,7 @@
 
 namespace Modules\Catalog\Filament\Resources\Categories;
 
+use App\Core\Modules\Modules;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -26,6 +27,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Attributes\Filament\Forms\CategoryAttributesSection;
 use Modules\Catalog\Filament\Resources\Categories\Pages\CreateCategory;
 use Modules\Catalog\Filament\Resources\Categories\Pages\EditCategory;
 use Modules\Catalog\Filament\Resources\Categories\Pages\ListCategories;
@@ -69,6 +71,7 @@ class CategoryResource extends Resource
                         ->helperText('دقیقاً همان مسیر سایت فعلی (مثلاً ظروف-آشپزخانه/قابلمه). اگر بعداً عوضش کنی، آدرس قبلی خودکار ۳۰۱ می‌شود.'),
                     RichEditor::make('description')->label('توضیحات پایین صفحه')->columnSpanFull(),
                 ])->columns(2),
+                ...(Modules::enabled('Attributes') ? [CategoryAttributesSection::make()] : []),
                 Section::make('سئو')->schema([
                     TextInput::make('meta_title')->label('عنوان سئو')->maxLength(70),
                     Textarea::make('meta_description')->label('توضیحات متا')->maxLength(160)->rows(2),

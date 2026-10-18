@@ -1,0 +1,11 @@
+{
+    "title": "درگاه‌های پرداخت",
+    "description": "زرین‌پال، کارت‌به‌کارت و پرداخت در محل.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": [
+        "Order"
+    ],
+    "default": true,
+    "icon": "credit-card"
+}

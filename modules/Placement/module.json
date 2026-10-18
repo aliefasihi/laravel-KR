@@ -1,0 +1,9 @@
+{
+    "title": "بنرها",
+    "description": "جایگاه‌های بنر صفحه‌ی اصلی و دسته‌ها برای سوپراپ.",
+    "version": "1.0.0",
+    "core": true,
+    "requires": [],
+    "default": true,
+    "icon": "rectangle-group"
+}

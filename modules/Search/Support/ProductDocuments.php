@@ -23,13 +23,37 @@ class ProductDocuments
     /** @var array<int, array{parent_id: ?int, name: string}>|null */
     private ?array $categoryTree = null;
 
+    /** @var array<string, callable(Collection<int, Product>): array<int, array<string, mixed>>> */
+    private static array $extenders = [];
+
+    /**
+     * Other modules add fields to the documents, e.g. Attributes adds
+     * attr_values (value ids, for filters) and attributes (value labels, searchable).
+     */
+    public static function extend(string $key, callable $extender): void
+    {
+        self::$extenders[$key] = $extender;
+    }
+
     /**
      * @param  Collection<int, Product>  $products  with brand, categories, variants loaded
      * @return list<array<string, mixed>>
      */
     public function build(Collection $products): array
     {
-        return $products->map(fn (Product $product) => $this->document($product))->values()->all();
+        $extra = [];
+        foreach (self::$extenders as $extender) {
+            foreach ($extender($products) as $productId => $fields) {
+                $extra[$productId] = ($extra[$productId] ?? []) + $fields;
+            }
+        }
+
+        return $products->map(function (Product $product) use ($extra) {
+            $document = ($extra[$product->id] ?? []) + $this->document($product);
+            $document['attributes'] = array_values(array_filter(array_map(SearchText::normalize(...), $document['attributes'])));
+
+            return $document;
+        })->values()->all();
     }
 
     /** @return array<string, mixed> */
@@ -65,6 +89,8 @@ class ProductDocuments
             'on_sale' => $discount > 0 ? 1 : 0,
             'created_at' => $product->created_at?->getTimestamp() ?? $now->getTimestamp(),
             'price_valid_until' => $this->nextPriceSwitch($variants, $now)?->getTimestamp(),
+            'attr_values' => [],
+            'attributes' => [],
         ];
     }
 
@@ -77,6 +103,7 @@ class ProductDocuments
             $document['sku'] === '' ? null : SearchText::normalize($document['sku']),
             $document['sku_compact'],
             implode(' ', $document['categories']),
+            implode(' ', $document['attributes'] ?? []),
         ])));
     }
 

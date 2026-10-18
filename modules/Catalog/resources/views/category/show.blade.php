@@ -50,7 +50,7 @@
 
         <x-placement key="category.header" :context-id="$category->id" />
 
-        <x-listing :products="$products" :filters="$filters" :sorts="$sorts" :brands="$brands" :counts="$counts" :price-range="$priceRange" :filtered="$filtered" :action="$category->url()" />
+        <x-listing :products="$products" :filters="$filters" :sorts="$sorts" :brands="$brands" :counts="$counts" :price-range="$priceRange" :filter-attributes="$attributes" :value-counts="$valueCounts" :filtered="$filtered" :action="$category->url()" />
 
         @if ($category->description && $page === 1)
             <section class="glass rounded-[var(--radius-glass)] p-6 sm:p-10" x-data="{ more: false }" aria-label="درباره {{ $category->name }}">
