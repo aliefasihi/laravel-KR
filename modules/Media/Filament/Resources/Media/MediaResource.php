@@ -63,7 +63,9 @@ class MediaResource extends Resource
             ->defaultSort('id', 'desc')
             ->contentGrid(['md' => 3, 'xl' => 5])
             ->columns([
-                ImageColumn::make('path')->label('')->disk('public')->imageHeight(160),
+                // small WebP version instead of the (often multi-MB) original
+                ImageColumn::make('thumb')->label('')->imageHeight(160)
+                    ->state(fn (Media $record) => $record->urlFor(320)),
                 TextColumn::make('title')->label('عنوان')->searchable()->placeholder('بدون عنوان'),
                 TextColumn::make('dimensions')->label('ابعاد')
                     ->state(fn (Media $record) => $record->width ? PersianText::toPersianDigits("{$record->width}×{$record->height}") : null)

@@ -27,7 +27,7 @@
 
         <div class="glass rounded-[var(--radius-glass)] p-2">
             @if ($cover)
-                <x-media.picture :media="$cover" :alt="$post->title" eager class="aspect-[16/8] w-full rounded-[1.2rem] object-cover" />
+                <x-media.picture :media="$cover" :alt="$post->title" eager sizes="(min-width: 896px) 860px, 100vw" class="aspect-[16/8] w-full rounded-[1.2rem] object-cover" />
             @endif
             <div class="px-4 pt-8 pb-6 sm:px-10">
                 <header>

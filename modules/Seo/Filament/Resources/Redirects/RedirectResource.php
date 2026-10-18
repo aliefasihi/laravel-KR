@@ -38,7 +38,7 @@ class RedirectResource extends Resource
 
     protected static ?string $pluralModelLabel = 'ریدایرکت‌ها';
 
-    private const SOURCES = ['import' => 'مهاجرت وردپرس', 'slug_change' => 'تغییر آدرس', 'manual' => 'دستی'];
+    private const SOURCES = ['import' => 'مهاجرت وردپرس', 'slug_change' => 'تغییر آدرس', 'suggestion' => 'پیشنهاد سیستم', 'manual' => 'دستی'];
 
     public static function form(Schema $schema): Schema
     {

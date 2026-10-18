@@ -11,17 +11,22 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Modules\Catalog\Models\Brand;
 use Modules\Catalog\Support\ProductListing;
+use Modules\Search\Support\ProductFinder;
 
 class BrandController
 {
-    public function show(Request $request, string $slug, ProductListing $listing): View
+    public function show(Request $request, string $slug, ProductListing $listing, ProductFinder $finder): View
     {
         $brand = Brand::query()->where('slug', $slug)->with('media')->firstOrFail();
         $filters = $listing->filters($request);
+        $filters['brand'] = []; // the page is the brand
+
+        [$products, $result] = $finder->paginate($listing->query($filters, $request, scopeBrandId: $brand->id), $brand->url());
 
         return view('catalog::brand.show', [
             'brand' => $brand,
-            'products' => $listing->apply($listing->base(brandId: $brand->id), $filters)->paginate(24)->withQueryString(),
+            'products' => $products,
+            'priceRange' => $result->priceRange,
             'filters' => $filters,
             'sorts' => ProductListing::SORTS,
         ]);

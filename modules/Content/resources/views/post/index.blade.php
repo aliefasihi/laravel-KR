@@ -10,7 +10,7 @@
         <x-breadcrumbs :items="['مجله' => null]" />
 
         <header class="glass relative isolate overflow-hidden rounded-[var(--radius-glass)] px-6 py-10 text-center sm:px-10">
-            <div class="pointer-events-none absolute -top-24 start-1/3 -z-10 size-80 rounded-full bg-gradient-to-br from-rose/25 to-caramel/25 blur-3xl" aria-hidden="true"></div>
+            <div class="blob-duo -top-24 start-1/3 -z-10 size-80" aria-hidden="true"></div>
             <p class="font-latin text-xs font-bold tracking-[0.3em] text-caramel-600 uppercase" dir="ltr">Romantic Journal</p>
             <h1 class="mt-3 text-3xl font-black text-navy sm:text-4xl">مجله خانه رمانتیک</h1>
             <p class="mx-auto mt-3 max-w-xl leading-8 text-muted">ایده‌های چیدمان، راهنمای خرید و نکته‌های نگهداری برای خانه‌ای گرم‌تر.</p>

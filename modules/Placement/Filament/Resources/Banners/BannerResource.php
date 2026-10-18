@@ -84,9 +84,11 @@ class BannerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('desktopMedia'))
             ->defaultSort('id', 'desc')
             ->columns([
-                ImageColumn::make('desktopMedia.path')->label('')->disk('public')->imageHeight(48),
+                ImageColumn::make('thumb')->label('')->imageHeight(48)
+                    ->state(fn ($record) => $record->desktopMedia?->urlFor(320)),
                 TextColumn::make('title')->label('عنوان')->searchable(),
                 TextColumn::make('placement.name')->label('جایگاه'),
                 TextColumn::make('status')->label('وضعیت')->badge()

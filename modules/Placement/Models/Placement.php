@@ -7,12 +7,15 @@
 
 namespace Modules\Placement\Models;
 
+use App\Core\Concerns\FlushesStoreCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 
 class Placement extends Model
 {
+    use FlushesStoreCache;
+
     public const CONTEXTS = ['category' => 'دسته‌بندی', 'product' => 'محصول', 'brand' => 'برند'];
 
     protected $guarded = ['id'];

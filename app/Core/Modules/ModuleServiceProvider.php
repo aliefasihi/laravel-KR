@@ -10,6 +10,7 @@
  *   modules/{Name}/database/migrations
  *   modules/{Name}/resources/views  (namespace = lowercase module name)
  *   modules/{Name}/config.php       (merged as config("modules.{name}"))
+ *   modules/{Name}/Console/*Command.php  (artisan commands)
  */
 
 namespace App\Core\Modules;
@@ -43,6 +44,20 @@ abstract class ModuleServiceProvider extends ServiceProvider
         if (! $this->app->routesAreCached()) {
             $this->registerRoutes();
         }
+
+        if ($this->app->runningInConsole()) {
+            $this->registerCommands();
+        }
+    }
+
+    protected function registerCommands(): void
+    {
+        $files = glob($this->modulePath('Console').DIRECTORY_SEPARATOR.'*Command.php') ?: [];
+
+        $this->commands(array_map(
+            fn (string $file) => 'Modules\\'.$this->moduleName().'\\Console\\'.basename($file, '.php'),
+            $files,
+        ));
     }
 
     protected function registerRoutes(): void

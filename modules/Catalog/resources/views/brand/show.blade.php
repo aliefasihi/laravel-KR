@@ -10,10 +10,10 @@
         <x-breadcrumbs :items="['برندها' => route('catalog.shop'), $brand->name_fa => null]" />
 
         <header class="glass-navy relative isolate overflow-hidden rounded-[var(--radius-glass)] px-6 py-10 sm:px-10">
-            <div class="pointer-events-none absolute -top-24 end-10 -z-10 size-80 rounded-full bg-rose/30 blur-3xl" aria-hidden="true"></div>
+            <div class="blob -top-24 end-10 -z-10 size-80 text-rose/30" aria-hidden="true"></div>
             <div class="flex flex-wrap items-center gap-6">
                 @if ($logo = $brand->media->first())
-                    <span class="grid size-24 place-items-center rounded-3xl bg-white p-3"><x-media.picture :media="$logo" :alt="$brand->name_fa" class="max-h-full w-auto object-contain" /></span>
+                    <span class="grid size-24 place-items-center rounded-3xl bg-white p-3"><x-media.picture :media="$logo" :alt="$brand->name_fa" sizes="96px" class="max-h-full w-auto object-contain" /></span>
                 @endif
                 <div>
                     <h1 class="text-3xl font-black sm:text-4xl">{{ $brand->name_fa }}</h1>
@@ -25,6 +25,6 @@
             @endif
         </header>
 
-        <x-listing :products="$products" :filters="$filters" :sorts="$sorts" :action="$brand->url()" :filtered="false" />
+        <x-listing :products="$products" :filters="$filters" :sorts="$sorts" :action="$brand->url()" :filtered="false" :price-range="$priceRange" />
     </div>
 @endsection

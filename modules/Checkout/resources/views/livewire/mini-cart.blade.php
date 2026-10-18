@@ -13,7 +13,7 @@
         @teleport('body')
             <div class="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="سبد خرید" x-data x-trap.noscroll="true" @keydown.escape.window="$wire.set('open', false)">
                 <div class="absolute inset-0 bg-navy/30 backdrop-blur-sm" wire:click="$set('open', false)"></div>
-                <div class="glass-strong absolute inset-y-2 end-2 flex w-[25rem] max-w-[92vw] flex-col overflow-hidden rounded-[1.75rem]">
+                <div class="glass-strong frost absolute inset-y-2 end-2 flex w-[25rem] max-w-[92vw] flex-col overflow-hidden rounded-[1.75rem]">
                     <div class="flex items-center justify-between px-5 py-4">
                         <div>
                             <p class="text-lg font-black text-navy">سبد خرید</p>
@@ -37,7 +37,7 @@
                             @foreach ($lines as $line)
                                 @php($product = $line->variant->product)
                                 <li class="flex gap-3 rounded-2xl bg-white/70 p-2.5" wire:key="mini-{{ $line->variant->id }}">
-                                    <x-media.picture :media="$product->media->first()" :alt="$product->name" class="size-[4.5rem] shrink-0 rounded-xl object-cover" />
+                                    <x-media.picture :media="$product->media->first()" :alt="$product->name" sizes="72px" class="size-[4.5rem] shrink-0 rounded-xl object-cover" />
                                     <div class="min-w-0 flex-1 text-sm">
                                         <a href="{{ $product->url() }}" class="line-clamp-2 font-bold leading-6 text-navy">{{ $product->name }}</a>
                                         @if ($line->variant->options)

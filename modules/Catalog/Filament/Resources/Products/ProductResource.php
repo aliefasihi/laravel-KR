@@ -122,9 +122,11 @@ class ProductResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('media'))
             ->defaultSort('id', 'desc')
             ->columns([
-                ImageColumn::make('media.path')->label('')->disk('public')->square()->limit(1),
+                ImageColumn::make('thumb')->label('')->square()
+                    ->state(fn (Product $record) => $record->media->first()?->urlFor(160)),
                 TextColumn::make('name')->label('نام')->searchable()->sortable()->limit(50)->wrap(),
                 TextColumn::make('brand.name_fa')->label('برند')->sortable(),
                 TextColumn::make('sku')->label('SKU')->searchable()->copyable()->fontFamily(FontFamily::Mono),

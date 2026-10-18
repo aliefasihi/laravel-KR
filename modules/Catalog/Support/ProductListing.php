@@ -1,12 +1,14 @@
 <?php
 
 /**
- * Khaneh Romantic — Shared product listing (shop, category, brand): filters + sort
+ * Khaneh Romantic — Shared product listing (shop, category, brand, search): filters + sort
  * نویسنده: علی فصیحی (Ali Fasihi)
  *
  * Filters come from plain GET params so every state has a crawlable URL:
  *   ?brand[]=goldkish&in_stock=1&sale=1&min=500000&max=3000000&sort=price_asc
  * Prices in the URL are Toman (what shoppers see); the database is Rials.
+ * Results come from the search engine (Modules\Search) via query(); apply() is the plain-SQL
+ * variant still used for the home page's cached blocks.
  */
 
 namespace Modules\Catalog\Support;
@@ -18,6 +20,8 @@ use Illuminate\Support\Collection;
 use Modules\Catalog\Models\Brand;
 use Modules\Catalog\Models\Product;
 use Modules\Catalog\Models\ProductVariant;
+use Modules\Search\Support\SearchQuery;
+use Modules\Search\Support\SearchResult;
 
 class ProductListing
 {
@@ -28,8 +32,11 @@ class ProductListing
         'discount' => 'بیشترین تخفیف',
     ];
 
+    /** Sorts on the search results page (relevance first). */
+    public const SEARCH_SORTS = ['relevance' => 'مرتبط‌ترین'] + self::SORTS;
+
     /** @return array{brand: list<string>, in_stock: bool, sale: bool, min: ?int, max: ?int, sort: string} */
-    public function filters(Request $request): array
+    public function filters(Request $request, array $sorts = self::SORTS): array
     {
         $toman = fn (string $key) => ($v = (int) PersianText::toLatinDigits((string) $request->query($key))) > 0 ? $v : null;
 
@@ -39,14 +46,42 @@ class ProductListing
             'sale' => $request->boolean('sale'),
             'min' => $toman('min'),
             'max' => $toman('max'),
-            'sort' => array_key_exists((string) $request->query('sort'), self::SORTS) ? (string) $request->query('sort') : 'newest',
+            'sort' => array_key_exists((string) $request->query('sort'), $sorts) ? (string) $request->query('sort') : array_key_first($sorts),
         ];
     }
 
-    public function isFiltered(array $filters): bool
+    /** URL filters → engine query (brand slugs resolved to ids, Toman → Rials). */
+    public function query(array $filters, Request $request, string $term = '', ?array $categoryIds = null, ?int $scopeBrandId = null, int $perPage = 24): SearchQuery
+    {
+        return new SearchQuery(
+            term: $term,
+            brandIds: $filters['brand'] ? Brand::query()->whereIn('slug', $filters['brand'])->pluck('id')->all() : [],
+            categoryIds: $categoryIds,
+            scopeBrandId: $scopeBrandId,
+            inStock: $filters['in_stock'],
+            onSale: $filters['sale'],
+            minPrice: $filters['min'] !== null ? $filters['min'] * 10 : null,
+            maxPrice: $filters['max'] !== null ? $filters['max'] * 10 : null,
+            sort: $filters['sort'],
+            page: max(1, (int) $request->query('page', 1)),
+            perPage: $perPage,
+        );
+    }
+
+    /** Brands for the filter sidebar: those with results (facets) plus any already selected. */
+    public function facetBrands(SearchResult $result, array $filters): Collection
+    {
+        return Brand::query()
+            ->whereIn('id', array_keys($result->brandCounts))
+            ->when($filters['brand'], fn ($q, $slugs) => $q->orWhereIn('slug', $slugs))
+            ->orderBy('name_fa')
+            ->get();
+    }
+
+    public function isFiltered(array $filters, string $defaultSort = 'newest'): bool
     {
         return $filters['brand'] !== [] || $filters['in_stock'] || $filters['sale']
-            || $filters['min'] !== null || $filters['max'] !== null || $filters['sort'] !== 'newest';
+            || $filters['min'] !== null || $filters['max'] !== null || $filters['sort'] !== $defaultSort;
     }
 
     /** Base scope: active products, optionally inside a set of categories or one brand. */
@@ -86,13 +121,5 @@ class ProductListing
             ->when($filters['sort'] === 'price_desc', fn ($q) => $q->orderByDesc('min_price'))
             ->when($filters['sort'] === 'discount', fn ($q) => $q->orderByDesc('max_discount'))
             ->with(['brand', 'variants', 'media']);
-    }
-
-    /** Brands that have products inside the base scope (for the filter sidebar). */
-    public function brandsFor(Builder $base): Collection
-    {
-        $ids = (clone $base)->select('brand_id')->distinct()->pluck('brand_id');
-
-        return Brand::query()->whereIn('id', $ids)->orderBy('name_fa')->get();
     }
 }

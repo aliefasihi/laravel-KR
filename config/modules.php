@@ -9,6 +9,7 @@ use Modules\Media\Providers\MediaServiceProvider;
 use Modules\Order\Providers\OrderServiceProvider;
 use Modules\Payment\Providers\PaymentServiceProvider;
 use Modules\Placement\Providers\PlacementServiceProvider;
+use Modules\Search\Providers\SearchServiceProvider;
 use Modules\Seo\Providers\SeoServiceProvider;
 use Modules\WordPressImport\Providers\WordPressImportServiceProvider;
 
@@ -23,6 +24,7 @@ return [
         MediaServiceProvider::class,
         SeoServiceProvider::class,
         CatalogServiceProvider::class,
+        SearchServiceProvider::class,
         ContentServiceProvider::class,
         PlacementServiceProvider::class,
         CustomerServiceProvider::class,

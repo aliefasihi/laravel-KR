@@ -12,7 +12,7 @@
         <x-breadcrumbs :items="['درباره ما' => null]" />
 
         <section class="glass relative isolate overflow-hidden rounded-[var(--radius-glass)] px-6 py-12 sm:px-14">
-            <div class="pointer-events-none absolute -top-24 -end-16 -z-10 size-80 rounded-full bg-gradient-to-br from-rose/25 to-caramel/30 blur-3xl" aria-hidden="true"></div>
+            <div class="blob-duo -top-24 -end-16 -z-10 size-80" aria-hidden="true"></div>
             <p class="font-latin text-xs font-bold tracking-[0.3em] text-caramel-600 uppercase" dir="ltr">Our Story</p>
             <h1 class="mt-3 text-3xl font-black text-navy sm:text-4xl">درباره {{ $store['name'] }}</h1>
             <p class="mt-6 max-w-3xl text-lg leading-9 text-muted">{{ $store['about'] }}</p>

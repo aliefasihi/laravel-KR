@@ -10,6 +10,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\AvatarProviders\InitialsAvatarProvider;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -46,7 +47,11 @@ class AdminPanelProvider extends PanelProvider
                 'gray' => Color::Slate,
             ])
             ->font('Vazirmatn', url: asset('fonts/fonts.css'), provider: LocalFontProvider::class)
+            ->defaultAvatarProvider(InitialsAvatarProvider::class) // no ui-avatars.com request on every page
             ->sidebarCollapsibleOnDesktop()
+            // SPA navigation: page changes swap only the content (no full reload of Filament's CSS/JS),
+            // and links are prefetched on hover so most clicks open instantly.
+            ->spa(hasPrefetching: true)
             ->navigationGroups([
                 'کاتالوگ',
                 'محتوا',

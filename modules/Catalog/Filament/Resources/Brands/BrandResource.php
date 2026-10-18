@@ -74,8 +74,10 @@ class BrandResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('media'))
             ->columns([
-                ImageColumn::make('media.path')->label('')->disk('public')->circular()->limit(1),
+                ImageColumn::make('thumb')->label('')->circular()
+                    ->state(fn (Brand $record) => $record->media->first()?->urlFor(160)),
                 TextColumn::make('name_fa')->label('نام')->searchable()->sortable(),
                 TextColumn::make('name_en')->label('English')->searchable(),
                 TextColumn::make('slug')->label('اسلاگ')->fontFamily(FontFamily::Mono),

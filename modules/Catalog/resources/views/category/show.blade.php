@@ -19,14 +19,14 @@
         <x-breadcrumbs :items="array_slice($category->trail(), 0, -1, true) + [$category->name => null]" />
 
         <header class="glass relative isolate overflow-hidden rounded-[var(--radius-glass)] px-6 py-8 sm:px-10">
-            <div class="pointer-events-none absolute -top-20 -end-10 -z-10 size-72 rounded-full bg-gradient-to-br from-rose/25 to-caramel/25 blur-3xl" aria-hidden="true"></div>
+            <div class="blob-duo -top-20 -end-10 -z-10 size-72" aria-hidden="true"></div>
             <div class="flex flex-wrap items-center justify-between gap-6">
                 <div>
                     <h1 class="text-3xl font-black text-navy sm:text-4xl">{{ $category->name }}</h1>
                     <p class="mt-2 text-sm text-muted">{{ PersianText::toPersianDigits($products->total()) }} محصول با ضمانت اصالت کالا</p>
                 </div>
                 @if ($image = $category->media->first())
-                    <x-media.picture :media="$image" :alt="$category->name" class="size-24 rounded-full object-cover ring-4 ring-white/80 sm:size-28" />
+                    <x-media.picture :media="$image" :alt="$category->name" sizes="112px" class="size-24 rounded-full object-cover ring-4 ring-white/80 sm:size-28" />
                 @endif
             </div>
 
@@ -37,7 +37,7 @@
                             <li class="shrink-0">
                                 <a href="{{ $child->url() }}" class="chip">
                                     @if ($thumb = $child->media->first())
-                                        <x-media.picture :media="$thumb" :alt="''" class="-ms-2 size-7 rounded-full object-cover" />
+                                        <x-media.picture :media="$thumb" :alt="''" sizes="28px" class="-ms-2 size-7 rounded-full object-cover" />
                                     @endif
                                     {{ $child->name }}
                                 </a>
@@ -50,7 +50,7 @@
 
         <x-placement key="category.header" :context-id="$category->id" />
 
-        <x-listing :products="$products" :filters="$filters" :sorts="$sorts" :brands="$brands" :filtered="$filtered" :action="$category->url()" />
+        <x-listing :products="$products" :filters="$filters" :sorts="$sorts" :brands="$brands" :counts="$counts" :price-range="$priceRange" :filtered="$filtered" :action="$category->url()" />
 
         @if ($category->description && $page === 1)
             <section class="glass rounded-[var(--radius-glass)] p-6 sm:p-10" x-data="{ more: false }" aria-label="درباره {{ $category->name }}">

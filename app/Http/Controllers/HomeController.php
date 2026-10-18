@@ -3,10 +3,15 @@
 /**
  * Khaneh Romantic — Home page
  * نویسنده: علی فصیحی (Ali Fasihi)
+ *
+ * The home body is built and rendered once, then served from StoreCache until the catalog
+ * changes (model events) or the next scheduled switch: a sale starting or ending, a banner
+ * going live or expiring, or the daily deals countdown rolling over.
  */
 
 namespace App\Http\Controllers;
 
+use App\Core\Support\StoreCache;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
 use Modules\Catalog\Models\Brand;
@@ -15,11 +20,38 @@ use Modules\Catalog\Models\Product;
 use Modules\Catalog\Models\ProductVariant;
 use Modules\Catalog\Support\ProductListing;
 use Modules\Content\Models\Post;
+use Modules\Placement\Models\Banner;
 use Modules\Placement\Models\Placement;
 
 class HomeController
 {
     public function __invoke(ProductListing $listing): View
+    {
+        // The whole body is rendered once and kept as HTML: a cached home page costs one cache read.
+        $sections = StoreCache::remember(
+            'home.sections',
+            fn () => view('home.sections', $this->data($listing))->render(),
+            fn () => $this->nextSwitch(),
+        );
+
+        return view('home', ['sections' => $sections]);
+    }
+
+    /** When the home page changes by itself: a sale or a banner starts or ends, or the day rolls over. */
+    private function nextSwitch(): ?Carbon
+    {
+        $now = now();
+
+        return StoreCache::soonest([
+            ProductVariant::query()->where('sale_starts_at', '>', $now)->min('sale_starts_at'),
+            ProductVariant::query()->whereNotNull('sale_price')->where('sale_ends_at', '>', $now)->min('sale_ends_at'),
+            Banner::query()->where('starts_at', '>', $now)->min('starts_at'),
+            Banner::query()->where('ends_at', '>', $now)->min('ends_at'),
+            $now->copy()->setTimezone(config('khaneh.display_timezone'))->endOfDay(), // the daily deals countdown
+        ]);
+    }
+
+    private function data(ProductListing $listing): array
     {
         $now = now();
         $onSale = fn ($v) => $v->where('is_active', true)->where('stock', '>', 0)->whereNotNull('sale_price')
@@ -55,7 +87,7 @@ class HomeController
                 ->pipe(fn ($c) => $c->count() > 4 ? $c->take(intdiv($c->count(), 4) * 4) : $c),
         ])->values();
 
-        return view('home', [
+        return [
             'heroBanners' => Placement::liveFor('home.hero'),
             'duoBanners' => Placement::liveFor('home.duo'),
             'wideBanners' => Placement::liveFor('home.wide'),
@@ -69,6 +101,6 @@ class HomeController
             'brands' => $brands,
             'showcase' => $showcase,
             'posts' => Post::query()->published()->with('media')->latest('published_at')->limit(3)->get(),
-        ]);
+        ];
     }
 }

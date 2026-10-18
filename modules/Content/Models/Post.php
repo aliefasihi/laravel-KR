@@ -7,13 +7,14 @@
 
 namespace Modules\Content\Models;
 
+use App\Core\Concerns\FlushesStoreCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Media\Concerns\HasMedia;
 
 class Post extends Model
 {
-    use HasMedia;
+    use FlushesStoreCache, HasMedia;
 
     public const STATUS_DRAFT = 'draft';
 

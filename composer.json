@@ -69,7 +69,8 @@
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
-            "@php artisan filament:upgrade"
+            "@php artisan filament:upgrade",
+            "@php artisan vendor:publish --tag=livewire:assets --ansi --force"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
@@ -84,6 +85,14 @@
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ],
+        "prod:optimize": [
+            "@php artisan optimize",
+            "@php artisan filament:optimize"
+        ],
+        "prod:clear": [
+            "@php artisan optimize:clear",
+            "@php artisan filament:optimize-clear"
         ]
     },
     "extra": {

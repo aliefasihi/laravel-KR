@@ -7,11 +7,14 @@
 
 namespace Modules\Catalog\Models;
 
+use App\Core\Concerns\FlushesStoreCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductVariant extends Model
 {
+    use FlushesStoreCache;
+
     protected $guarded = ['id'];
 
     protected function casts(): array

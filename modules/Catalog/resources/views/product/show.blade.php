@@ -73,7 +73,7 @@
                             <span class="badge-off absolute start-4 top-4 !px-3 !py-1.5 !text-xs">{{ PersianText::toPersianDigits(Money::discountPercent($best->price, $best->currentPrice())) }}٪ تخفیف</span>
                         @endif
                         @if ($images->count() > 1)
-                            <span class="glass absolute end-4 bottom-4 rounded-full px-3 py-1 text-xs font-bold text-navy" aria-hidden="true">
+                            <span class="glass frost absolute end-4 bottom-4 rounded-full px-3 py-1 text-xs font-bold text-navy" aria-hidden="true">
                                 <span x-text="toFa(active + 1)">۱</span> / {{ PersianText::toPersianDigits($images->count()) }}
                             </span>
                         @endif
@@ -85,7 +85,7 @@
                             <button type="button" @click="go({{ $loop->index }})" class="glass shrink-0 overflow-hidden rounded-2xl p-1 transition"
                                     :class="active === {{ $loop->index }} ? 'ring-2 ring-rose' : 'opacity-70 hover:opacity-100'"
                                     aria-label="تصویر {{ $loop->iteration }}">
-                                <x-media.picture :media="$image" alt="" class="size-16 rounded-xl object-cover sm:size-20" />
+                                <x-media.picture :media="$image" alt="" sizes="80px" class="size-16 rounded-xl object-cover sm:size-20" />
                             </button>
                         @endforeach
                     </div>
@@ -145,7 +145,7 @@
         </div>
 
         {{-- Section tabs (anchor navigation) --}}
-        <nav class="glass sticky top-36 z-20 mx-auto flex w-fit max-w-full gap-1 overflow-x-auto rounded-full p-1.5 lg:top-40" aria-label="بخش‌های صفحه محصول">
+        <nav class="glass frost sticky top-36 z-20 mx-auto flex w-fit max-w-full gap-1 overflow-x-auto rounded-full p-1.5 lg:top-40" aria-label="بخش‌های صفحه محصول">
             @foreach ($tabs as $id => $label)
                 <a href="#{{ $id }}" class="shrink-0 rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-white hover:text-navy">{{ $label }}</a>
             @endforeach
@@ -189,7 +189,7 @@
     @if ($best)
         @section('buy_bar', '1')
         <div class="fixed inset-x-3 bottom-[5.6rem] z-30 lg:hidden">
-            <div class="glass-strong flex items-center justify-between gap-3 rounded-[1.4rem] p-2 ps-4">
+            <div class="glass-strong frost flex items-center justify-between gap-3 rounded-[1.4rem] p-2 ps-4">
                 <x-price :variant="$best" />
                 <a href="#buy" class="btn-rose !px-5 !py-2.5">{{ $best->stock > 0 ? 'افزودن به سبد' : 'جزئیات' }}</a>
             </div>

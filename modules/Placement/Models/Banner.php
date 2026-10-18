@@ -7,6 +7,7 @@
 
 namespace Modules\Placement\Models;
 
+use App\Core\Concerns\FlushesStoreCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,8 @@ use Modules\Media\Models\Media;
 
 class Banner extends Model
 {
+    use FlushesStoreCache;
+
     public const STATUSES = ['draft' => 'پیش‌نویس', 'approved' => 'تأییدشده (نمایش)', 'archived' => 'بایگانی'];
 
     protected $guarded = ['id'];

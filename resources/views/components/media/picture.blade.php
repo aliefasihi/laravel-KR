@@ -1,15 +1,15 @@
 {{-- Responsive image from the Media module (soft placeholder when missing) | نویسنده: علی فصیحی (Ali Fasihi) --}}
+{{-- Browsers pick the smallest AVIF/WebP version that fits `sizes`; the original is only a fallback. --}}
 @props(['media' => null, 'alt' => null, 'eager' => false, 'sizes' => '100vw'])
 
 @if ($media)
-    @php($variants = $media->variants ?? [])
     <picture class="contents">
-        @isset($variants['avif'])
-            <source type="image/avif" srcset="{{ \Illuminate\Support\Facades\Storage::disk($media->disk)->url($variants['avif']['path']) }}" sizes="{{ $sizes }}">
-        @endisset
-        @isset($variants['webp'])
-            <source type="image/webp" srcset="{{ \Illuminate\Support\Facades\Storage::disk($media->disk)->url($variants['webp']['path']) }}" sizes="{{ $sizes }}">
-        @endisset
+        @if ($avif = $media->srcset('avif'))
+            <source type="image/avif" srcset="{{ $avif }}" sizes="{{ $sizes }}">
+        @endif
+        @if ($webp = $media->srcset('webp'))
+            <source type="image/webp" srcset="{{ $webp }}" sizes="{{ $sizes }}">
+        @endif
         <img src="{{ $media->url() }}"
              alt="{{ $alt ?? $media->alt ?? '' }}"
              @if ($media->width) width="{{ $media->width }}" height="{{ $media->height }}" @endif

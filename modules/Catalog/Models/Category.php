@@ -7,20 +7,19 @@
 
 namespace Modules\Catalog\Models;
 
+use App\Core\Concerns\FlushesStoreCache;
 use App\Core\Support\UrlPath;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Cache;
 use Modules\Catalog\Events\CategoryUrlChanged;
-use Modules\Catalog\View\Composers\NavigationComposer;
 use Modules\Media\Concerns\HasMedia;
 
 class Category extends Model
 {
-    use HasMedia;
+    use FlushesStoreCache, HasMedia;
 
     protected $guarded = ['id'];
 
@@ -45,9 +44,6 @@ class Category extends Model
                 );
             }
         });
-
-        static::saved(fn () => Cache::forget(NavigationComposer::CACHE_KEY));
-        static::deleted(fn () => Cache::forget(NavigationComposer::CACHE_KEY));
     }
 
     public function parent(): BelongsTo

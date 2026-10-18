@@ -3,7 +3,7 @@
 
 <article {{ $attributes->class(['group glass relative flex flex-col rounded-[var(--radius-glass)] p-2 transition duration-300 hover:-translate-y-1 hover:bg-white/80']) }}>
     <div class="relative overflow-hidden rounded-[1.15rem]">
-        <x-media.picture :media="$post->media->first()" :alt="$post->title" class="aspect-[16/10] w-full object-cover transition duration-700 group-hover:scale-105" />
+        <x-media.picture :media="$post->media->first()" :alt="$post->title" sizes="(min-width: 768px) 33vw, 100vw" class="aspect-[16/10] w-full object-cover transition duration-700 group-hover:scale-105" />
         @if ($post->published_at)
             <time datetime="{{ $post->published_at->toDateString() }}" class="glass absolute start-3 bottom-3 rounded-full px-3 py-1 text-[11px] font-bold text-navy">
                 {{ \App\Core\Support\Jalali::format($post->published_at) }}

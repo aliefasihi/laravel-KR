@@ -13,6 +13,9 @@ cp .env.example .env && php artisan key:generate
 php artisan migrate --seed       # جایگاه‌های بنر (+ داده‌ی نمونه در محیط local)
 php artisan storage:link
 php artisan khaneh:admin you@example.com --name="Ali Fasihi"
+php artisan search:rebuild       # ایندکس جستجو
+php artisan media:optimize       # نسخه‌های WebP تصاویر
+php artisan queue:work           # (پروسه‌ی جدا) ایندکس جستجو و تصاویر از صف ساخته می‌شوند
 php artisan test
 ```
 
@@ -33,10 +36,13 @@ php artisan test
 - کامپوننت‌ها در `resources/views/components`:
   `site.header` (مگامنو ۳ سطحی + منوی کشویی موبایل)، `site.footer`، `site.promo`، `site.bottom-nav` (نوار پایین موبایل)، `site.whatsapp`،
   `section-title`، `product.card`، `listing` (فیلتر + گرید مشترک دسته/برند/فروشگاه)، `price`، `breadcrumbs`، `media.picture`، `post.card`، `ui.toast`.
-- Livewire: `catalog.search-box`، `checkout.add-to-cart`، `checkout.quick-add` (افزودن سریع از کارت محصول)، `checkout.mini-cart`، `checkout.cart-page`.
+- Livewire فقط جایی که state سمت سرور لازم است: `checkout.add-to-cart`، `checkout.mini-cart` (افزودن سریع از کارت‌ها را هم می‌گیرد)، `checkout.cart-page`.
+  جستجوی هدر (`<x-search-box>`) با Alpine و endpoint سبک `/search/suggest` کار می‌کند.
 - صفحه‌ی اصلی: اسلایدر (`home.hero`)، پیشنهاد ویژه با شمارش معکوس، دایره‌های دسته‌بندی، «محصولات شگفت‌انگیز»، جدیدترین‌ها، بنرهای `home.duo` و `home.wide`، برندها، مقاله‌ها.
   تصویر دایره‌ی دسته‌ها و لوگوی برندها از پنل (فیلد تصویر/لوگو) انتخاب می‌شود.
-- مسیرها: `/shop` (همه‌ی محصولات)، `/brand/{slug}`، `/search`، `/blog`، `/aboutus`، `/contact-us`، `POST /newsletter` (عضویت خبرنامه با ایمیل یا موبایل).
+- مسیرها: `/shop` (همه‌ی محصولات)، `/brand/{slug}`، `/search`، `/search/suggest`، `/blog`، `/aboutus`، `/contact-us`، `POST /newsletter` (عضویت خبرنامه با ایمیل یا موبایل).
+- **جستجو** (ماژول Search): موتور قابل انتخاب (`database` / `meilisearch` / `elasticsearch`)، غلط‌یابی، مترادف، پیشنهاد لحظه‌ای، تعداد کنار فیلترها، گزارش جستجو. ← `modules/Search/README.md`
+- **سرعت**: کش صفحه با باطل‌سازی خودکار، WebP واکنش‌گرا، prerender لینک‌ها، شیشه‌ی سبک. چک‌لیست سرور ← `docs/PERFORMANCE.md`
 - فیلترها فرم GET معمولی است تا لینک‌ها قابل کراول باشند؛ صفحه‌ی فیلترشده `noindex` و canonical به آدرس تمیز دسته دارد.
 - قیمت‌ها: `App\Core\Support\Money::toman()`؛ تاریخ: `Jalali::format()`؛ ارقام: `PersianText::toPersianDigits()`.
 
@@ -44,7 +50,7 @@ php artisan test
 
 - مسیر `/admin`، فارسی و راست‌به‌چپ، فقط کاربرهای `is_admin`.
 - هر ماژول ریسورس‌های خودش را در `modules/{Name}/Filament/Resources` دارد و پنل خودکار پیدایشان می‌کند.
-- بخش‌ها: محصولات (با مدل/قیمت/موجودی)، دسته‌بندی‌ها، برندها، مقاله‌ها، کتابخانه تصاویر، بنرها، جایگاه‌های بنر، ریدایرکت‌ها، کاربران پنل.
+- بخش‌ها: محصولات (با مدل/قیمت/موجودی)، دسته‌بندی‌ها، برندها، مقاله‌ها، کتابخانه تصاویر، بنرها، جایگاه‌های بنر، گزارش جستجو، ریدایرکت‌ها، پیشنهادهای ریدایرکت، کاربران پنل.
 - قیمت در پنل به **تومان** وارد می‌شود و در دیتابیس **ریال** ذخیره می‌شود.
 - داشبورد: محصولات ناموجود، بدون تصویر، پیش‌نویس‌ها و ورودی از آدرس‌های قدیمی.
 
@@ -74,7 +80,8 @@ docs/                     معماری، سیاست URL، قراردادهای �
 | ماژول | وضعیت | مسئولیت |
 |---|---|---|
 | Catalog | ✅ پایه | برند، دسته (URL حفظ‌شده)، محصول `/p/{brand}-{sku}`، ورییشن |
-| Seo | ✅ پایه | ریدایرکت legacy یک‌مرحله‌ای، 410، URLهای `?p=` |
+| Seo | ✅ پایه | ریدایرکت legacy یک‌مرحله‌ای، 410، URLهای `?p=`، پیشنهاد ریدایرکت برای ۴۰۴های قدیمی |
+| Search | ✅ | موتور جستجو (database/Meilisearch/Elasticsearch)، فیلتر و facet، پیشنهاد لحظه‌ای، گزارش جستجو |
 | Media | ✅ پایه | کتابخانه‌ی تصاویر، `HasMedia` |
 | Content | ✅ پایه | مقاله‌ها `/blog/{slug}`، مقصد سینک ai-platform |
 | Placement | ✅ پایه | جایگاه‌های بنر برای سوپراپ، `<x-placement>` |

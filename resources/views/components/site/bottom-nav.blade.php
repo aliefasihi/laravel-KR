@@ -10,8 +10,9 @@
     ];
 @endphp
 
-<nav class="fixed inset-x-3 bottom-3 z-40 lg:hidden" style="padding-bottom: env(safe-area-inset-bottom)" aria-label="ناوبری پایین">
-    <ul class="glass-strong mx-auto flex max-w-md items-stretch justify-between rounded-[1.6rem] px-2 py-1.5">
+<nav class="fixed inset-x-3 bottom-3 z-40 lg:hidden" style="padding-bottom: env(safe-area-inset-bottom)" aria-label="ناوبری پایین"
+     x-data="{ count: {{ $count }} }" @cart-count.window="count = $event.detail.count">
+    <ul class="glass-strong frost mx-auto flex max-w-md items-stretch justify-between rounded-[1.6rem] px-2 py-1.5">
         @foreach ($items as $item)
             <li class="flex-1">
                 @php($classes = ['relative flex w-full flex-col items-center gap-1 rounded-2xl py-1.5 text-[11px] font-bold transition', 'text-rose' => $item['active'], 'text-navy/70' => ! $item['active']])
@@ -25,9 +26,10 @@
                     @endif
                     <span class="relative">
                         <svg class="size-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ $item['icon'] }}"/></svg>
-                        @if (! empty($item['badge']))
-                            <span class="absolute -top-1.5 -end-2 grid min-w-4 place-items-center rounded-full bg-rose px-1 text-[10px] leading-4 text-white">{{ \App\Core\Support\PersianText::toPersianDigits($item['badge']) }}</span>
-                        @endif
+                        @isset($item['badge'])
+                            <span x-show="count > 0" x-text="toFa(count)" @if (! $item['badge']) x-cloak @endif
+                                  class="absolute -top-1.5 -end-2 grid min-w-4 place-items-center rounded-full bg-rose px-1 text-[10px] leading-4 text-white">{{ \App\Core\Support\PersianText::toPersianDigits($item['badge']) }}</span>
+                        @endisset
                     </span>
                     {{ $item['label'] }}
                 @if ($item['url'])

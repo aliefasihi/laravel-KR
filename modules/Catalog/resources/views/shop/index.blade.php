@@ -18,7 +18,7 @@
         <x-breadcrumbs :items="['فروشگاه' => null]" />
 
         <header class="glass relative isolate overflow-hidden rounded-[var(--radius-glass)] px-6 py-8 sm:px-10">
-            <div class="pointer-events-none absolute -top-20 -end-10 -z-10 size-72 rounded-full bg-gradient-to-br from-rose/25 to-caramel/25 blur-3xl" aria-hidden="true"></div>
+            <div class="blob-duo -top-20 -end-10 -z-10 size-72" aria-hidden="true"></div>
             <h1 class="text-3xl font-black text-navy sm:text-4xl">{{ $filters['sale'] ? 'تخفیف‌های ویژه' : 'فروشگاه خانه رمانتیک' }}</h1>
             <p class="mt-2 text-sm text-muted">{{ PersianText::toPersianDigits($products->total()) }} محصول</p>
             @if ($categories->isNotEmpty())
@@ -30,6 +30,6 @@
             @endif
         </header>
 
-        <x-listing :products="$products" :filters="$filters" :sorts="$sorts" :brands="$brands" :filtered="$filtered" :action="route('catalog.shop')" />
+        <x-listing :products="$products" :filters="$filters" :sorts="$sorts" :brands="$brands" :counts="$counts" :price-range="$priceRange" :filtered="$filtered" :action="route('catalog.shop')" />
     </div>
 @endsection

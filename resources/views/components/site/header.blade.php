@@ -18,7 +18,7 @@
         @open-menu.window="menu = true"
         @keydown.escape.window="mega = false; menu = false">
 
-    <div class="glass mx-auto max-w-7xl rounded-[1.75rem] transition-[background-color,box-shadow] duration-300"
+    <div class="glass frost mx-auto max-w-7xl rounded-[1.75rem] transition-[background-color,box-shadow] duration-300"
          :class="scrolled && '!bg-white/80 shadow-[0_16px_40px_-20px_rgb(35_40_79/0.35)]'"
          @mouseleave="mega = false">
 
@@ -31,7 +31,7 @@
             <x-site.logo class="max-lg:mx-auto" />
 
             <div class="hidden flex-1 justify-center md:flex">
-                <livewire:catalog.search-box />
+                <x-search-box />
             </div>
 
             <div class="flex items-center gap-1 sm:gap-2">
@@ -114,7 +114,7 @@
                                 </div>
                             </div>
                             <a href="{{ $category->url() }}" class="group relative hidden overflow-hidden rounded-2xl bg-gradient-to-br from-cream to-rose-100 xl:block">
-                                <x-media.picture :media="$category->media->first()" :alt="$category->name" class="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                                <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="208px" class="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                                 <span class="absolute inset-x-3 bottom-3 rounded-xl bg-white/80 px-3 py-2 text-center text-sm font-bold text-navy backdrop-blur">{{ $category->name }}</span>
                             </a>
                         </div>
@@ -127,7 +127,7 @@
     {{-- Mobile drawer --}}
     <div x-show="menu" x-cloak class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="منو">
         <div class="absolute inset-0 bg-navy/30 backdrop-blur-sm" @click="menu = false" x-show="menu" x-transition.opacity></div>
-        <div class="glass-strong absolute inset-y-2 start-2 flex w-[22rem] max-w-[88vw] flex-col overflow-hidden rounded-[1.75rem]"
+        <div class="glass-strong frost absolute inset-y-2 start-2 flex w-[22rem] max-w-[88vw] flex-col overflow-hidden rounded-[1.75rem]"
              x-show="menu" x-trap.noscroll="menu"
              x-transition:enter="transition duration-300 ease-out" x-transition:enter-start="translate-x-[110%]"
              x-transition:leave="transition duration-200" x-transition:leave-end="translate-x-[110%]">

@@ -31,8 +31,8 @@
 
         {{-- Newsletter --}}
         <section class="relative overflow-hidden rounded-[var(--radius-glass)] bg-gradient-to-l from-cream via-[#fde8ee] to-caramel-100 p-6 shadow-[var(--shadow-glass)] sm:p-10" aria-labelledby="newsletter-title">
-            <div class="pointer-events-none absolute -top-16 -start-10 size-56 rounded-full bg-rose/15 blur-3xl" aria-hidden="true"></div>
-            <div class="pointer-events-none absolute -bottom-20 end-10 size-64 rounded-full bg-caramel/25 blur-3xl" aria-hidden="true"></div>
+            <div class="blob -top-16 -start-10 size-56 text-rose/15" aria-hidden="true"></div>
+            <div class="blob -bottom-20 end-10 size-64 text-caramel/25" aria-hidden="true"></div>
             <div class="relative grid items-center gap-6 lg:grid-cols-[1fr_28rem]">
                 <div>
                     <h2 id="newsletter-title" class="text-2xl font-black text-navy">عضویت در باشگاه خبری خانه رمانتیک</h2>
@@ -54,7 +54,7 @@
 
         {{-- Main footer --}}
         <div class="glass-navy relative overflow-hidden rounded-[var(--radius-glass)]">
-            <div class="pointer-events-none absolute -top-24 end-1/4 size-72 rounded-full bg-rose/20 blur-3xl" aria-hidden="true"></div>
+            <div class="blob -top-24 end-1/4 size-72 text-rose/20" aria-hidden="true"></div>
             <div class="relative grid gap-10 px-6 py-10 sm:px-10 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
                 <div>
                     <x-site.logo light />

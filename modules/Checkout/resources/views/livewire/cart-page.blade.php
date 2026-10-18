@@ -21,7 +21,7 @@
                     @php($product = $line->variant->product)
                     <li class="glass flex flex-wrap items-center gap-4 rounded-[var(--radius-card)] p-3 sm:flex-nowrap" wire:key="line-{{ $line->variant->id }}">
                         <a href="{{ $product->url() }}" class="shrink-0 overflow-hidden rounded-2xl">
-                            <x-media.picture :media="$product->media->first()" :alt="$product->name" class="size-24 object-cover" />
+                            <x-media.picture :media="$product->media->first()" :alt="$product->name" sizes="96px" class="size-24 object-cover" />
                         </a>
                         <div class="min-w-0 flex-1">
                             <span class="text-[11px] font-bold text-caramel-600">{{ $product->brand->name_fa }}</span>

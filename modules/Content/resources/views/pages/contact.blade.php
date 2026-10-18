@@ -21,7 +21,7 @@
         <x-breadcrumbs :items="['تماس با ما' => null]" />
 
         <section class="glass relative isolate overflow-hidden rounded-[var(--radius-glass)] px-6 py-10 sm:px-14">
-            <div class="pointer-events-none absolute -top-24 -end-16 -z-10 size-80 rounded-full bg-gradient-to-br from-rose/25 to-caramel/30 blur-3xl" aria-hidden="true"></div>
+            <div class="blob-duo -top-24 -end-16 -z-10 size-80" aria-hidden="true"></div>
             <h1 class="text-3xl font-black text-navy sm:text-4xl">تماس با ما</h1>
             <p class="mt-3 max-w-xl leading-8 text-muted">برای مشاوره‌ی خرید، پیگیری سفارش یا هر سؤالی، از هر یک از راه‌های زیر با ما در ارتباط باشید.</p>
         </section>

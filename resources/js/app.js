@@ -102,6 +102,74 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    // Instant search: debounced fetch of /search/suggest, cached per term, keyboard navigation.
+    Alpine.data('searchBox', (initial = '', endpoint = '/search/suggest') => ({
+        q: initial,
+        open: false,
+        loading: false,
+        active: -1,
+        data: { products: [], categories: [], brands: [] },
+        cache: new Map(),
+        timer: null,
+        controller: null,
+        input() {
+            clearTimeout(this.timer);
+            const term = this.q.trim();
+            if (term.length < 2) {
+                this.open = false;
+                return;
+            }
+            this.timer = setTimeout(() => this.fetch(term), 160);
+        },
+        focus() {
+            if (this.q.trim().length >= 2) {
+                this.cache.has(this.q.trim()) ? (this.open = true) : this.input();
+            }
+        },
+        async fetch(term) {
+            if (this.cache.has(term)) {
+                return this.show(term, this.cache.get(term));
+            }
+            this.controller?.abort();
+            this.controller = new AbortController();
+            this.loading = true;
+            try {
+                const response = await fetch(`${endpoint}?q=${encodeURIComponent(term)}`, {
+                    headers: { Accept: 'application/json' },
+                    signal: this.controller.signal,
+                });
+                if (!response.ok) return;
+                const data = await response.json();
+                this.cache.set(term, data);
+                this.show(term, data);
+            } catch (error) {
+                if (error.name !== 'AbortError') console.warn('search suggest failed', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        show(term, data) {
+            if (term !== this.q.trim()) return; // a newer keystroke won
+            this.data = data;
+            this.active = -1;
+            this.open = true;
+        },
+        links() {
+            return [...this.$root.querySelectorAll('[data-suggest-link]')];
+        },
+        move(step) {
+            const count = this.links().length;
+            if (!this.open || count === 0) return;
+            this.active = (this.active + step + count) % count;
+        },
+        enter(event) {
+            if (this.open && this.active >= 0) {
+                event.preventDefault();
+                this.links()[this.active]?.click();
+            }
+        },
+    }));
+
     // Copy the current URL (share)
     Alpine.data('share', () => ({
         copied: false,

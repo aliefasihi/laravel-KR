@@ -4,8 +4,34 @@
  *
  * Brand colours carried over from the current site: deep navy, rose, caramel and cream.
  * Surfaces are frosted glass floating over a soft blush/peach/lavender mesh.
+ *
+ * Performance rules (keep scrolling at 60fps on mid-range phones):
+ *  - `glass*` surfaces are translucent but NOT backdrop-filtered: over a smooth mesh a blur
+ *    looks identical and costs a full offscreen render per element.
+ *  - Real blur (`frost`) only on things that float over varied content: header, bottom nav,
+ *    drawers, sheets, dropdowns, toasts, sticky bars.
+ *  - The mesh lives on a fixed, composited layer (no background-attachment: fixed repaints).
+ *  - Decorative blobs are radial gradients (`blob`, `blob-duo`), never filter: blur().
  */
 @import 'tailwindcss';
+
+/* Self-hosted Vazirmatn (variable, OFL) — inlined here so the storefront needs no extra CSS request. */
+@font-face {
+    font-family: 'Vazirmatn';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('/fonts/vazirmatn/vazirmatn-arabic-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFC;
+}
+@font-face {
+    font-family: 'Vazirmatn';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('/fonts/vazirmatn/vazirmatn-latin-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -68,12 +94,21 @@
     body {
         @apply text-ink font-sans antialiased;
         background-color: #fbf7f5;
+    }
+
+    /* The mesh: a fixed layer the compositor just keeps in place while scrolling (no repaints). */
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
         background-image:
             radial-gradient(42rem 32rem at 100% -6%, rgb(204 51 102 / 0.16), transparent 62%),
             radial-gradient(38rem 30rem at -8% 22%, rgb(228 169 108 / 0.22), transparent 60%),
             radial-gradient(46rem 36rem at 60% 108%, rgb(110 118 214 / 0.14), transparent 62%),
             radial-gradient(30rem 24rem at 40% 48%, rgb(255 245 237 / 0.9), transparent 70%);
-        background-attachment: fixed;
+        transform: translateZ(0);
     }
 
     [x-cloak] {
@@ -108,26 +143,45 @@
 
 /* ── Glass surfaces & buttons (utilities so they compose with @apply and variants) ── */
 @utility glass {
-    background: rgb(255 255 255 / 0.62);
-    -webkit-backdrop-filter: blur(20px) saturate(170%);
-    backdrop-filter: blur(20px) saturate(170%);
-    border: 1px solid rgb(255 255 255 / 0.75);
+    background: rgb(255 255 255 / 0.66);
+    border: 1px solid rgb(255 255 255 / 0.8);
     box-shadow: var(--shadow-glass);
 }
 @utility glass-strong {
-    background: rgb(255 255 255 / 0.84);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgb(255 255 255 / 0.9);
+    background: rgb(255 255 255 / 0.86);
+    border: 1px solid rgb(255 255 255 / 0.92);
     box-shadow: var(--shadow-glass);
 }
 @utility glass-navy {
-    background: linear-gradient(150deg, rgb(46 52 102 / 0.92), rgb(35 40 79 / 0.96));
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    backdrop-filter: blur(20px) saturate(160%);
+    background: linear-gradient(150deg, rgb(46 52 102 / 0.95), rgb(35 40 79 / 0.98));
     border: 1px solid rgb(255 255 255 / 0.14);
     box-shadow: var(--shadow-float), inset 0 1px 0 rgb(255 255 255 / 0.12);
     color: #fff;
+}
+/* Real frosted glass — only for surfaces that float over changing content. */
+@utility frost {
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    backdrop-filter: blur(18px) saturate(170%);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .frost { background-color: rgb(255 255 255 / 0.94); }
+}
+/* Soft colour blobs (cheap radial gradients; colour from text-*: `blob text-rose/30`). */
+@utility blob {
+    pointer-events: none;
+    position: absolute;
+    border-radius: 9999px;
+    background: radial-gradient(closest-side, currentColor, transparent);
+    scale: 1.4; /* matches the halo the old blur(64px) blobs had */
+}
+@utility blob-duo {
+    pointer-events: none;
+    position: absolute;
+    border-radius: 9999px;
+    background:
+        radial-gradient(closest-side at 40% 40%, rgb(204 51 102 / 0.26), transparent),
+        radial-gradient(closest-side at 60% 60%, rgb(228 169 108 / 0.32), transparent);
+    scale: 1.4;
 }
 @utility btn {
     display: inline-flex;
@@ -157,10 +211,6 @@
     @apply inline-flex size-11 items-center justify-center rounded-full transition hover:bg-white/70;
 }
 
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass { background: rgb(255 255 255 / 0.92); }
-    .glass-strong { background: #fff; }
-}
 
 @layer components {
     /* ── Inputs ────────────────────────────────────────────────── */
@@ -182,7 +232,7 @@
 
     /* ── Chips & badges ────────────────────────────────────────── */
     .chip {
-        @apply inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/60 px-4 py-2 text-sm text-navy backdrop-blur transition hover:border-rose/30 hover:bg-white hover:text-rose;
+        @apply inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/70 px-4 py-2 text-sm text-navy transition hover:border-rose/30 hover:bg-white hover:text-rose;
     }
     .badge-off {
         @apply inline-flex items-center rounded-full bg-rose px-2.5 py-1 text-[11px] leading-none font-black text-white shadow-[0_6px_14px_-6px_rgb(204_51_102/0.9)];

@@ -92,9 +92,11 @@ class CategoryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('media'))
             ->defaultSort('sort')
             ->columns([
-                ImageColumn::make('media.path')->label('')->disk('public')->circular()->limit(1),
+                ImageColumn::make('thumb')->label('')->circular()
+                    ->state(fn (Category $record) => $record->media->first()?->urlFor(160)),
                 TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 TextColumn::make('parent.name')->label('والد')->placeholder('—'),
                 TextColumn::make('path')->label('مسیر')->limit(40)->tooltip(fn (Category $record) => $record->path),

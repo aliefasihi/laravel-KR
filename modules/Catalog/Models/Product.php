@@ -7,6 +7,7 @@
 
 namespace Modules\Catalog\Models;
 
+use App\Core\Concerns\FlushesStoreCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +20,7 @@ use Modules\Media\Concerns\HasMedia;
 
 class Product extends Model
 {
-    use HasMedia, SoftDeletes;
+    use FlushesStoreCache, HasMedia, SoftDeletes;
 
     public const STATUS_DRAFT = 'draft';
 

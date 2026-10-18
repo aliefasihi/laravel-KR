@@ -8,6 +8,7 @@
 namespace App\Filament\Widgets;
 
 use App\Core\Support\PersianText;
+use App\Core\Support\StoreCache;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\Catalog\Models\Product;
@@ -19,16 +20,24 @@ class StoreOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 1;
 
+    /** Filament polls stats every 5s by default — six COUNT queries per open tab. Not needed here. */
+    protected ?string $pollingInterval = null;
+
     protected function getStats(): array
     {
         $fa = fn (int $n) => PersianText::toPersianDigits(number_format($n));
 
-        $active = Product::query()->active()->count();
-        $drafts = Product::query()->where('status', Product::STATUS_DRAFT)->count();
-        $outOfStock = ProductVariant::query()->where('is_active', true)->where('stock', '<', 1)
-            ->whereHas('product', fn ($q) => $q->active())->count();
-        $noImage = Product::query()->active()->doesntHave('media')->count();
-        $redirectHits = (int) Redirect::query()->where('last_hit_at', '>=', now()->subDays(30))->sum('hits');
+        // Refreshed whenever the catalog changes (StoreCache), otherwise at most every 5 minutes.
+        ['active' => $active, 'drafts' => $drafts, 'outOfStock' => $outOfStock, 'noImage' => $noImage,
+            'posts' => $posts, 'redirectHits' => $redirectHits] = StoreCache::remember('admin.overview', fn () => [
+                'active' => Product::query()->active()->count(),
+                'drafts' => Product::query()->where('status', Product::STATUS_DRAFT)->count(),
+                'outOfStock' => ProductVariant::query()->where('is_active', true)->where('stock', '<', 1)
+                    ->whereHas('product', fn ($q) => $q->active())->count(),
+                'noImage' => Product::query()->active()->doesntHave('media')->count(),
+                'posts' => Post::query()->published()->count(),
+                'redirectHits' => (int) Redirect::query()->where('last_hit_at', '>=', now()->subDays(30))->sum('hits'),
+            ], maxTtl: 300);
 
         return [
             Stat::make('محصولات منتشرشده', $fa($active))
@@ -38,7 +47,7 @@ class StoreOverview extends StatsOverviewWidget
                 ->color($outOfStock > 0 ? 'danger' : 'success'),
             Stat::make('محصولات بدون تصویر', $fa($noImage))
                 ->color($noImage > 0 ? 'warning' : 'success'),
-            Stat::make('مقاله‌های منتشرشده', $fa(Post::query()->published()->count())),
+            Stat::make('مقاله‌های منتشرشده', $fa($posts)),
             Stat::make('ورود از آدرس‌های قدیمی', $fa($redirectHits))
                 ->description('۳۰ روز اخیر، از طریق ریدایرکت'),
         ];

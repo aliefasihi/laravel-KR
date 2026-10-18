@@ -15,6 +15,7 @@ use Modules\Catalog\Events\CategoryUrlChanged;
 use Modules\Catalog\Events\ProductUrlChanged;
 use Modules\Seo\Http\Middleware\LegacyQueryStringRedirect;
 use Modules\Seo\Listeners\CreateRedirectForChangedUrl;
+use Modules\Seo\Support\LegacyProductMatcher;
 use Modules\Seo\Support\RedirectResolver;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -33,7 +34,8 @@ class SeoServiceProvider extends ModuleServiceProvider
 
     /**
      * Every GET that would end in 404 — an unknown path, or a known route whose
-     * model is missing (e.g. an old /p/ slug) — first checks the redirects table.
+     * model is missing (e.g. an old /p/ slug) — first checks the redirects table,
+     * then looks for the product an old WooCommerce URL meant (suggestion + "did you mean").
      */
     private function registerLegacyRedirects(): void
     {
@@ -43,7 +45,8 @@ class SeoServiceProvider extends ModuleServiceProvider
                     return null;
                 }
 
-                return $this->app->make(RedirectResolver::class)->respond($request->getPathInfo());
+                return $this->app->make(RedirectResolver::class)->respond($request->getPathInfo())
+                    ?? rescue(fn () => $this->app->make(LegacyProductMatcher::class)->respond($request), report: true);
             }
         );
     }

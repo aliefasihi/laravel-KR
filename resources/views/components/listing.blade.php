@@ -1,8 +1,11 @@
 {{-- Product listing: glass filter panel (sidebar on desktop, bottom sheet on mobile) + grid | نویسنده: علی فصیحی (Ali Fasihi) --}}
-@props(['products', 'filters', 'sorts', 'action', 'brands' => collect(), 'filtered' => false])
+{{-- counts: brand_id => products (from the search engine's facets); priceRange: Rials; hidden: extra GET params to keep (e.g. q) --}}
+@props(['products', 'filters', 'sorts', 'action', 'brands' => collect(), 'filtered' => false, 'counts' => [], 'priceRange' => null, 'hidden' => []])
 @php
+    use App\Core\Support\Money;
     use App\Core\Support\PersianText;
     $activeCount = count($filters['brand']) + (int) $filters['in_stock'] + (int) $filters['sale'] + (int) ($filters['min'] !== null || $filters['max'] !== null);
+    $reset = $action.($hidden ? '?'.http_build_query($hidden) : '');
 @endphp
 
 <div class="grid gap-6 lg:grid-cols-[17rem_1fr] [&>*]:min-w-0" x-data="{ sheet: false }">
@@ -28,10 +31,13 @@
         <div class="absolute inset-0 bg-navy/30 backdrop-blur-sm lg:hidden" @click="sheet = false" aria-hidden="true"></div>
         <form method="get" action="{{ $action }}" x-data="autoSubmit" @change="if (window.innerWidth >= 1024) submit()"
               class="glass-strong relative max-h-[85vh] w-full space-y-6 overflow-y-auto rounded-t-[1.75rem] p-5 lg:sticky lg:top-40 lg:max-h-none lg:rounded-[var(--radius-glass)] lg:bg-white/60">
+            @foreach ($hidden as $name => $value)
+                <input type="hidden" name="{{ $name }}" value="{{ $value }}">
+            @endforeach
             <div class="flex items-center justify-between">
                 <p class="text-base font-black text-navy">فیلتر محصولات</p>
                 @if ($filtered)
-                    <a href="{{ $action }}" class="text-xs font-bold text-rose">حذف همه</a>
+                    <a href="{{ $reset }}" class="text-xs font-bold text-rose">حذف همه</a>
                 @endif
                 <button type="button" class="btn-icon size-9 text-navy lg:hidden" @click="sheet = false" aria-label="بستن">✕</button>
             </div>
@@ -62,22 +68,27 @@
                 <legend class="mb-3 text-sm font-bold text-navy">محدوده قیمت <span class="font-normal text-muted">(تومان)</span></legend>
                 <div class="grid grid-cols-2 gap-2">
                     <label class="sr-only" for="f-min">از</label>
-                    <input id="f-min" name="min" type="text" inputmode="numeric" value="{{ $filters['min'] }}" placeholder="از" class="field !py-2.5 text-center" @change.stop>
+                    <input id="f-min" name="min" type="text" inputmode="numeric" value="{{ $filters['min'] }}" placeholder="{{ $priceRange ? 'از '.Money::toman($priceRange['min']) : 'از' }}" class="field !py-2.5 text-center" @change.stop>
                     <label class="sr-only" for="f-max">تا</label>
-                    <input id="f-max" name="max" type="text" inputmode="numeric" value="{{ $filters['max'] }}" placeholder="تا" class="field !py-2.5 text-center" @change.stop>
+                    <input id="f-max" name="max" type="text" inputmode="numeric" value="{{ $filters['max'] }}" placeholder="{{ $priceRange ? 'تا '.Money::toman($priceRange['max']) : 'تا' }}" class="field !py-2.5 text-center" @change.stop>
                 </div>
                 <button class="mt-2 hidden w-full rounded-xl bg-navy/5 py-2 text-xs font-bold text-navy hover:bg-navy hover:text-white lg:block">اعمال قیمت</button>
             </fieldset>
 
-            @if ($brands->count() > 1)
+            @if ($brands->count() > 1 || $filters['brand'] !== [])
                 <fieldset>
                     <legend class="mb-3 text-sm font-bold text-navy">برند</legend>
                     <div class="space-y-1.5">
                         @foreach ($brands as $brand)
-                            <label class="flex cursor-pointer items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-white/60">
+                            @php($n = $counts[$brand->id] ?? null)
+                            <label @class(['flex cursor-pointer items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-white/60', 'opacity-50' => $n === 0])>
                                 <input type="checkbox" name="brand[]" value="{{ $brand->slug }}" @checked(in_array($brand->slug, $filters['brand'], true)) class="size-[18px] rounded-md accent-rose">
                                 <span class="flex-1 text-sm text-navy">{{ $brand->name_fa }}</span>
-                                <span class="font-latin text-[10px] tracking-wider text-subtle uppercase" dir="ltr">{{ $brand->name_en }}</span>
+                                @if ($n !== null)
+                                    <span class="rounded-full bg-navy/5 px-2 py-0.5 text-[11px] font-bold text-muted">{{ PersianText::toPersianDigits($n) }}</span>
+                                @else
+                                    <span class="font-latin text-[10px] tracking-wider text-subtle uppercase" dir="ltr">{{ $brand->name_en }}</span>
+                                @endif
                             </label>
                         @endforeach
                     </div>
@@ -97,7 +108,7 @@
                     <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4" stroke-linecap="round"/></svg>
                 </span>
                 <p class="font-bold text-navy">با این فیلترها محصولی پیدا نشد</p>
-                <a href="{{ $action }}" class="btn-glass">حذف فیلترها</a>
+                <a href="{{ $reset }}" class="btn-glass">حذف فیلترها</a>
             </div>
         @else
             <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
