@@ -36,9 +36,12 @@ class CartPage extends Component
     {
         $cart = app(Cart::class);
 
+        $quote = $cart->quote();
+
         return view('checkout::livewire.cart-page', [
-            'lines' => $cart->lines(),
-            'subtotal' => $cart->subtotal(),
+            'lines' => $quote->context->lines,
+            'subtotal' => $quote->subtotal,
+            'quote' => $quote,
         ]);
     }
 }

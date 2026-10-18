@@ -27,6 +27,8 @@
   - FileManager به Media و Catalog
   - Attributes به Catalog و Search (فیلدهای سند جستجو را با `ProductDocuments::extend()` اضافه می‌کند)
   - HomeSliders به Catalog؛ Customer به Sms
+  - Coupon و Shipping به Checkout (پله‌های `Quoter`)؛ Order به Customer و Checkout؛ Payment به Order؛ Reviews به Catalog و Customer
+  - Coupon به رویدادهای رشته‌ای Order گوش می‌دهد (`order.placed`، `order.cancelled`)، نه به کلاس‌هایش
   - Appearance، HomeSliders و Customer تکه‌هایشان را با `StorefrontHooks` در قالب می‌گذارند و تنظیماتشان را با `Settings::section()`
 - ماژول‌های غیرهسته از پنل روشن و خاموش می‌شوند (`docs/MODULES.md`). هرجا ماژول دیگری از آن‌ها استفاده می‌کند، پشت `Modules::enabled()` است.
 
@@ -42,7 +44,7 @@
 ## قدم‌های بعدی
 
 1. ایمپورتر WordPress: برند و دسته، تصاویر، محصول، مقاله، بازنویسی لینک‌ها، ریدایرکت‌ها
-2. ثبت سفارش، Order و Payment (درگاه‌های ایرانی)، کوپن و ارسال
+2. ایمپورت مشتریان و سفارش‌های ووکامرس (WordPressImport)
 3. `php artisan install:api` (Sanctum) و abilityهای Store API
 4. dispatcher صف برای Outbox با وب‌هوک‌های امضاشده‌ی HMAC
 5. کش کامل صفحه برای کاربر مهمان + نسخه‌های avif/webp تصاویر

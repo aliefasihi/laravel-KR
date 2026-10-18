@@ -32,7 +32,15 @@
     </div>
 
     <div class="flex flex-1 flex-col gap-1 px-1.5 pt-3 pb-1">
-        <span class="text-[11px] font-bold text-caramel-600">{{ $product->brand->name_fa }}</span>
+        <span class="flex items-center justify-between gap-2 text-[11px] font-bold">
+            <span class="text-caramel-600">{{ $product->brand->name_fa }}</span>
+            @if (($product->rating_count ?? 0) > 0 && \App\Core\Modules\Modules::enabled('Reviews'))
+                <span class="flex items-center gap-0.5 text-navy" title="امتیاز {{ number_format((float) $product->rating_avg, 1) }} از ۵">
+                    <svg class="size-3.5 text-caramel" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.8l2.5 5.2 5.7.8-4.1 4 1 5.7L10 14.8l-5.1 2.7 1-5.7-4.1-4 5.7-.8L10 1.8Z"/></svg>
+                    {{ \App\Core\Support\PersianText::toPersianDigits(number_format((float) $product->rating_avg, 1)) }}
+                </span>
+            @endif
+        </span>
         <h3 class="line-clamp-2 min-h-11 text-[13.5px] leading-[1.6rem] font-bold text-navy">
             <a href="{{ $product->url() }}" class="after:absolute after:inset-0 after:rounded-[var(--radius-card)] focus:outline-none">{{ $product->name }}</a>
         </h3>

@@ -26,6 +26,7 @@
 ## تنظیمات فروشگاه
 **پنل ← تنظیمات ← تنظیمات فروشگاه** (`/admin/settings`)
 - هر ماژول روشن تب خودش را دارد: ظاهر سایت، پیامک و بعدها پرداخت و ارسال.
+- تب‌ها: ظاهر سایت، پرداخت، پیامک، پیامک سفارش، نظرات.
 - مقدارها در جدول `settings` ذخیره می‌شوند. در کد: `Settings::get('sms.driver')`.
 - پیش‌فرض‌ها از `.env` یا config خود ماژول می‌آیند.
 - ماژول تازه با `Settings::section(new SettingsSection(...))` در provider تب اضافه می‌کند.
@@ -39,6 +40,9 @@
 | `header.actions` | کنار سبد خرید | دکمه‌ی ماه/خورشید، ورود/حساب |
 | `drawer.footer` | پایین منوی موبایل | ورود، انتخاب ظاهر |
 | `home.after_hero` … `home.before_journal` | صفحه‌ی اصلی | اسلایدرهای محصولات |
+| `cart.summary` | خلاصه‌ی سبد و تسویه‌حساب | فیلد کد تخفیف |
+| `order.payment` | صفحه‌ی سفارش مشتری | کارت به کارت (رسید)، پرداخت در محل |
+| `product.tabs`، `product.sections` | صفحه‌ی محصول | نظرات |
 | `body.start`، `body.end` | ابتدا و انتهای `<body>` | — |
 
 ```php
@@ -51,3 +55,15 @@ StorefrontHooks::add('header.actions', 'mymodule::partials.button', sort: 30);
 2. `module.json` کنار آن.
 3. اضافه کردن provider به `config/modules.php`.
 4. هرجا ماژول دیگری از آن استفاده می‌کند، پشت `Modules::enabled('{Name}')` بگذار تا با خاموش شدنش چیزی نشکند.
+
+## قیمت‌گذاری سبد (Checkout)
+مبلغ سبد، تسویه‌حساب و سفارش ثبت‌شده همه از یک مسیر می‌آیند (`Quoter`):
+1. کد تخفیف (Coupon) — اولویت ۱۰
+2. ارسال (Shipping) — اولویت ۲۰، روی مبلغ بعد از تخفیف
+
+ماژول تازه با `Quoter::extend('key', fn (QuoteContext $c, Quote $q) => …, priority: 30)` هزینه یا تخفیف اضافه می‌کند. روش پرداخت تازه با `PaymentMethods::register(new MyMethod)` اضافه می‌شود.
+
+## رویدادهای سفارش
+`order.placed` · `order.paid` · `order.status_changed` · `order.cancelled` · `order.shipped` · `order.refunded` · `order.customer_note`
+
+با `Event::listen('order.paid', fn (array $order) => …)` گوش بده. داده آرایه است؛ ماژول شنونده به کلاس‌های Order وابسته نمی‌شود.

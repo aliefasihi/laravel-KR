@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Khaneh Romantic — Checkout module (session cart now; shipping, coupons and order placement next)
+ * Khaneh Romantic — Checkout module: session cart and the pricing pipeline (Quoter)
+ * that Coupon, Shipping and Payment plug into; orders are placed by the Order module.
  * نویسنده: علی فصیحی (Ali Fasihi)
  */
 
@@ -13,6 +14,7 @@ use Modules\Checkout\Livewire\AddToCart;
 use Modules\Checkout\Livewire\CartPage;
 use Modules\Checkout\Livewire\MiniCart;
 use Modules\Checkout\Support\Cart;
+use Modules\Checkout\Support\Pricing\Quoter;
 
 class CheckoutServiceProvider extends ModuleServiceProvider
 {
@@ -21,6 +23,7 @@ class CheckoutServiceProvider extends ModuleServiceProvider
         parent::register();
 
         $this->app->scoped(Cart::class);
+        Quoter::flush(); // pricing steps are registered by the modules' boot()
     }
 
     public function boot(): void

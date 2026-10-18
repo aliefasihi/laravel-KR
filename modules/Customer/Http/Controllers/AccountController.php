@@ -12,10 +12,16 @@ use Illuminate\Support\Facades\Auth;
 
 class AccountController
 {
-    public function login()
+    public function login(Request $request)
     {
+        // ?back=/p/…#reviews — return there after logging in (same-site paths only)
+        $back = (string) $request->query('back');
+        if (str_starts_with($back, '/') && ! str_starts_with($back, '//') && ! str_contains($back, '\\')) {
+            $request->session()->put('url.intended', url($back));
+        }
+
         if (Auth::guard('customer')->check()) {
-            return redirect()->route('customer.account');
+            return redirect()->intended(route('customer.account'));
         }
 
         return view('customer::login');

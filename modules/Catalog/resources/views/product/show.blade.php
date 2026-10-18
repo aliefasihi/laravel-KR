@@ -39,6 +39,7 @@
     if (! empty($attributeSpecs)) {
         $schema['additionalProperty'] = array_map(fn ($row) => ['@type' => 'PropertyValue', 'name' => $row['name'], 'value' => $row['value']], $attributeSpecs);
     }
+    $schema = \Modules\Catalog\Support\ProductSchema::apply($product, $schema); // reviews (aggregateRating)…
     $tabs = array_filter([
         'description' => $product->description ? 'معرفی محصول' : null,
         'specs' => 'مشخصات',
@@ -156,6 +157,7 @@
             @foreach ($tabs as $id => $label)
                 <a href="#{{ $id }}" class="shrink-0 rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface hover:text-navy">{{ $label }}</a>
             @endforeach
+            @storefrontHook('product.tabs', ['product' => $product])
         </nav>
 
         <div class="grid gap-6 lg:grid-cols-[1fr_22rem] [&>*]:min-w-0">
@@ -179,6 +181,9 @@
                 </dl>
             </section>
         </div>
+
+        {{-- reviews (Reviews module)… --}}
+        @storefrontHook('product.sections', ['product' => $product])
 
         @if ($related->isNotEmpty())
             <section id="related" class="space-y-7 pt-6" aria-labelledby="related-title">

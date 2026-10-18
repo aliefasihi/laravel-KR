@@ -14,6 +14,9 @@ use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Collection;
 use Modules\Catalog\Models\Product;
 use Modules\Catalog\Models\ProductVariant;
+use Modules\Checkout\Support\Pricing\Quote;
+use Modules\Checkout\Support\Pricing\QuoteContext;
+use Modules\Checkout\Support\Pricing\Quoter;
 
 class Cart
 {
@@ -53,7 +56,7 @@ class Cart
 
     public function clear(): void
     {
-        $this->session->forget(self::KEY);
+        $this->session->forget([self::KEY, 'checkout.coupon']);
     }
 
     public function quantityOf(int $variantId): int
@@ -103,6 +106,36 @@ class Cart
         }
 
         return $lines;
+    }
+
+    /** Coupon code the shopper entered (kept in the session until the order is placed). */
+    public function coupon(): ?string
+    {
+        return $this->session->get('checkout.coupon');
+    }
+
+    public function setCoupon(?string $code): void
+    {
+        $code === null || $code === ''
+            ? $this->session->forget('checkout.coupon')
+            : $this->session->put('checkout.coupon', $code);
+    }
+
+    /**
+     * The cart priced by the pricing pipeline (coupon, shipping…).
+     *
+     * @param  array<string, mixed>  $choices  QuoteContext fields: province, city, shippingMethod, paymentMethod…
+     */
+    public function quote(array $choices = []): Quote
+    {
+        $customer = config('auth.guards.customer') ? auth('customer')->user() : null;
+
+        return app(Quoter::class)->quote(new QuoteContext(...array_merge([
+            'lines' => $this->lines(),
+            'customerId' => $customer?->getAuthIdentifier(),
+            'mobile' => $customer?->mobile,
+            'couponCode' => $this->coupon(),
+        ], $choices)));
     }
 
     /** Subtotal in Rials. */

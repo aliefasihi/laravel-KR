@@ -49,14 +49,33 @@
             <aside class="glass-strong h-fit space-y-4 rounded-[var(--radius-glass)] p-6 lg:sticky lg:top-40">
                 <p class="text-lg font-black text-navy">خلاصه سفارش</p>
                 <dl class="space-y-3 text-sm">
-                    <div class="flex justify-between"><dt class="text-muted">قیمت کالاها</dt><dd class="font-bold text-navy">{{ Money::toman($subtotal + $savings) }} تومان</dd></div>
+                    <div class="flex justify-between"><dt class="text-muted">قیمت کالاها ({{ PersianText::toPersianDigits($quote->context->itemCount()) }})</dt><dd class="font-bold text-navy">{{ Money::toman($subtotal + $savings) }} تومان</dd></div>
                     @if ($savings > 0)
-                        <div class="flex justify-between text-rose"><dt>سود شما از این خرید</dt><dd class="font-bold">{{ Money::toman($savings) }} تومان</dd></div>
+                        <div class="flex justify-between text-rose"><dt>تخفیف کالاها</dt><dd class="font-bold">{{ Money::toman($savings) }} تومان</dd></div>
                     @endif
-                    <div class="flex justify-between border-t border-line pt-3"><dt class="font-bold text-navy">جمع سبد</dt><dd class="text-xl font-black text-navy">{{ Money::toman($subtotal) }} <span class="text-xs font-medium text-muted">تومان</span></dd></div>
+                    @foreach ($quote->rows as $row)
+                        @continue($row['key'] === 'shipping')
+                        <div @class(['flex justify-between', 'text-rose' => $row['amount'] < 0])>
+                            <dt>{{ $row['label'] }}</dt>
+                            <dd class="font-bold">{{ Money::toman(abs($row['amount'])) }} تومان</dd>
+                        </div>
+                    @endforeach
+                    @if ($quote->freeShipping)
+                        <div class="flex justify-between text-ok"><dt>ارسال</dt><dd class="font-bold">رایگان</dd></div>
+                    @endif
+                    <div class="flex justify-between border-t border-line pt-3"><dt class="font-bold text-navy">جمع سبد</dt><dd class="text-xl font-black text-navy">{{ Money::toman($subtotal - $quote->discount) }} <span class="text-xs font-medium text-muted">تومان</span></dd></div>
                 </dl>
-                <p class="rounded-2xl bg-cream px-4 py-3 text-xs leading-6 text-muted">هزینه‌ی ارسال در مرحله‌ی بعد و بر اساس آدرس شما محاسبه می‌شود.</p>
-                <button type="button" disabled class="btn-navy w-full !py-3.5" title="ثبت سفارش به‌زودی فعال می‌شود">ادامه و ثبت سفارش</button>
+                @if ($quote->discount + $savings > 0)
+                    <p class="rounded-2xl bg-rose-100 px-4 py-2.5 text-center text-xs font-bold text-rose">سود شما از این خرید: {{ Money::toman($quote->discount + $savings) }} تومان</p>
+                @endif
+                {{-- coupon field (Coupon module)… --}}
+                @storefrontHook('cart.summary')
+                <p class="rounded-2xl bg-cream px-4 py-3 text-xs leading-6 text-muted">هزینه‌ی ارسال در مرحله‌ی بعد و بر اساس نشانی شما محاسبه می‌شود.</p>
+                @if (Route::has('order.checkout'))
+                    <a href="{{ route('order.checkout') }}" class="btn-navy w-full !py-3.5" data-no-prerender>ادامه و ثبت سفارش</a>
+                @else
+                    <button type="button" disabled class="btn-navy w-full !py-3.5" title="ثبت سفارش فعال نیست">ادامه و ثبت سفارش</button>
+                @endif
             </aside>
         </div>
     @endif
