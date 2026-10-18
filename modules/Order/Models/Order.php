@@ -105,6 +105,19 @@ class Order extends Model
         return $this->status === 'pending' && $this->payment_status === 'unpaid';
     }
 
+    /**
+     * Give a freshly saved order its public number: offset + id. Numbers kept from WooCommerce can
+     * sit in that range, so a taken number is pushed up by a million (rare; stays unique and numeric).
+     */
+    public function assignNumber(): void
+    {
+        $number = (int) config('modules.order.number_offset', 100000) + $this->id;
+        while (static::query()->where('number', (string) $number)->whereKeyNot($this->id)->exists()) {
+            $number += 1_000_000;
+        }
+        $this->forceFill(['number' => (string) $number])->save();
+    }
+
     public function displayNumber(): string
     {
         return PersianText::toPersianDigits((string) $this->number);

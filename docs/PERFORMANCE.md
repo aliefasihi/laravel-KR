@@ -24,6 +24,8 @@
 
 ## روی سرور production (چک‌لیست)
 
+چک‌لیست کامل نصب و دیپلوی، از جمله کرون scheduler و صف، در `docs/DEPLOY.md` است.
+
 ### `.env`
 ```dotenv
 APP_ENV=production

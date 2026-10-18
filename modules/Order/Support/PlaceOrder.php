@@ -100,7 +100,7 @@ class PlaceOrder
                 'ip' => request()->ip(),
                 'user_agent' => substr((string) request()->userAgent(), 0, 250),
             ]);
-            $order->forceFill(['number' => (string) (config('modules.order.number_offset') + $order->id)])->save();
+            $order->assignNumber();
 
             foreach ($lines as $line) {
                 $variant = $line->variant;

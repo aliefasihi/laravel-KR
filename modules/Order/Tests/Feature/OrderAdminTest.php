@@ -8,9 +8,11 @@
 namespace Modules\Order\Tests\Feature;
 
 use App\Models\User;
+use Filament\Forms\Components\Repeater;
 use Livewire\Livewire;
 use Modules\Order\Filament\Pages\SalesReport;
 use Modules\Order\Filament\Resources\Orders\OrderActions;
+use Modules\Order\Filament\Resources\Orders\Pages\CreateOrder;
 use Modules\Order\Filament\Resources\Orders\Pages\ListOrders;
 use Modules\Order\Filament\Resources\Orders\Pages\ViewOrder;
 use Modules\Order\Filament\Widgets\LatestOrders;
@@ -80,5 +82,57 @@ class OrderAdminTest extends ShopTestCase
         Livewire::test(OrdersOverview::class)->assertSee('فروش امروز')->assertSee('۱۱٬۴۰۰٬۰۰۰', false);
         Livewire::test(LatestOrders::class)->assertCanSeeTableRecords([$this->order]);
         Livewire::test(SalesChart::class)->assertOk();
+    }
+
+    public function test_manual_order_and_editing_its_items(): void
+    {
+        $undo = Repeater::fake();
+        $pan = $this->variant('GK-7710');        // stock 5 after setUp's order
+        $dish = $this->variant('3217073');       // stock 3
+
+        // more than in stock → refused, nothing saved
+        Livewire::test(CreateOrder::class)
+            ->fillForm(['customer_id' => $this->customer->id, 'source' => 'instagram', 'payment_method' => 'cash', 'status' => 'processing',
+                'items' => [['variant_id' => $pan->id, 'quantity' => 99, 'unit_price' => null]]])
+            ->call('create')
+            ->assertNotified('از «سرویس قابلمه ۱۰ پارچه گرانیتی» فقط ۵ عدد موجود است.');
+        $this->assertSame(1, Order::query()->count());
+
+        Livewire::test(CreateOrder::class)
+            ->fillForm([
+                'customer_id' => $this->customer->id, 'source' => 'instagram', 'payment_method' => 'cash', 'paid' => true, 'status' => 'processing',
+                'items' => [
+                    ['variant_id' => $pan->id, 'quantity' => 2, 'unit_price' => null],          // site price
+                    ['variant_id' => $dish->id, 'quantity' => 1, 'unit_price' => '2500000'],   // custom, Toman
+                ],
+                'address' => ['recipient_name' => 'علی فصیحی', 'recipient_mobile' => '09121234567', 'province' => 'تهران', 'city' => 'تهران', 'address' => 'خیابان ولیعصر'],
+                'shipping_method' => 'pickup', 'shipping_total' => 100000, 'discount' => 0, 'reduce_stock' => true,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $order = Order::query()->latest('id')->with('items')->first();
+        $this->assertSame('instagram', $order->source);
+        $this->assertSame('paid', $order->payment_status);
+        $this->assertSame(2 * 84_500_000 + 25_000_000 + 1_000_000, $order->total);
+        $this->assertSame((string) (100000 + $order->id), $order->number);
+        $this->assertSame(3, $pan->fresh()->stock);
+        $this->assertSame(2, $dish->fresh()->stock);
+        $this->get('/admin/orders?tableFilters[source][value]=instagram')->assertOk();
+
+        // edit: one pan instead of two, dish removed → stock comes back, totals recomputed, noted
+        Livewire::test(ViewOrder::class, ['record' => $order->number])
+            ->callAction('editItems', [
+                'items' => [['variant_id' => $pan->id, 'quantity' => 1, 'unit_price' => null]],
+                'shipping_total' => 0, 'discount' => 500000,
+            ])
+            ->assertHasNoActionErrors();
+        $order->refresh();
+        $this->assertSame(84_500_000 - 5_000_000, $order->total);
+        $this->assertSame(1, $order->items()->count());
+        $this->assertSame(4, $pan->fresh()->stock);
+        $this->assertSame(3, $dish->fresh()->stock);
+        $this->assertTrue($order->notes()->where('body', 'like', '%کالاهای سفارش ویرایش شد%')->exists());
+        $undo();
     }
 }

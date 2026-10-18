@@ -36,6 +36,7 @@ class ViewOrder extends ViewRecord
             OrderActions::paymentReceived()->after(fn () => $this->refreshOrder()),
             ActionGroup::make([
                 OrderActions::addNote()->after(fn () => $this->refreshOrder()),
+                OrderActions::editItems()->after(fn () => $this->refreshOrder()),
                 OrderActions::editAddress()->after(fn () => $this->refreshOrder()),
                 OrderActions::invoice(),
                 OrderActions::packingSlip(),

@@ -9,6 +9,7 @@ namespace Modules\Order\Filament\Resources\Orders\Pages;
 
 use App\Core\Support\PersianText;
 use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
@@ -39,6 +40,7 @@ class ListOrders extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            CreateAction::make()->label('ثبت سفارش دستی')->icon('heroicon-o-plus'),
             Action::make('report')->label('گزارش فروش')->icon('heroicon-o-chart-bar')->color('gray')->url(SalesReport::getUrl()),
         ];
     }

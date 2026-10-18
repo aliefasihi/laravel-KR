@@ -28,10 +28,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Modules\Order\Filament\Resources\Orders\Pages\CreateOrder;
 use Modules\Order\Filament\Resources\Orders\Pages\ListOrders;
 use Modules\Order\Filament\Resources\Orders\Pages\ViewOrder;
 use Modules\Order\Models\Order;
 use Modules\Order\Payments\PaymentMethods;
+use Modules\Order\Support\AdminOrders;
 use Modules\Order\Support\OrdersCsv;
 use Modules\Order\Support\OrderWorkflow;
 use UnitEnum;
@@ -72,11 +74,6 @@ class OrderResource extends Resource
         return 'در حال پردازش + در انتظار بررسی';
     }
 
-    public static function canCreate(): bool
-    {
-        return false;
-    }
-
     public static function table(Table $table): Table
     {
         $fa = fn ($n) => PersianText::toPersianDigits((string) $n);
@@ -105,6 +102,8 @@ class OrderResource extends Resource
                 TextColumn::make('total')->label('مبلغ')->sortable()->weight('bold')
                     ->formatStateUsing(fn ($state) => Money::toman((int) $state).' تومان')
                     ->description(fn (Order $r) => $r->coupon_code ? 'کد '.$r->coupon_code : null),
+                TextColumn::make('source')->label('کانال')->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn (?string $state) => AdminOrders::SOURCES[$state] ?? $state),
                 TextColumn::make('tracking_code')->label('رهگیری')->searchable()->toggleable(isToggledHiddenByDefault: true)->copyable(),
             ])
             ->filters([
@@ -123,6 +122,7 @@ class OrderResource extends Resource
                     ->options(fn () => Order::query()->whereNotNull('shipping_method')->distinct()->pluck('shipping_method_title', 'shipping_method')->all()),
                 SelectFilter::make('province')->label('استان')->searchable()
                     ->options(fn () => array_combine(config('modules.customer.provinces'), config('modules.customer.provinces'))),
+                SelectFilter::make('source')->label('کانال فروش')->options(AdminOrders::SOURCES),
                 TernaryFilter::make('coupon')->label('با کد تخفیف')
                     ->queries(true: fn ($q) => $q->whereNotNull('coupon_code'), false: fn ($q) => $q->whereNull('coupon_code')),
             ])
@@ -165,6 +165,7 @@ class OrderResource extends Resource
     {
         return [
             'index' => ListOrders::route('/'),
+            'create' => CreateOrder::route('/create'),
             'view' => ViewOrder::route('/{record}'),
         ];
     }

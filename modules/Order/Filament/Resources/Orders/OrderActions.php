@@ -19,8 +19,11 @@ use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Text;
 use Illuminate\Support\Facades\URL;
 use Modules\Order\Models\Order;
+use Modules\Order\Support\AdminOrders;
+use Modules\Order\Support\OrderException;
 use Modules\Order\Support\OrderWorkflow;
 use Modules\Payment\Support\PaymentReview;
 
@@ -108,6 +111,38 @@ final class OrderActions
                 }
                 app(OrderWorkflow::class)->refund($record->load('items'), (int) $data['amount'] * 10, $quantities, $data['reason'] ?: null, auth()->id());
                 Notification::make()->success()->title('استرداد ثبت شد')->send();
+            });
+    }
+
+    public static function editItems(): Action
+    {
+        return Action::make('editItems')->label('ویرایش کالاها')->icon('heroicon-o-pencil-square')->color('gray')
+            ->visible(fn (Order $record) => ! in_array($record->status, ['cancelled', 'failed', 'refunded'], true) && $record->refunded_total === 0)
+            ->modalWidth('5xl')
+            ->fillForm(fn (Order $record) => [
+                'items' => $record->items->map(fn ($i) => ['variant_id' => $i->variant_id, 'quantity' => $i->quantity, 'unit_price' => intdiv($i->unit_price, 10)])->all(),
+                'shipping_total' => intdiv($record->shipping_total, 10),
+                'discount' => intdiv($record->discount, 10),
+            ])
+            ->schema([
+                OrderForm::items(),
+                Grid::make(3)->schema([
+                    TextInput::make('shipping_total')->label('هزینه‌ی ارسال')->numeric()->minValue(0)->suffix('تومان')->live(onBlur: true),
+                    TextInput::make('discount')->label('تخفیف')->numeric()->minValue(0)->suffix('تومان')->live(onBlur: true),
+                    Toggle::make('allow_backorder')->label('اجازه‌ی بیش از موجودی')->inline(false),
+                ]),
+                Text::make(fn ($get) => OrderForm::total((array) $get('items'), $get('shipping_total'), $get('discount')))->weight('bold'),
+            ])
+            ->modalDescription('موجودی انبار به‌اندازه‌ی تغییرها کم یا زیاد می‌شود و تغییر در تاریخچه ثبت می‌شود.')
+            ->action(function (Order $record, array $data, Action $action) {
+                try {
+                    app(AdminOrders::class)->updateItems($record, OrderForm::itemsToRials($data['items'] ?? []),
+                        (int) $data['shipping_total'] * 10, (int) $data['discount'] * 10, (bool) ($data['allow_backorder'] ?? false), auth()->id());
+                    Notification::make()->success()->title('کالاهای سفارش به‌روز شد')->send();
+                } catch (OrderException $e) {
+                    Notification::make()->danger()->title($e->getMessage())->send();
+                    $action->halt();
+                }
             });
     }
 
