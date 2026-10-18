@@ -68,7 +68,12 @@ class Importer
 
         try {
             if ($error = $this->wp->check()) {
-                throw new RuntimeException('اتصال به دیتابیس وردپرس برقرار نشد: '.$error);
+                $hint = str_contains($error, '[2002]')
+                    ? ' — MySQL روی این host/port در دسترس نیست؛ پورت درست (Local: تب Database، MAMP: 8889) یا WP_DB_SOCKET را در .env بگذارید.'
+                    : (str_contains($error, '[1045]') ? ' — نام کاربری/رمز WP_DB_USERNAME / WP_DB_PASSWORD درست نیست.'
+                    : (str_contains($error, '[1049]') ? ' — دیتابیسی با نام WP_DB_DATABASE نیست.'
+                    : (str_contains($error, "doesn't exist") ? ' — جدول پیدا نشد؛ WP_DB_PREFIX را بررسی کنید.' : '')));
+                throw new RuntimeException('اتصال به دیتابیس وردپرس برقرار نشد: '.$error.$hint);
             }
             $run?->forceFill(['status' => 'running', 'started_at' => now()])->save();
 

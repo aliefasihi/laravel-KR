@@ -16,6 +16,8 @@ return [
         'username' => env('WP_DB_USERNAME', 'root'),
         'password' => env('WP_DB_PASSWORD', ''),
         'prefix' => env('WP_DB_PREFIX', 'wp_'),
+        // Local by Flywheel / MAMP use a socket file instead of 127.0.0.1:3306
+        'unix_socket' => env('WP_DB_SOCKET', ''),
         'charset' => 'utf8mb4',
         'collation' => 'utf8mb4_unicode_ci',
         'strict' => false,
