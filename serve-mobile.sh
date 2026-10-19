@@ -9,6 +9,9 @@
 #
 # Options:  ./serve-mobile.sh [port] [ip]      e.g. ./serve-mobile.sh 8003   or   ./serve-mobile.sh 8002 172.20.10.3
 #
+# Before anything else it stops whatever is listening on that port, and this project's other dev
+# servers on any port (php artisan serve, an earlier serve-mobile, npm run dev).
+#
 # Nothing in .env is changed: APP_URL (used for image links) is given to this server only, so when you
 # stop it (Ctrl+C) and run `php artisan serve` again, everything is exactly as before.
 
@@ -25,8 +28,51 @@ die()  { printf '%s%s%s\n' "$red" "$*" "$reset" >&2; exit 1; }
 
 [[ -f artisan ]] || die "artisan not found — put this file in the project root."
 command -v php >/dev/null || die "php not found."
+[[ "$PORT" =~ ^[0-9]+$ ]] || die "Port must be a number: ./serve-mobile.sh 8002"
+ROOT="$(pwd -P)"
 
-# 1) this computer's address on the local network (Wi-Fi, Ethernet or iPhone hotspot)
+# 1) first: free the port and stop this project's running dev servers
+in_project() {   # is the process working inside this project?
+    local cwd
+    cwd="$(lsof -a -p "$1" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p' | head -n 1 || true)"
+    [[ -n "$cwd" && ( "$cwd" == "$ROOT" || "$cwd" == "$ROOT"/* ) ]]
+}
+stop_servers() {
+    command -v lsof >/dev/null 2>&1 || { warn "lsof not found — can't check for running servers."; return; }
+    local pids="" pid
+    for pid in $(lsof -nP -tiTCP:"$PORT" -sTCP:LISTEN 2>/dev/null || true); do
+        pids="$pids $pid"                                     # anything on our port
+    done
+    # only real php/node server processes (not shells or editors that merely mention these words)
+    for pid in $(pgrep -f '^([^ ]*/)?php[0-9.]* (artisan serve|-S )|^([^ ]*/)?node .*vite' 2>/dev/null || true); do
+        [[ "$pid" == "$$" || "$pid" == "$PPID" ]] && continue
+        in_project "$pid" && pids="$pids $pid"                # this project's servers on other ports
+    done
+    pids="$(printf '%s\n' $pids | sort -un | tr '\n' ' ')"
+    [[ -z "${pids// /}" ]] && return
+
+    say "Stopping running servers:"
+    for pid in $pids; do                                      # one line per server (workers share one)
+        local ports
+        ports="$(lsof -nP -a -p "$pid" -iTCP -sTCP:LISTEN 2>/dev/null | awk 'NR>1 {sub(/.*:/, "", $9); print $9}' | sort -u | tr '\n' ' ' || true)"
+        printf '  - %s%s\n' "$(ps -o command= -p "$pid" 2>/dev/null | cut -c1-80)" "${ports:+  (port ${ports% })}"
+    done | sort -u
+    kill $pids 2>/dev/null || true
+    for _ in 1 2 3 4 5 6 7 8 9 10; do                         # up to 3 seconds to exit cleanly
+        local alive=""
+        for pid in $pids; do kill -0 "$pid" 2>/dev/null && alive="$alive $pid"; done
+        [[ -z "$alive" ]] && break
+        sleep 0.3
+    done
+    for pid in $pids; do kill -0 "$pid" 2>/dev/null && kill -9 "$pid" 2>/dev/null || true; done
+    sleep 0.3
+}
+stop_servers
+if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+    die "Port $PORT is still in use by a process this user can't stop. Try: sudo lsof -iTCP:$PORT -sTCP:LISTEN — or use another port: ./serve-mobile.sh 8003"
+fi
+
+# 2) this computer's address on the local network (Wi-Fi, Ethernet or iPhone hotspot)
 if [[ -z "$IP" ]]; then
     if command -v ipconfig >/dev/null 2>&1; then               # macOS
         for iface in en0 en1 en2 en3 en4 en5 en6 en7 en8 bridge100; do
@@ -44,25 +90,9 @@ fi
 [[ -n "$IP" ]] || die "Could not find this computer's IP. Connect to Wi-Fi/hotspot, or pass it: ./serve-mobile.sh $PORT 192.168.1.10"
 URL="http://$IP:$PORT"
 
-# 2) port must be free
-if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
-    die "Port $PORT is busy (is 'php artisan serve' still running?). Stop it, or use another port: ./serve-mobile.sh 8003"
-fi
-
-# 3) CSS/JS: phones can't reach the Vite dev server (npm run dev), so use built files
-HOT_MOVED=0
-if [[ -f public/hot ]]; then
-    warn "npm run dev is (or was) running — using the built CSS/JS instead while in mobile mode."
-    mv public/hot public/hot.mobile-off
-    HOT_MOVED=1
-fi
-ROOT="$(pwd)"
-restore() {
-    if [[ "$HOT_MOVED" == 1 && -f "$ROOT/public/hot.mobile-off" ]]; then
-        mv "$ROOT/public/hot.mobile-off" "$ROOT/public/hot"
-    fi
-}
-trap restore EXIT
+# 3) CSS/JS: phones can't reach the Vite dev server, so use built files (npm run dev was stopped above;
+#    a «hot» file left behind would point pages at it)
+rm -f public/hot public/hot.mobile-off
 trap 'exit 130' INT TERM
 
 needs_build=0
