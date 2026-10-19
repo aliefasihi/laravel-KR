@@ -114,7 +114,7 @@ class OrderWorkflow
      *
      * @param  array<int, int>  $quantities  order item id => quantity to return to stock
      */
-    public function refund(Order $order, int $amount, array $quantities = [], ?string $reason = null, ?int $userId = null): Order
+    public function refund(Order $order, int $amount, array $quantities = [], ?string $reason = null, ?int $userId = null, bool $toWallet = false): Order
     {
         $amount = max(0, min($amount, $order->total - $order->refunded_total));
 
@@ -141,7 +141,7 @@ class OrderWorkflow
         if ($order->payment_status === 'refunded' && $order->status !== 'refunded') {
             $this->changeStatus($order, 'refunded', null, $userId, notify: false);
         }
-        Event::dispatch('order.refunded', [OrderEvents::payload($order, ['amount' => $amount])]);
+        Event::dispatch('order.refunded', [OrderEvents::payload($order, ['amount' => $amount, 'to_wallet' => $toWallet])]);
 
         return $order;
     }

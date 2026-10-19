@@ -90,7 +90,10 @@
                 <div class="flex justify-between"><dt class="text-muted">ارسال — {{ $order->shipping_method_title }}</dt>
                     <dd class="font-bold text-navy">{{ $order->shipping_on_delivery ? 'پس‌کرایه' : ($order->shipping_total ? Money::toman($order->shipping_total).' تومان' : 'رایگان') }}</dd></div>
             @endif
-            <div class="flex justify-between border-t border-line pt-3"><dt class="font-bold text-navy">مبلغ کل</dt><dd class="text-lg font-black text-navy">{{ Money::toman($order->total) }} تومان</dd></div>
+            @if ($order->wallet_used ?? 0)
+                <div class="flex justify-between text-rose"><dt>پرداخت از کیف پول</dt><dd class="font-bold">{{ Money::toman($order->wallet_used) }} تومان</dd></div>
+            @endif
+            <div class="flex justify-between border-t border-line pt-3"><dt class="font-bold text-navy">{{ ($order->wallet_used ?? 0) ? 'باقی‌مانده‌ی قابل پرداخت' : 'مبلغ کل' }}</dt><dd class="text-lg font-black text-navy">{{ Money::toman($order->total) }} تومان</dd></div>
             <div class="flex justify-between"><dt class="text-muted">پرداخت</dt><dd class="text-navy">{{ $order->payment_method_title }} — {{ $order->paymentStatusLabel() }}</dd></div>
         </dl>
     </section>

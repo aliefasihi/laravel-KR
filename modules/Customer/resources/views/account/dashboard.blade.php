@@ -12,6 +12,8 @@
         </div>
     @endif
 
+    @storefrontHook('account.dashboard', ['customer' => $customer])
+
     <section class="glass rounded-[var(--radius-glass)] p-5 sm:p-7" aria-labelledby="profile-title">
         <h1 id="profile-title" class="mb-5 text-xl font-black text-navy">اطلاعات حساب</h1>
         <livewire:customer.profile />

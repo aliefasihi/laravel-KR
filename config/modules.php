@@ -12,6 +12,7 @@ use Modules\Customer\Providers\CustomerServiceProvider;
 use Modules\FileManager\Providers\FileManagerServiceProvider;
 use Modules\HomeSliders\Providers\HomeSlidersServiceProvider;
 use Modules\Integration\Providers\IntegrationServiceProvider;
+use Modules\Loyalty\Providers\LoyaltyServiceProvider;
 use Modules\Media\Providers\MediaServiceProvider;
 use Modules\Order\Providers\OrderServiceProvider;
 use Modules\Payment\Providers\PaymentServiceProvider;
@@ -50,6 +51,7 @@ return [
         ShippingServiceProvider::class,
         OrderServiceProvider::class,
         PaymentServiceProvider::class,
+        LoyaltyServiceProvider::class,
         ReviewsServiceProvider::class,
         CommentsServiceProvider::class,
         IntegrationServiceProvider::class,

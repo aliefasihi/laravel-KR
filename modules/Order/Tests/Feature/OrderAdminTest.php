@@ -57,7 +57,7 @@ class OrderAdminTest extends ShopTestCase
         $this->order->refresh();
         $this->assertSame('completed', $this->order->status);
         $this->assertSame('paid', $this->order->payment_status);
-        $this->assertStringContainsString('تحویل شد', $this->order->notes()->first()->body);
+        $this->assertTrue($this->order->notes()->where('body', 'like', '%تحویل شد%')->exists());
 
         $this->get(OrderActions::printUrl([$this->order->id]))->assertOk()->assertSee('فاکتور فروش')->assertSee('خیابان ولیعصر');
         $this->get('/orders/print?ids='.$this->order->id)->assertForbidden(); // unsigned

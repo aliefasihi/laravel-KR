@@ -13,6 +13,7 @@ namespace Modules\WordPressImport\Support;
 use App\Core\Modules\Modules;
 use App\Core\Support\StoreCache;
 use Illuminate\Support\Facades\Cache;
+use Modules\Loyalty\Support\Levels;
 use Modules\WordPressImport\Models\ImportRun;
 use Modules\WordPressImport\Models\ImportSource;
 use Modules\WordPressImport\Support\Steps\CommentsStep;
@@ -113,6 +114,10 @@ class Importer
                     $report->count($key, 'failed');
                     $report->warn($key, 'خطا: '.$e->getMessage());
                     report($e);
+                }
+                if ($key === 'orders' && ! $report->dryRun && Modules::enabled('Loyalty')) {
+                    // old completed orders count towards club levels (no points are given for them)
+                    $report->info($key, 'سطح باشگاه '.Levels::rebuild().' مشتری از سفارش‌های قبلی حساب شد.');
                 }
                 $report->info($key, '✓ '.$report->summary($key));
                 $run?->forceFill(['counts' => $report->counts, 'log' => $report->log])->save();

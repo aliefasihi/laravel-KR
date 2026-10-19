@@ -124,6 +124,7 @@
 
                 <div id="buy" class="glass-strong rounded-[var(--radius-glass)] p-6">
                     <livewire:checkout.add-to-cart :product="$product" />
+                    @storefrontHook('product.buybox', ['product' => $product])
                 </div>
 
                 <ul class="grid grid-cols-3 gap-2 text-center text-[11px] font-bold text-navy">

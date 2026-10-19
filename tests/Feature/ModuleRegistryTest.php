@@ -66,6 +66,7 @@ class ModuleRegistryTest extends TestCase
         }
 
         $registry->disable('Payment');
+        $registry->disable('Loyalty');   // also requires Order
         $registry->disable('Order');
         $this->assertFalse((new ModuleRegistry)->enabled('Order'));
         $this->assertNotContains('Modules\Order\Providers\OrderServiceProvider', (new ModuleRegistry)->providers());

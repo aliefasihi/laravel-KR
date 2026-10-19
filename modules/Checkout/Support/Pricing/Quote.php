@@ -19,6 +19,9 @@ final class Quote
 
     public int $fees = 0;
 
+    /** Paid from store credit (wallet): lowers what is left to pay, not a discount. */
+    public int $credit = 0;
+
     public bool $freeShipping = false;
 
     /** Shipping is chosen and possible for the address (Shipping module sets it). */
@@ -55,8 +58,27 @@ final class Quote
         $this->rows[] = ['key' => $key, 'label' => $label, 'amount' => $amount, 'note' => $note];
     }
 
-    public function total(): int
+    /** What the order is worth before store credit is applied. */
+    public function totalBeforeCredit(): int
     {
         return max(0, $this->subtotal - $this->discount + $this->shipping + $this->fees);
+    }
+
+    /** Store credit (wallet) used for this order; run it as the last pricing step. */
+    public function addCredit(string $key, string $label, int $amount, ?string $note = null): int
+    {
+        $amount = max(0, min($amount, $this->totalBeforeCredit() - $this->credit));
+        if ($amount > 0) {
+            $this->credit += $amount;
+            $this->rows[] = ['key' => $key, 'label' => $label, 'amount' => -$amount, 'note' => $note];
+        }
+
+        return $amount;
+    }
+
+    /** Left to pay (by the chosen payment method). */
+    public function total(): int
+    {
+        return max(0, $this->totalBeforeCredit() - $this->credit);
     }
 }

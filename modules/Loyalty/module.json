@@ -1,0 +1,9 @@
+{
+    "title": "باشگاه مشتریان",
+    "description": "کیف پول، امتیاز خرید، سطح‌های مشتری و معرفی دوستان؛ پرداخت با کیف پول در تسویه حساب.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": ["Customer", "Checkout", "Order"],
+    "default": true,
+    "icon": "gift"
+}

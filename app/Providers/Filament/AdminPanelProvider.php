@@ -64,6 +64,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 'فروش',
                 'ارتباط با مشتری',
+                'باشگاه مشتریان',
                 'کاتالوگ',
                 'محتوا',
                 'بازاریابی',

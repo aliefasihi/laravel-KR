@@ -6,7 +6,7 @@
  *
  * Everything happens in one transaction with the variants locked: stock is checked and taken
  * out, so two shoppers can never buy the last item twice. Prices come from the same quote the
- * shopper saw (coupon, shipping); if anything changed in between, the shopper is told.
+ * shopper saw (coupon, shipping, store credit); if anything changed in between, the shopper is told.
  */
 
 namespace Modules\Order\Support;
@@ -50,7 +50,7 @@ class PlaceOrder
             throw new OrderException($quote->messages['shipping'] ?? 'روش ارسال را انتخاب کنید.', 'shipping');
         }
         $method = PaymentMethods::find($choices['payment_method']);
-        if (! $method || ! $method->availableFor($quote)) {
+        if (! $method || ! array_key_exists($method->code(), PaymentMethods::availableFor($quote))) {
             throw new OrderException('روش پرداخت را انتخاب کنید.', 'payment');
         }
         if (isset($choices['expected_total']) && $choices['expected_total'] !== null && $choices['expected_total'] !== $quote->total()) {
@@ -120,6 +120,10 @@ class PlaceOrder
 
             $this->stock->reduce($order->load('items'));
             $order->note('سفارش ثبت شد — '.$method->title().'.');
+
+            // modules settle their part inside this transaction (e.g. take the wallet credit);
+            // an OrderException thrown here cancels the whole order
+            Event::dispatch('order.placing', [$order, $quote]);
 
             return $order;
         });

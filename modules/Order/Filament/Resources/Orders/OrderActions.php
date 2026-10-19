@@ -102,14 +102,16 @@ final class OrderActions
                         ->maxValue($i->quantity - $i->refunded_quantity)->suffix('از '.PersianText::toPersianDigits($i->quantity - $i->refunded_quantity)))->all()
                 )->columns(1),
                 Textarea::make('reason')->label('دلیل')->rows(2),
+                Toggle::make('to_wallet')->label('این مبلغ به کیف پول مشتری برگردد (به‌جای کارت بانکی)')
+                    ->visible(fn () => Modules::enabled('Loyalty') && $record->customer_id),
             ])
-            ->modalDescription('پول از پنل بانک یا درگاه برگردانده می‌شود؛ این‌جا فقط ثبت و موجودی به‌روز می‌شود.')
+            ->modalDescription('پول از پنل بانک یا درگاه برگردانده می‌شود (یا به کیف پول)؛ این‌جا ثبت و موجودی به‌روز می‌شود. سهم پرداخت‌شده از کیف پول خودکار برمی‌گردد.')
             ->action(function (Order $record, array $data) {
                 $quantities = [];
                 foreach ((array) ($data['items'] ?? []) as $key => $qty) {
                     $quantities[(int) str_replace('item_', '', $key)] = (int) $qty;
                 }
-                app(OrderWorkflow::class)->refund($record->load('items'), (int) $data['amount'] * 10, $quantities, $data['reason'] ?: null, auth()->id());
+                app(OrderWorkflow::class)->refund($record->load('items'), (int) $data['amount'] * 10, $quantities, $data['reason'] ?: null, auth()->id(), (bool) ($data['to_wallet'] ?? false));
                 Notification::make()->success()->title('استرداد ثبت شد')->send();
             });
     }

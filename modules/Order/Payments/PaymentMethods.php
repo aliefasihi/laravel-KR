@@ -38,10 +38,17 @@ final class PaymentMethods
         return self::$methods[$code][1] ?? null;
     }
 
-    /** @return array<string, PaymentMethod> */
+    /**
+     * Methods offered for this quote. When store credit covers everything (nothing left to pay),
+     * only methods that settle a zero total are offered — and those only then.
+     *
+     * @return array<string, PaymentMethod>
+     */
     public static function availableFor(Quote $quote): array
     {
-        return array_filter(self::all(), fn (PaymentMethod $m) => $m->availableFor($quote));
+        $zero = $quote->total() === 0 && $quote->credit > 0;
+
+        return array_filter(self::all(), fn (PaymentMethod $m) => ($m instanceof SettlesZeroTotal) === $zero && $m->availableFor($quote));
     }
 
     /** @return array<string, string> code => title (admin filters) */

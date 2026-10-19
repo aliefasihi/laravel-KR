@@ -128,7 +128,9 @@ class AdminOrders
             $order->sale_savings = array_sum(array_map(fn ($l) => max(0, $l['regular_price'] - $l['unit_price']) * $l['quantity'], $lines));
             $order->discount = min($discount ?? $order->discount, $subtotal);
             $order->shipping_total = $shippingTotal ?? $order->shipping_total;
-            $order->total = max(0, $subtotal - $order->discount + $order->shipping_total + $order->fees_total);
+            // store credit (wallet) already used still pays its part
+            $credit = max(0, (int) ($order->wallet_used ?? 0) - (int) ($order->wallet_refunded ?? 0));
+            $order->total = max(0, $subtotal - $order->discount + $order->shipping_total + $order->fees_total - $credit);
             $order->save();
 
             if ($hadStock) {

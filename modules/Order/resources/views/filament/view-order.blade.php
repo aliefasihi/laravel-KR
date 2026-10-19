@@ -70,7 +70,8 @@
                         <div class="flex justify-between"><dt class="text-gray-500">ارسال — {{ $order->shipping_method_title }}</dt><dd>{{ $order->shipping_on_delivery ? 'پس‌کرایه' : ($order->shipping_total ? $toman($order->shipping_total) : 'رایگان') }}</dd></div>
                     @endif
                     @if ($order->fees_total)<div class="flex justify-between"><dt class="text-gray-500">هزینه‌ها</dt><dd>{{ $toman($order->fees_total) }}</dd></div>@endif
-                    <div class="flex justify-between border-t border-gray-200 pt-2 text-base font-bold dark:border-white/10"><dt>مبلغ کل</dt><dd>{{ $toman($order->total) }}</dd></div>
+                    @if ($order->wallet_used ?? 0)<div class="flex justify-between text-info-600"><dt>پرداخت از کیف پول @if ($order->wallet_refunded) (برگشت {{ $toman($order->wallet_refunded) }}) @endif</dt><dd>{{ $toman($order->wallet_used) }}−</dd></div>@endif
+                    <div class="flex justify-between border-t border-gray-200 pt-2 text-base font-bold dark:border-white/10"><dt>{{ ($order->wallet_used ?? 0) ? 'مبلغ پرداختی (بدون کیف پول)' : 'مبلغ کل' }}</dt><dd>{{ $toman($order->total) }}</dd></div>
                     @if ($order->refunded_total)
                         <div class="flex justify-between text-danger-600"><dt>مسترد شده</dt><dd>{{ $toman($order->refunded_total) }}−</dd></div>
                         <div class="flex justify-between font-bold"><dt>خالص</dt><dd>{{ $toman($order->total - $order->refunded_total) }}</dd></div>
