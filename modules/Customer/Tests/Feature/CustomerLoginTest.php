@@ -136,6 +136,21 @@ class CustomerLoginTest extends TestCase
         $this->get('/admin')->assertRedirect(); // the admin panel still asks for an admin login
     }
 
+    public function test_login_page_is_focused_and_any_digits_work(): void
+    {
+        $html = $this->get('/account/login')->assertOk()->assertSee('ورود یا ثبت‌نام')->assertSee('بازگشت به فروشگاه')->getContent();
+        $this->assertStringNotContainsString('<header', $html);   // no site header/footer/bottom bar here
+        $this->assertStringNotContainsString('<footer', $html);
+        $this->assertStringContainsString('<header', $this->get('/')->getContent());
+
+        // Arabic-Indic digits, spaces, +98 — and the code pasted with the whole SMS text
+        $component = Livewire::test(Login::class)->set('mobile', '+٩٨ ٩١٢ ١٢٣ ٤٥٦٧')->call('send')
+            ->assertHasNoErrors()->assertSet('verifiedMobile', '09121234567');
+        $arabic = strtr($this->lastCode(), ['0' => '٠', '1' => '١', '2' => '٢', '3' => '٣', '4' => '٤', '5' => '٥', '6' => '٦', '7' => '٧', '8' => '٨', '9' => '٩']);
+        $component->set('code', 'کد ورود شما: '.$arabic)->call('verify')->assertHasNoErrors()->assertRedirect();
+        $this->assertTrue(Auth::guard('customer')->check());
+    }
+
     public function test_sms_failure_is_reported(): void
     {
         app(Sms::class)->use(new class implements SmsDriver

@@ -43,20 +43,25 @@
     ]}, "eagerness": "moderate"}]}
     </script>
 </head>
-<body @class(['flex min-h-dvh flex-col lg:pb-0', 'pb-24' => ! View::hasSection('buy_bar'), 'pb-44' => View::hasSection('buy_bar')])>
+@php($bare = View::hasSection('bare'))   {{-- focused pages (login): no promo, header, footer, bottom bar --}}
+<body @class(['flex min-h-dvh flex-col lg:pb-0', 'pb-24' => ! $bare && ! View::hasSection('buy_bar'), 'pb-44' => ! $bare && View::hasSection('buy_bar')])>
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-[60] focus:rounded-full focus:bg-surface focus:px-5 focus:py-2.5 focus:shadow-lg">پرش به محتوا</a>
 
     @storefrontHook('body.start')
-    <x-site.promo />
-    <x-site.header />
+    @unless ($bare)
+        <x-site.promo />
+        <x-site.header />
+    @endunless
 
     <main id="main" class="flex-1">
         @yield('content')
     </main>
 
-    <x-site.footer />
-    <x-site.bottom-nav />
-    <x-site.whatsapp :raised="View::hasSection('buy_bar')" />
+    @unless ($bare)
+        <x-site.footer />
+        <x-site.bottom-nav />
+        <x-site.whatsapp :raised="View::hasSection('buy_bar')" />
+    @endunless
     <x-ui.toast />
 
     @storefrontHook('body.end')

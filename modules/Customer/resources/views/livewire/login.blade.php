@@ -8,12 +8,30 @@
         <form wire:submit="send" class="mt-8 space-y-5" novalidate>
             <div>
                 <label for="otp-mobile" class="mb-2 block text-sm font-bold text-navy">شماره‌ی موبایل</label>
-                <input id="otp-mobile" type="tel" inputmode="numeric" autocomplete="tel" dir="ltr" placeholder="09121234567" maxlength="14"
+                <input id="otp-mobile" type="tel" inputmode="numeric" autocomplete="tel" dir="ltr" placeholder="09121234567" maxlength="20"
                        wire:model="mobile" autofocus
                        @class(['field !py-4 text-center text-lg tracking-[0.2em]', '!border-rose/50 !ring-4 !ring-rose/10' => $errors->has('mobile')])
                        @error('mobile') aria-invalid="true" aria-describedby="otp-mobile-error" @enderror>
                 @error('mobile')<p id="otp-mobile-error" class="mt-2 text-sm text-rose">{{ $message }}</p>@enderror
             </div>
+            @if ($invites)
+                <div x-data="{ open: @js($inviteOpen) }">
+                    <button type="button" x-show="! open" @click="open = true; $nextTick(() => $refs.invite.focus())" class="inline-flex items-center gap-1.5 text-sm font-bold text-rose hover:underline">
+                        <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 3a.75.75 0 0 1 .75.75v5.5h5.5a.75.75 0 0 1 0 1.5h-5.5v5.5a.75.75 0 0 1-1.5 0v-5.5h-5.5a.75.75 0 0 1 0-1.5h5.5v-5.5A.75.75 0 0 1 10 3Z"/></svg>
+                        کد معرف دارید؟
+                    </button>
+                    <div x-show="open" x-cloak>
+                        <label for="otp-invite" class="mb-2 flex items-center justify-between text-sm font-bold text-navy">
+                            کد معرف <span class="text-xs font-medium text-subtle">اختیاری — فقط برای ثبت‌نام تازه</span>
+                        </label>
+                        <input id="otp-invite" x-ref="invite" type="text" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20" placeholder="KR…"
+                               wire:model="invite" data-latin
+                               @class(['field text-center font-latin uppercase tracking-[0.25em]', '!border-rose/50 !ring-4 !ring-rose/10' => $errors->has('invite')])
+                               @error('invite') aria-invalid="true" aria-describedby="otp-invite-error" @enderror>
+                        @error('invite')<p id="otp-invite-error" class="mt-2 text-sm text-rose">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            @endif
             <button type="submit" class="btn-rose w-full !py-4" wire:loading.attr="disabled" wire:target="send">
                 <span wire:loading.remove wire:target="send">دریافت کد</span>
                 <span wire:loading wire:target="send">در حال ارسال…</span>
@@ -34,8 +52,8 @@
         <form wire:submit="verify" class="mt-8 space-y-5" novalidate x-ref="form">
             <div>
                 <label for="otp-code" class="sr-only">کد تأیید</label>
-                <input id="otp-code" type="text" inputmode="numeric" autocomplete="one-time-code" dir="ltr" maxlength="{{ $length + 2 }}"
-                       placeholder="{{ str_repeat('–', $length) }}" wire:model="code" x-ref="code" autofocus
+                <input id="otp-code" type="text" inputmode="numeric" autocomplete="one-time-code" dir="ltr"
+                       placeholder="{{ str_repeat('–', $length) }}" data-digits="{{ $length }}" wire:model="code" x-ref="code" autofocus
                        @input="autoSubmit($event.target)"
                        @class(['field !py-4 text-center font-latin text-3xl font-black tracking-[0.6em] placeholder:tracking-[0.6em]', '!border-rose/50 !ring-4 !ring-rose/10' => $errors->has('code')])
                        @error('code') aria-invalid="true" aria-describedby="otp-code-error" @enderror>

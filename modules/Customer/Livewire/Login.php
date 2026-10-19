@@ -3,6 +3,9 @@
 /**
  * Khaneh Romantic — Login / sign-up with mobile + SMS code (one form for both)
  * نویسنده: علی فصیحی (Ali Fasihi)
+ *
+ * Digits may be typed in any script (۰۹۱۲…, ٠٩١٢…, 0912…) and with spaces/dashes; an optional
+ * «کد معرف» (invite code) is checked on the first step and used when the account is created.
  */
 
 namespace Modules\Customer\Livewire;
@@ -12,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Modules\Customer\Models\Customer;
+use Modules\Customer\Support\Invites;
 use Modules\Customer\Support\Mobile;
 use Modules\Customer\Support\Otp;
 
@@ -23,10 +27,22 @@ class Login extends Component
 
     public string $code = '';
 
+    public string $invite = '';
+
+    public bool $inviteOpen = false;
+
     #[Locked]
     public string $verifiedMobile = '';
 
     public int $retryIn = 0;
+
+    public function mount(): void
+    {
+        $invites = app(Invites::class);
+        if ($invites->enabled() && ($code = $invites->prefill())) {
+            [$this->invite, $this->inviteOpen] = [$code, true];
+        }
+    }
 
     public function send(): void
     {
@@ -36,6 +52,19 @@ class Login extends Component
             $this->addError('mobile', 'شماره‌ی موبایل را درست وارد کنید؛ مثل ۰۹۱۲۱۲۳۴۵۶۷');
 
             return;
+        }
+
+        $invites = app(Invites::class);
+        $this->invite = trim(PersianText::toLatinDigits($this->invite));
+        if ($this->invite !== '' && $invites->enabled()) {
+            $code = $invites->check($this->invite);
+            if (! $code) {
+                $this->inviteOpen = true;
+                $this->addError('invite', 'این کد معرف پیدا نشد؛ دوباره بررسی کنید یا خالی بگذارید.');
+
+                return;
+            }
+            $this->invite = $code;
         }
 
         $result = app(Otp::class)->send($mobile, request()->ip());
@@ -75,8 +104,13 @@ class Login extends Component
             return;
         }
 
-        $customer = Customer::query()->firstOrCreate(['mobile' => $this->verifiedMobile]);
+        $invites = app(Invites::class);
+        $invite = $invites->enabled() ? (string) $invites->check($this->invite) : '';
+        $customer = $invites->forSignup($invite, fn () => Customer::query()->firstOrCreate(['mobile' => $this->verifiedMobile]));
         $isNew = $customer->wasRecentlyCreated;
+        if (! $isNew && $invite !== '') {
+            $invites->apply($customer, $invite);   // a fresh account without orders may still add one
+        }
         $customer->forceFill(['mobile_verified_at' => $customer->mobile_verified_at ?? now(), 'last_login_at' => now()])->save();
 
         Auth::guard('customer')->login($customer, remember: true);
@@ -103,6 +137,7 @@ class Login extends Component
     {
         return view('customer::livewire.login', [
             'length' => (int) config('modules.customer.otp.length'),
+            'invites' => app(Invites::class)->enabled(),
         ]);
     }
 }

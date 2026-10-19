@@ -18,6 +18,7 @@ use Modules\Customer\Livewire\Addresses;
 use Modules\Customer\Livewire\Login;
 use Modules\Customer\Livewire\Profile;
 use Modules\Customer\Models\Customer;
+use Modules\Customer\Support\Invites;
 use Modules\Customer\Support\Otp;
 
 class CustomerServiceProvider extends ModuleServiceProvider
@@ -27,6 +28,7 @@ class CustomerServiceProvider extends ModuleServiceProvider
         parent::register();
 
         $this->app->scoped(Otp::class);
+        $this->app->singleton(Invites::class);
 
         config([
             'auth.guards.customer' => ['driver' => 'session', 'provider' => 'customers'],

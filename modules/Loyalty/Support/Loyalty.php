@@ -27,6 +27,7 @@ final class Loyalty
         'referral_referrer_reward' => 200_000,   // Toman
         'referral_referred_reward' => 100_000,   // Toman
         'referral_min_order' => 2_000_000,       // Toman (items after discount)
+        'referral_late_days' => 7,               // after signing up, a code can still be added for this many days
         'sms_notify' => false,
     ];
 

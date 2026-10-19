@@ -90,6 +90,26 @@
         </section>
     @endif
 
+    {{-- who invited me: late entry for new members who skipped it at sign-up --}}
+    @if ($referral && $referral['can_enter'])
+        <section class="glass flex flex-wrap items-center gap-4 rounded-[var(--radius-glass)] p-6">
+            <div class="min-w-56 flex-1">
+                <h2 class="text-lg font-black text-navy">کد معرف دارید؟</h2>
+                <p class="mt-1 text-sm leading-7 text-muted">
+                    اگر دوستی شما را دعوت کرده، کدش را وارد کنید@if ($referral['referred_reward']) تا با اولین خریدتان {{ Money::toman($referral['referred_reward']) }} تومان اعتبار هدیه بگیرید@endif.
+                </p>
+            </div>
+            <form wire:submit="enterInvite" class="w-full sm:w-auto">
+                <div class="flex items-center gap-2">
+                    <input type="text" wire:model="inviteCode" data-latin dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20" placeholder="KR…" aria-label="کد معرف"
+                           @class(['field !py-2.5 text-center font-latin uppercase tracking-[0.2em] sm:w-44', '!border-rose/50' => $errors->has('inviteCode')])>
+                    <button type="submit" class="btn-navy shrink-0 !py-2.5" wire:loading.attr="disabled" wire:target="enterInvite">ثبت</button>
+                </div>
+                @error('inviteCode')<p class="mt-1.5 text-xs text-rose">{{ $message }}</p>@enderror
+            </form>
+        </section>
+    @endif
+
     {{-- invite friends --}}
     @if ($referral)
         <section class="glass rounded-[var(--radius-glass)] p-6" x-data="{ copied: false, copy(text) { navigator.clipboard?.writeText(text); this.copied = true; setTimeout(() => this.copied = false, 2000) } }">
@@ -115,6 +135,9 @@
                 <a href="sms:?body={{ rawurlencode($share) }}" class="btn-glass !py-2 text-xs">پیامک</a>
                 <span class="ms-auto text-xs text-muted">{{ $fa($referral['invited']) }} نفر عضو شده‌اند · {{ $fa($referral['rewarded']) }} نفر خرید کرده‌اند</span>
             </div>
+            @if ($referral['invited_by'])
+                <p class="mt-4 border-t border-line pt-3 text-xs text-muted">شما با دعوت <b class="text-navy">{{ $referral['invited_by']->referrer?->first_name ?: 'یک دوست' }}</b> عضو شدید{{ $referral['invited_by']->status === 'pending' && $referral['referred_reward'] ? ' — هدیه‌تان بعد از اولین خرید می‌رسد.' : '.' }}</p>
+            @endif
         </section>
     @endif
 

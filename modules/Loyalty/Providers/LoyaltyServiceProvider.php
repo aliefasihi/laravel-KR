@@ -25,6 +25,7 @@ use Modules\Checkout\Support\Pricing\Quote;
 use Modules\Checkout\Support\Pricing\QuoteContext;
 use Modules\Checkout\Support\Pricing\Quoter;
 use Modules\Customer\Models\Customer;
+use Modules\Customer\Support\Invites;
 use Modules\Loyalty\Http\Middleware\CaptureReferral;
 use Modules\Loyalty\Livewire\Club;
 use Modules\Loyalty\Livewire\WalletToggle;
@@ -66,12 +67,22 @@ class LoyaltyServiceProvider extends ModuleServiceProvider
         Event::listen('order.placing', fn (Order $order, Quote $quote) => OrderLoyalty::placing($order, $quote));
         Event::listen('order.status_changed', fn (array $payload) => OrderLoyalty::statusChanged($payload));
         Event::listen('order.refunded', fn (array $payload) => OrderLoyalty::refunded($payload));
+        // who invited a new account: the code typed on the sign-up form, else the ?ref= link cookie
         Event::listen('eloquent.created: '.Customer::class, function (Customer $customer) {
-            if ($code = request()->cookie(Referrals::COOKIE)) {
+            $cookie = request()->cookie(Referrals::COOKIE);
+            if ($code = app(Invites::class)->pending ?: $cookie) {
                 rescue(fn () => Referrals::attach($customer, $code), report: true);
+            }
+            if ($cookie) {
                 cookie()->queue(cookie()->forget(Referrals::COOKIE));
             }
         });
+        app(Invites::class)->using(
+            enabled: fn () => Loyalty::on('referral'),
+            check: fn (string $code) => Referrals::find($code),
+            prefill: fn () => (string) Referrals::find((string) request()->cookie(Referrals::COOKIE)),
+            apply: fn (Customer $customer, string $code) => Referrals::enter($customer, $code) !== null,
+        );
 
         StorefrontHooks::add('cart.summary', fn () => auth('customer')->check() && Loyalty::on('wallet') ? view('loyalty::partials.wallet-toggle') : null, 20);
         StorefrontHooks::add('account.dashboard', 'loyalty::partials.dashboard-card', 10);
@@ -104,6 +115,8 @@ class LoyaltyServiceProvider extends ModuleServiceProvider
                     TextInput::make('referral_referrer_reward')->label('هدیه‌ی معرف')->numeric()->minValue(0)->suffix('تومان'),
                     TextInput::make('referral_referred_reward')->label('هدیه‌ی دوستِ معرفی‌شده')->numeric()->minValue(0)->suffix('تومان'),
                     TextInput::make('referral_min_order')->label('حداقل اولین خرید دوست')->numeric()->minValue(0)->suffix('تومان'),
+                    TextInput::make('referral_late_days')->label('ثبت کد معرف بعد از عضویت تا')->numeric()->minValue(0)->suffix('روز')
+                        ->helperText('کد معرف در فرم ثبت‌نام وارد می‌شود؛ اگر یادش رفت، تا این چند روز (و قبل از اولین سفارش تکمیل‌شده) از صفحه‌ی باشگاه هم می‌تواند ثبت کند. ۰ = فقط هنگام ثبت‌نام.'),
                 ]),
                 Toggle::make('sms_notify')->label('پیامک امتیاز و هدیه‌ی معرفی به مشتری'),
             ],

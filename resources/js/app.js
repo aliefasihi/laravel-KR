@@ -8,6 +8,26 @@
 const toFa = (value) => String(value).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 window.toFa = toFa; // usable in Alpine expressions: x-text="toFa(count)"
 
+// Number fields work in any keyboard language: ۰۹۱۲ / ٠٩١٢ become 0912 while typing (before
+// Livewire/Alpine see the value). [data-latin] code fields also turn Persian-layout letters into the
+// Latin key under them (ق ن → r k). [data-digits=N] keeps only N digits (pasting the whole SMS works).
+const toLatinDigits = (value) => value.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+window.toLatinDigits = toLatinDigits;
+const persianKeys = { 'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p', 'ش': 'a', 'س': 's', 'ی': 'd', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k', 'م': 'l', 'ظ': 'z', 'ط': 'x', 'ز': 'c', 'ر': 'v', 'ذ': 'b', 'د': 'n', 'پ': 'm', 'ئ': 'm' };
+document.addEventListener('input', (event) => {
+    const el = event.target;
+    if (!(el instanceof HTMLInputElement) || !el.matches('[type=tel], [inputmode=numeric], [data-latin], [data-digits]')) return;
+    let value = toLatinDigits(el.value);
+    if (el.matches('[data-latin]')) value = value.replace(/./gu, (c) => persianKeys[c] ?? c).toUpperCase();
+    if (el.dataset.digits) value = value.replace(/\D/g, '').slice(0, Number(el.dataset.digits));
+    if (value === el.value) return;
+    const caret = el.selectionStart === null ? null : Math.min(el.selectionStart - (el.value.length - value.length), value.length);
+    el.value = value;
+    if (caret !== null && document.activeElement === el) {
+        try { el.setSelectionRange(Math.max(0, caret), Math.max(0, caret)); } catch { /* type=tel/number may not support it */ }
+    }
+}, true);
+
 document.addEventListener('alpine:init', () => {
     const Alpine = window.Alpine;
 
@@ -219,7 +239,7 @@ document.addEventListener('alpine:init', () => {
             this.webOtp();
         },
         autoSubmit(input) {
-            const digits = input.value.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\D/g, '');
+            const digits = toLatinDigits(input.value).replace(/\D/g, '');
             if (digits.length === length) {
                 this.$wire.set('code', digits, false);
                 this.$wire.verify();

@@ -23,6 +23,22 @@ final class PersianText
         '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
     ];
 
+    /** Letters typed on a Persian keyboard → the Latin key under them (ق ن → R K). For codes. */
+    private const KEYBOARD = [
+        'ض' => 'q', 'ص' => 'w', 'ث' => 'e', 'ق' => 'r', 'ف' => 't', 'غ' => 'y', 'ع' => 'u', 'ه' => 'i', 'خ' => 'o', 'ح' => 'p',
+        'ش' => 'a', 'س' => 's', 'ی' => 'd', 'ي' => 'd', 'ب' => 'f', 'ل' => 'g', 'ا' => 'h', 'ت' => 'j', 'ن' => 'k', 'م' => 'l',
+        'ظ' => 'z', 'ط' => 'x', 'ز' => 'c', 'ر' => 'v', 'ذ' => 'b', 'د' => 'n', 'پ' => 'm', 'ئ' => 'm',
+    ];
+
+    /**
+     * For Latin codes (invite, coupon, tracking) typed with the Persian layout still on:
+     * Persian/Arabic digits → ASCII, Persian letters → the Latin letter on the same key.
+     */
+    public static function fromPersianKeyboard(string $text): string
+    {
+        return strtr(self::toLatinDigits($text), self::KEYBOARD);
+    }
+
     /** Unify Arabic letter variants to their Persian forms (ي→ی, ك→ک, …). */
     public static function normalizeLetters(string $text): string
     {

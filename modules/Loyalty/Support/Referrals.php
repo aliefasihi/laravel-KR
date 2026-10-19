@@ -4,14 +4,16 @@
  * Khaneh Romantic — «Invite a friend»: personal codes, ?ref= links, rewards on the first purchase
  * نویسنده: علی فصیحی (Ali Fasihi)
  *
- * The link sets a 30-day cookie; when that visitor signs up the referrer is saved once (never
- * changed later, no self-referral). When the new customer's first qualifying order is completed,
+ * The link sets a 30-day cookie; the code can also be typed on the sign-up form, or (within
+ * «referral_late_days» of signing up, before a completed order) in the club page. The referrer
+ * is saved once (never changed later, no self-referral). When the new customer's first qualifying order is completed,
  * both get a fixed wallet reward — the status change and both credits in one transaction. If that
  * order is refunded/cancelled, both rewards are taken back (as far as the balances allow).
  */
 
 namespace Modules\Loyalty\Support;
 
+use App\Core\Support\PersianText;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Customer\Models\Customer;
@@ -48,11 +50,37 @@ final class Referrals
         return url('/').'?ref='.self::codeFor($customerId);
     }
 
+    /** " kr-7xm2q ", "ن ق۷ط…" (Persian layout still on) → "KR7XM2Q"; junk → null */
     public static function normalize(?string $code): ?string
     {
-        $code = Str::upper(trim((string) $code));
+        $code = Str::upper(preg_replace('/[\s\-_‌]+/u', '', PersianText::fromPersianKeyboard((string) $code)));
 
         return preg_match('/^[A-Z0-9]{4,16}$/', $code) ? $code : null;
+    }
+
+    /** A known code (normalized), or null. */
+    public static function find(?string $code): ?string
+    {
+        $code = self::normalize($code);
+
+        return $code && ReferralCode::query()->where('code', $code)->exists() ? $code : null;
+    }
+
+    /** Can this (already registered) customer still add who invited them? */
+    public static function canEnter(Customer $customer): bool
+    {
+        $days = (int) Loyalty::get('referral_late_days');
+
+        return Loyalty::on('referral') && $days > 0
+            && $customer->created_at?->greaterThanOrEqualTo(now()->subDays($days))
+            && ! Referral::query()->where('referred_id', $customer->id)->exists()
+            && ! Order::query()->where('customer_id', $customer->id)->where('status', 'completed')->exists();
+    }
+
+    /** The customer typed a code after signing up (sign-in form or club page). */
+    public static function enter(Customer $customer, ?string $code): ?Referral
+    {
+        return self::canEnter($customer) ? self::attach($customer, $code) : null;
     }
 
     /** A new customer arrived through a link: remember who invited them (once). */

@@ -16,7 +16,10 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use LogicException;
 use Modules\Checkout\Support\Cart;
+use Modules\Customer\Livewire\Login;
 use Modules\Customer\Models\Customer;
+use Modules\Customer\Support\Invites;
+use Modules\Customer\Support\Otp;
 use Modules\Loyalty\Filament\Resources\Members\Pages\ListMembers;
 use Modules\Loyalty\Filament\Resources\Members\Pages\ViewMember;
 use Modules\Loyalty\Livewire\Club;
@@ -223,6 +226,56 @@ class LoyaltyTest extends ShopTestCase
         $this->assertSame('reversed', $referral->fresh()->status);
         $this->assertSame(0, Wallet::balance($this->customer->id));
         $this->assertSame(0, Wallet::balance($sara->id));              // only what was left (400,000)
+    }
+
+    public function test_invite_code_on_the_sign_up_form_and_later_in_the_club(): void
+    {
+        $code = Referrals::codeFor($this->customer->id);
+        Auth::guard('customer')->logout();
+        $this->get('/account/login')->assertSee('کد معرف دارید؟');
+
+        // typed with the Persian layout still on (ن ق = K R) and Persian digits → still found
+        $persian = strtr(strtolower($code), ['k' => 'ن', 'r' => 'ق', 'a' => 'ش', 's' => 'س', 'd' => 'ی', 'f' => 'ب', 'm' => 'پ', 'x' => 'ط']);
+        $persian = strtr($persian, ['2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']);
+        $this->assertSame($code, Referrals::find(' '.$persian.' '));
+        $this->assertNull(Referrals::find('KRZZZZZ'));
+
+        // unknown code → error on the first step, no SMS
+        $login = Livewire::test(Login::class)->set('mobile', '09125556677')->set('invite', 'KRZZZZZ')->call('send')
+            ->assertHasErrors('invite')->assertSet('step', 'mobile');
+        $login->set('invite', strtolower($code))->call('send')->assertHasNoErrors()->assertSet('step', 'code')->assertSet('invite', $code);
+        $hash = (new \ReflectionMethod(Otp::class, 'hash'))->invoke(app(Otp::class), '09125556677', '12345');
+        DB::table('customer_otps')->where('mobile', '09125556677')->update(['code_hash' => $hash]);   // a known code
+        $login->set('code', '۱۲۳۴۵')->call('verify')->assertHasNoErrors();
+
+        $sara = Customer::query()->where('mobile', '09125556677')->sole();
+        $this->assertSame([$this->customer->id, 'pending'], [Referral::query()->where('referred_id', $sara->id)->value('referrer_id'), Referral::query()->where('referred_id', $sara->id)->value('status')]);
+
+        // the link cookie is prefilled, but what the person types wins
+        $other = Customer::create(['mobile' => '09127778899']);
+        $otherCode = Referrals::codeFor($other->id);
+        Auth::guard('customer')->logout();
+        $this->withCookie(Referrals::COOKIE, $code)->get('/account/login')->assertOk()->assertSee('&quot;invite&quot;:&quot;'.$code.'&quot;', false);
+        app(Invites::class)->forSignup($otherCode, fn () => Customer::create(['mobile' => '09121212121']));
+        $this->assertSame($other->id, Referral::query()->where('referred_id', Customer::query()->where('mobile', '09121212121')->value('id'))->value('referrer_id'));
+
+        // forgot it at sign-up: the club page takes it for a few days, before a completed order
+        app()->instance('request', Request::create('/account/login', 'POST'));   // (no link cookie this time)
+        $nima = Customer::create(['mobile' => '09124443322', 'first_name' => 'نیما']);
+        Auth::guard('customer')->login($nima);
+        Livewire::test(Club::class)->assertSee('کد معرف دارید؟')
+            ->set('inviteCode', Referrals::codeFor($nima->id))->call('enterInvite')->assertHasErrors('inviteCode')
+            ->set('inviteCode', 'KRZZZZZ')->call('enterInvite')->assertHasErrors('inviteCode')
+            ->set('inviteCode', $code)->call('enterInvite')->assertHasNoErrors()->assertDontSee('کد معرف دارید؟')->assertSee('شما با دعوت');
+        $this->assertSame($this->customer->id, Referral::query()->where('referred_id', $nima->id)->value('referrer_id'));
+
+        // too late: older account, or one with a completed order
+        $old = Customer::create(['mobile' => '09126665544']);
+        $old->forceFill(['created_at' => now()->subDays(8)])->save();
+        $this->assertFalse(Referrals::canEnter($old));
+        $this->assertNull(Referrals::enter($old, $code));
+        Settings::set(['loyalty.referral_late_days' => 0]);
+        $this->assertFalse(Referrals::canEnter(Customer::create(['mobile' => '09126665500'])));
     }
 
     public function test_account_club_product_hint_and_admin_pages(): void

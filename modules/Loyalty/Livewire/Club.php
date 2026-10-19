@@ -32,6 +32,8 @@ class Club extends Component
 
     public string $redeem = '';
 
+    public string $inviteCode = '';
+
     private function customerId(): int
     {
         return (int) Auth::guard('customer')->id();
@@ -80,9 +82,38 @@ class Club extends Component
         $this->dispatch('toast', message: Money::toman($credit).' تومان به کیف پول شما اضافه شد.');
     }
 
+    /** «کد معرف دارید؟» — a new member who skipped it on the sign-up form. */
+    public function enterInvite(): void
+    {
+        $this->resetErrorBag();
+        $customer = Auth::guard('customer')->user();
+        $key = 'loyalty-invite:'.$customer->id;
+        if (RateLimiter::tooManyAttempts($key, 8)) {
+            $this->addError('inviteCode', 'کمی بعد دوباره امتحان کنید.');
+
+            return;
+        }
+        RateLimiter::hit($key, 600);
+
+        $code = Referrals::find($this->inviteCode);
+        if (! $code || $code === Referrals::codeFor($customer->id)) {
+            $this->addError('inviteCode', $code ? 'کد خودتان را نمی‌شود وارد کرد.' : 'این کد معرف پیدا نشد.');
+
+            return;
+        }
+        if (! Referrals::enter($customer, $code)) {
+            $this->addError('inviteCode', 'مهلت ثبت کد معرف برای حساب شما تمام شده است.');
+
+            return;
+        }
+        $this->inviteCode = '';
+        $this->dispatch('toast', message: 'کد معرف ثبت شد؛ هدیه بعد از اولین خریدتان می‌رسد.');
+    }
+
     public function render()
     {
         $id = $this->customerId();
+        $customer = Auth::guard('customer')->user();
         $level = Levels::current($id);
         $history = $this->history === 'points'
             ? PointsTransaction::query()->where('customer_id', $id)->latest('id')->limit($this->perPage + 1)->get()
@@ -106,6 +137,8 @@ class Club extends Component
                 'referrer_reward' => Loyalty::rials('referral_referrer_reward'),
                 'referred_reward' => Loyalty::rials('referral_referred_reward'),
                 'min_order' => Loyalty::rials('referral_min_order'),
+                'can_enter' => Referrals::canEnter($customer),
+                'invited_by' => Referral::query()->where('referred_id', $id)->with('referrer')->first(),
             ] : null,
             'rows' => $history->take($this->perPage),
             'hasMore' => $history->count() > $this->perPage,
