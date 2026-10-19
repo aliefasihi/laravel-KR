@@ -148,13 +148,14 @@ class TaxonomiesStep extends Step
             $taxonomy = 'pa_'.$row->attribute_name;
             $terms = $this->wp->terms($taxonomy);
             $meta = $this->wp->termMeta($terms->keys()->all());
-            $report->count('attributes', 'created');
+            $slug = preg_match('/^[a-z0-9_-]+$/i', rawurldecode($row->attribute_name)) ? strtolower(rawurldecode($row->attribute_name)) : null;
+            $found = ProductAttribute::query()->where('slug', Str::slug($slug ?: $row->attribute_label))->first();
+            $report->count('attributes', $found ? 'updated' : 'created');
             if ($report->dryRun) {
                 continue;
             }
 
-            $slug = preg_match('/^[a-z0-9_-]+$/i', rawurldecode($row->attribute_name)) ? strtolower(rawurldecode($row->attribute_name)) : null;
-            $attribute = ProductAttribute::query()->where('slug', Str::slug($slug ?: $row->attribute_label))->first()
+            $attribute = $found
                 ?? ProductAttribute::create([
                     'name' => $row->attribute_label,
                     'slug' => $slug ?: $row->attribute_label,

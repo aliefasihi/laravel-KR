@@ -9,6 +9,7 @@ namespace Modules\WordPressImport\Console;
 
 use Illuminate\Console\Command;
 use Modules\WordPressImport\Models\ImportRun;
+use Modules\WordPressImport\Models\ImportSource;
 use Modules\WordPressImport\Support\Importer;
 use Modules\WordPressImport\Support\Report;
 use Throwable;
@@ -17,7 +18,8 @@ class WpImportCommand extends Command
 {
     protected $signature = 'wp:import {steps?* : '.'taxonomies products posts customers coupons orders reviews redirects links (or "all")}
         {--dry-run : Count only, write nothing}
-        {--limit= : Only the first N records of each step (for a trial)}';
+        {--limit= : Only the first N records of each step (for a trial)}
+        {--source= : An uploaded database (id from wp:import:load, or "latest"); default: the WP_DB_* connection}';
 
     protected $description = 'Import the WooCommerce site (catalog, posts, customers, orders, reviews, coupons, redirects)';
 
@@ -35,10 +37,24 @@ class WpImportCommand extends Command
         $report = new Report((bool) $this->option('dry-run'), $limit, function (string $level, string $step, string $message) {
             $level === 'warning' ? $this->warn("[{$step}] {$message}") : $this->line("[{$step}] {$message}");
         });
-        $run = ImportRun::create(['steps' => $steps, 'dry_run' => $report->dryRun, 'limit' => $limit, 'status' => 'queued']);
+        $source = null;
+        if ($option = $this->option('source')) {
+            $source = $option === 'latest'
+                ? ImportSource::query()->where('status', 'ready')->latest('id')->first()
+                : ImportSource::find((int) $option);
+            if (! $source?->isReady()) {
+                $this->error('No ready uploaded database '.($option === 'latest' ? '' : '#'.$option).'. Load one with: php artisan wp:import:load dump.sql');
+
+                return self::FAILURE;
+            }
+            $this->info("Reading «{$source->name}» (#{$source->id}, prefix {$source->prefix})");
+        }
+        $run = ImportRun::create(['source_id' => $source?->id, 'settings' => $source?->settings, 'steps' => $steps,
+            'dry_run' => $report->dryRun, 'limit' => $limit, 'status' => 'queued']);
 
         @set_time_limit(0);
         try {
+            $importer->useSource($source, $source?->settings ?? []);
             $importer->run($steps, $report, $run);
         } catch (Throwable $e) {
             $this->error($e->getMessage());

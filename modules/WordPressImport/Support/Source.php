@@ -23,9 +23,12 @@ class Source
     /** @var array<string, mixed> */
     private array $options = [];
 
+    /** «wordpress» = what the importer reads (an uploaded database or WP_DB_*); «wordpress_env» = always WP_DB_* */
+    public function __construct(private string $connection = 'wordpress') {}
+
     public function db(): ConnectionInterface
     {
-        return DB::connection('wordpress');
+        return DB::connection($this->connection);
     }
 
     public function table(string $table): Builder

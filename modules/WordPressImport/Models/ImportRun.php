@@ -8,6 +8,7 @@
 namespace Modules\WordPressImport\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImportRun extends Model
 {
@@ -18,9 +19,14 @@ class ImportRun extends Model
     protected function casts(): array
     {
         return [
-            'steps' => 'array', 'counts' => 'array', 'log' => 'array', 'dry_run' => 'boolean',
+            'steps' => 'array', 'counts' => 'array', 'settings' => 'array', 'log' => 'array', 'dry_run' => 'boolean',
             'started_at' => 'datetime', 'finished_at' => 'datetime',
         ];
+    }
+
+    public function source(): BelongsTo
+    {
+        return $this->belongsTo(ImportSource::class, 'source_id');
     }
 
     public function isActive(): bool

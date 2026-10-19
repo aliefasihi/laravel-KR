@@ -18,6 +18,7 @@ class WordPressImportServiceProvider extends ModuleServiceProvider
     {
         parent::boot();
 
-        config(['database.connections.wordpress' => config('modules.wordpressimport.connection')]);
+        $connection = config('modules.wordpressimport.connection');
+        config(['database.connections.wordpress' => $connection, 'database.connections.wordpress_env' => $connection]);
     }
 }

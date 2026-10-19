@@ -14,6 +14,7 @@ use App\Core\Modules\Modules;
 use App\Core\Support\StoreCache;
 use Illuminate\Support\Facades\Cache;
 use Modules\WordPressImport\Models\ImportRun;
+use Modules\WordPressImport\Models\ImportSource;
 use Modules\WordPressImport\Support\Steps\CouponsStep;
 use Modules\WordPressImport\Support\Steps\CustomersStep;
 use Modules\WordPressImport\Support\Steps\LinksStep;
@@ -32,6 +33,22 @@ class Importer
     public const ORDER = ['taxonomies', 'products', 'posts', 'customers', 'coupons', 'orders', 'reviews', 'redirects', 'links'];
 
     public function __construct(private Source $wp, private MediaImporter $media) {}
+
+    /**
+     * Read from an uploaded database (or the .env connection when null) with the admin's settings.
+     */
+    public function useSource(?ImportSource $source, array $settings = []): void
+    {
+        if ($source) {
+            if (! $source->isReady()) {
+                throw new RuntimeException('پایگاه داده‌ی آپلودشده هنوز آماده نیست.');
+            }
+            $source->connect();
+        }
+        ImportSettings::apply($settings, $source?->detected ?? []);
+        $this->wp = new Source;
+        $this->media = new MediaImporter($this->wp);
+    }
 
     /** @return array<string, Step> in run order */
     public function steps(): array

@@ -90,15 +90,18 @@ MEILISEARCH_KEY=…
 - [ ] اگر پرداخت آنلاین فعال است: یک پرداخت آزمایشی در sandbox زرین‌پال.
 
 ## ۵. یک بار: انتقال از وردپرس
-پیش‌نیاز در `.env`: `WP_DB_*` (دسترسی فقط-خواندنی به دیتابیس سایت فعلی)، `WP_BASE_URL`، `WP_CURRENCY` و اگر پوشه‌ی uploads روی همین سرور است `WP_UPLOADS_PATH`.
+1. از phpMyAdmin سایت فعلی خروجی کامل دیتابیس بگیرید (`.sql.gz`).
+2. پنل ← تنظیمات ← درون‌ریزی از وردپرس ← آپلود فایل ← تنظیمات تشخیص‌داده‌شده را نگاه کنید ← پیش‌نمایش ← اجرا.
+   یا از ترمینال:
 ```bash
-php artisan wp:import --dry-run             # فقط شمارش؛ لاگ را بخوانید
-php artisan wp:import products --limit=20   # آزمایش روی چند محصول
-php artisan wp:import                       # همه (یا از پنل ← تنظیمات ← درون‌ریزی از وردپرس)
+php artisan wp:import:load /path/khaneh_wp.sql.gz
+php artisan wp:import --source=latest --dry-run     # لاگ را بخوانید
+php artisan wp:import --source=latest
 php artisan media:optimize --queue
 php artisan filemanager:sync --move
 php artisan search:rebuild
 ```
+اگر پوشه‌ی `wp-content/uploads` روی همین سرور است `WP_UPLOADS_PATH` را بگذارید (سریع‌تر از دانلود تصاویر).
 - [ ] ✱ `ORDER_NUMBER_OFFSET` را بالاتر از بزرگ‌ترین شماره‌ی سفارش ووکامرس بگذارید (مثلاً اگر آخرین سفارش ۴۸۲۱۰ است: `100000` کافی است) و `php artisan config:cache`.
 - [ ] برگه‌هایی که در لاگ «معادل ندارد» آمده‌اند را در **سئو ← ریدایرکت‌ها** دستی بسازید.
 - [ ] درون‌ریزی را می‌شود هر وقت دوباره اجرا کرد (مثلاً شب قبل از تعویض DNS)؛ فقط به‌روز می‌کند، تکراری نمی‌سازد.

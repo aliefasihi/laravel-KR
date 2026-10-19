@@ -14,12 +14,13 @@ class FakeWordPress
 {
     private int $metaId = 1;
 
-    public static function boot(bool $hpos = true, string $database = ':memory:'): self
+    public static function boot(bool $hpos = true, ?string $database = null): self
     {
-        config(['database.connections.wordpress' => [
-            'driver' => 'sqlite', 'database' => $database, 'prefix' => 'wp_', 'foreign_key_constraints' => false,
-        ]]);
+        $database ??= (string) tempnam(sys_get_temp_dir(), 'wp-fake-');   // a file: the page also opens it as «wordpress_env»
+        $connection = ['driver' => 'sqlite', 'database' => $database, 'prefix' => 'wp_', 'foreign_key_constraints' => false];
+        config(['database.connections.wordpress' => $connection, 'database.connections.wordpress_env' => $connection]);
         DB::purge('wordpress');
+        DB::purge('wordpress_env');
         $wp = new self;
         $wp->schema($hpos);
 

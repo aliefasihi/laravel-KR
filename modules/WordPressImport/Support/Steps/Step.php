@@ -37,7 +37,7 @@ abstract class Step
         return [];
     }
 
-    /** Toman (WooCommerce IRT) / Rial (IRR) string → Rials. */
+    /** A WooCommerce amount (IRT, IRR, IRHT, IRHR) → Rials. */
     protected function rials(mixed $value): ?int
     {
         if ($value === null || $value === '') {
@@ -45,7 +45,9 @@ abstract class Step
         }
         $number = (float) str_replace([',', '٬'], '', PersianText::toLatinDigits((string) $value));
 
-        return (int) round($number * (strtoupper((string) config('modules.wordpressimport.currency', 'IRT')) === 'IRR' ? 1 : 10));
+        return (int) round($number * match (strtoupper((string) config('modules.wordpressimport.currency', 'IRT'))) {
+            'IRR' => 1, 'IRHR' => 1_000, 'IRHT' => 10_000, default => 10,   // Rial, thousand Rials, thousand Tomans, Toman
+        });
     }
 
     protected function date(mixed $value): ?Carbon
