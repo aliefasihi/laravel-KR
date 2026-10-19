@@ -63,6 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ->spa(hasPrefetching: true)
             ->navigationGroups([
                 'فروش',
+                'ارتباط با مشتری',
                 'کاتالوگ',
                 'محتوا',
                 'بازاریابی',

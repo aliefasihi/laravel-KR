@@ -19,7 +19,11 @@ use Filament\Forms\Components\Toggle;
 use Livewire\Livewire;
 use Modules\Catalog\Models\Product;
 use Modules\Catalog\Support\ProductSchema;
+use Modules\Crm\Support\FormDefinition;
+use Modules\Crm\Support\Forms;
+use Modules\Reviews\Filament\Resources\Reviews\ReviewResource;
 use Modules\Reviews\Livewire\ReviewForm;
+use Modules\Reviews\Livewire\ReviewList;
 use Modules\Reviews\Models\Review;
 
 class ReviewsServiceProvider extends ModuleServiceProvider
@@ -29,6 +33,10 @@ class ReviewsServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         Livewire::component('reviews.form', ReviewForm::class);
+        Livewire::component('reviews.list', ReviewList::class);
+        Forms::define(new FormDefinition('product_review', 'نظر محصول', [
+            'name' => 'نام', 'mobile' => 'موبایل', 'product' => 'محصول', 'rating' => 'امتیاز', 'title' => 'عنوان', 'body' => 'متن', 'verified' => 'خریدار',
+        ], icon: 'heroicon-o-star', sort: 30, subjectUrl: fn () => ReviewResource::getUrl()));
         StorefrontHooks::add('product.tabs', 'reviews::partials.tab');
         StorefrontHooks::add('product.sections', 'reviews::partials.section');
 
@@ -60,13 +68,14 @@ class ReviewsServiceProvider extends ModuleServiceProvider
             title: 'نظرات',
             icon: 'heroicon-o-star',
             sort: 40,
-            defaults: ['auto_approve' => 'none', 'require_purchase' => false],
+            defaults: ['auto_approve' => 'none', 'require_purchase' => false, 'allow_guests' => true],
             schema: fn () => [
                 Radio::make('auto_approve')->label('انتشار نظر')->options([
                     'none' => 'همه‌ی نظرها پس از تأیید در پنل',
                     'verified' => 'نظر خریداران این محصول خودکار؛ بقیه پس از تأیید',
                     'all' => 'همه خودکار (توصیه نمی‌شود)',
                 ])->required(),
+                Toggle::make('allow_guests')->label('بازدیدکنندگان بدون ورود هم بتوانند نظر بنویسند (با نام و موبایل؛ همیشه پس از تأیید منتشر می‌شود مگر «همه خودکار»)'),
                 Toggle::make('require_purchase')->label('فقط خریداران محصول بتوانند نظر بنویسند'),
             ],
         ));

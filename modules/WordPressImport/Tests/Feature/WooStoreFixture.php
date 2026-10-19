@@ -104,6 +104,11 @@ trait WooStoreFixture
         $wp->comment(801, 100, 'ممنون از شما', ['comment_author' => 'خانه رمانتیک', 'user_id' => 501, 'comment_parent' => 800]);
         $wp->comment(802, 100, 'spam', ['comment_approved' => 'spam'], ['rating' => '1']);
 
+        // blog comments: a question, the shop's answer, and a reply to the answer
+        $wp->comment(860, 200, 'برای گاز القایی هم خوب است؟', ['comment_author' => 'نگار', 'comment_author_email' => 'negar@example.com']);
+        $wp->comment(861, 200, 'بله، کف القایی دارد.', ['comment_author' => 'خانه رمانتیک', 'user_id' => 501, 'comment_parent' => 860]);
+        $wp->comment(862, 200, 'ممنون!', ['comment_author' => 'نگار', 'comment_parent' => 861, 'comment_approved' => '0']);
+
         return $wp;
     }
 

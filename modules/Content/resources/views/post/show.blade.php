@@ -43,4 +43,6 @@
             </div>
         </div>
     </article>
+
+    @storefrontHook('post.after', ['post' => $post])
 @endsection

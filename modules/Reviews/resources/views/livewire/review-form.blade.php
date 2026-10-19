@@ -1,10 +1,11 @@
 {{-- Review form | نویسنده: علی فصیحی (Ali Fasihi) --}}
 <div>
-    @if (! $customer)
+    @php($loginUrl = route('customer.login', ['back' => parse_url(\Modules\Catalog\Models\Product::find($productId)?->url() ?? '/', PHP_URL_PATH).'#reviews']))
+    @if (! $customer && ! $guests)
         <div class="rounded-[var(--radius-card)] bg-surface/60 p-5 text-center ring-1 ring-line">
             <p class="font-bold text-navy">نظر خود را درباره‌ی این محصول بنویسید</p>
             <p class="mt-1 text-sm text-muted">برای ثبت نظر، اول وارد حساب کاربری شوید.</p>
-            <a href="{{ route('customer.login', ['back' => parse_url(\Modules\Catalog\Models\Product::find($productId)?->url() ?? '/', PHP_URL_PATH).'#reviews']) }}" class="btn-navy mt-4" data-no-prerender>ورود و نوشتن نظر</a>
+            <a href="{{ $loginUrl }}" class="btn-navy mt-4" data-no-prerender>ورود و نوشتن نظر</a>
         </div>
     @elseif ($sent)
         <div class="rounded-[var(--radius-card)] bg-rose-100 p-5 text-center text-sm font-bold text-rose">نظر شما ثبت شد. ممنون که وقت گذاشتید 🌸</div>
@@ -25,6 +26,21 @@
                 <span class="ms-2 text-sm text-muted" x-text="['', 'خیلی بد', 'بد', 'معمولی', 'خوب', 'عالی'][hover || $wire.rating]"></span>
             </div>
             @error('rating')<p class="text-xs text-rose">{{ $message }}</p>@enderror
+            @unless ($customer)
+                <div class="grid gap-3">
+                    <div>
+                        <label for="rv-name" class="mb-1.5 block text-sm font-bold text-navy">نام</label>
+                        <input id="rv-name" type="text" wire:model="name" autocomplete="name" maxlength="60" class="field">
+                        @error('name')<p class="mt-1 text-xs text-rose">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="rv-mobile" class="mb-1.5 block text-sm font-bold text-navy">موبایل <span class="font-normal text-subtle">(نمایش داده نمی‌شود)</span></label>
+                        <input id="rv-mobile" type="tel" inputmode="numeric" dir="ltr" wire:model="mobile" placeholder="09xxxxxxxxx" class="field text-start">
+                        @error('mobile')<p class="mt-1 text-xs text-rose">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+                <p class="text-xs text-muted">از ما خرید کرده‌اید؟ <a href="{{ $loginUrl }}" class="font-bold text-rose" data-no-prerender>وارد شوید</a> تا نظرتان با نشان «خریدار این محصول» نمایش داده شود.</p>
+            @endunless
             <div>
                 <label for="rv-title" class="mb-1.5 block text-sm font-bold text-navy">عنوان <span class="font-normal text-subtle">(اختیاری)</span></label>
                 <input id="rv-title" type="text" wire:model="title" maxlength="80" class="field" placeholder="مثلاً: کیفیت عالی، بسته‌بندی خوب">
@@ -34,6 +50,7 @@
                 <textarea id="rv-body" rows="4" wire:model="body" maxlength="2000" class="field" placeholder="تجربه‌ی خود از کیفیت، اندازه و رنگ را بنویسید…"></textarea>
                 @error('body')<p class="mt-1 text-xs text-rose">{{ $message }}</p>@enderror
             </div>
+            <div class="hidden" aria-hidden="true"><input type="text" wire:model="website" tabindex="-1" autocomplete="off"></div>
             <button type="submit" class="btn-rose" wire:loading.attr="disabled">ثبت نظر</button>
         </form>
     @endif

@@ -25,3 +25,6 @@ Route::get('contact-us', [PageController::class, 'contact'])->name('pages.contac
 Route::post('newsletter', NewsletterController::class)
     ->middleware('throttle:5,1')
     ->name('newsletter.subscribe');
+Route::get('newsletter/unsubscribe/{subscriber}', [NewsletterController::class, 'unsubscribe'])
+    ->middleware('signed')
+    ->name('newsletter.unsubscribe');

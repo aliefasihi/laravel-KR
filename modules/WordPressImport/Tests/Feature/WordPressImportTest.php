@@ -18,6 +18,7 @@ use Modules\Attributes\Models\ProductAttribute;
 use Modules\Catalog\Models\Brand;
 use Modules\Catalog\Models\Category;
 use Modules\Catalog\Models\Product;
+use Modules\Comments\Models\Comment;
 use Modules\Content\Models\Post;
 use Modules\Coupon\Models\Coupon;
 use Modules\Customer\Models\Customer;
@@ -126,6 +127,17 @@ class WordPressImportTest extends TestCase
         $this->assertSame(1, Review::query()->count());
         $this->assertEquals(4.0, (float) $simple->fresh()->rating_avg);
 
+        // blog comments with the shop's answer; deeper replies hang under the first comment
+        $question = Comment::query()->where('legacy_comment_id', 860)->sole();
+        $answer = Comment::query()->where('legacy_comment_id', 861)->sole();
+        $thanks = Comment::query()->where('legacy_comment_id', 862)->sole();
+        $this->assertSame(Post::query()->where('legacy_post_id', 200)->value('id'), $question->commentable_id);
+        $this->assertSame('negar@example.com', $question->email);
+        $this->assertTrue($answer->is_staff);
+        $this->assertSame($question->id, $answer->parent_id);
+        $this->assertSame($question->id, $thanks->parent_id);
+        $this->assertSame('pending', $thanks->status);
+
         // redirects: product base, ?p=, post permalink, page map, image sizes, tags
         $this->get('/product/'.rawurlencode('سرویس-قابلمه').'/')->assertStatus(301)->assertRedirect(url('p/goldkish-gk-1024'));
         $this->get('/?p=100')->assertStatus(301)->assertRedirect(url('p/goldkish-gk-1024'));
@@ -151,6 +163,7 @@ class WordPressImportTest extends TestCase
         $this->assertSame(2, Order::query()->count());
         $this->assertSame(2, Customer::query()->count());
         $this->assertSame(1, Review::query()->count());
+        $this->assertSame(3, Comment::query()->count());
         $this->assertSame(1, Media::query()->count());
         $this->assertSame(1, DB::table('coupon_usages')->count());
         $this->assertSame(1, Order::query()->where('legacy_wp_id', 700)->sole()->items()->count());

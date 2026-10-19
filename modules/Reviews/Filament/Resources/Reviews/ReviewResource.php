@@ -77,7 +77,9 @@ class ReviewResource extends Resource
                     ->description(fn (Review $r) => $r->title),
                 TextColumn::make('product.name')->label('محصول')->limit(40)->searchable()
                     ->url(fn (Review $r) => $r->product?->url(), shouldOpenInNewTab: true),
-                TextColumn::make('name')->label('مشتری')->description(fn (Review $r) => $r->is_verified_buyer ? 'خریدار این محصول' : null),
+                TextColumn::make('name')->label('مشتری')->searchable(['name', 'mobile'])
+                    ->description(fn (Review $r) => $r->is_verified_buyer ? 'خریدار این محصول' : ($r->customer_id ? 'مشتری سایت' : ($r->mobile ? 'مهمان · '.PersianText::toPersianDigits($r->mobile) : null))),
+                TextColumn::make('helpful')->label('مفید')->formatStateUsing(fn ($state) => PersianText::toPersianDigits($state))->sortable()->toggleable(),
                 TextColumn::make('status')->label('وضعیت')->badge()
                     ->formatStateUsing(fn (string $state) => Review::STATUSES[$state] ?? $state)
                     ->color(fn (string $state) => Review::COLORS[$state] ?? 'gray'),

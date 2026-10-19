@@ -1,0 +1,9 @@
+{
+    "title": "نظرات مقاله‌ها",
+    "description": "بخش نظر زیر مقاله‌های مجله: پاسخ‌دهی تودرتو، پسندیدن، تأیید در پنل و پاسخ فروشگاه.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": ["Content"],
+    "default": true,
+    "icon": "chat-bubble-left-right"
+}

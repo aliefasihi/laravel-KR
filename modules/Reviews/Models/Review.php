@@ -27,7 +27,7 @@ class Review extends Model
 
     protected function casts(): array
     {
-        return ['rating' => 'integer', 'is_verified_buyer' => 'boolean', 'replied_at' => 'datetime'];
+        return ['rating' => 'integer', 'is_verified_buyer' => 'boolean', 'helpful' => 'integer', 'replied_at' => 'datetime'];
     }
 
     protected static function booted(): void

@@ -4,8 +4,10 @@ use Modules\Appearance\Providers\AppearanceServiceProvider;
 use Modules\Attributes\Providers\AttributesServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
 use Modules\Checkout\Providers\CheckoutServiceProvider;
+use Modules\Comments\Providers\CommentsServiceProvider;
 use Modules\Content\Providers\ContentServiceProvider;
 use Modules\Coupon\Providers\CouponServiceProvider;
+use Modules\Crm\Providers\CrmServiceProvider;
 use Modules\Customer\Providers\CustomerServiceProvider;
 use Modules\FileManager\Providers\FileManagerServiceProvider;
 use Modules\HomeSliders\Providers\HomeSlidersServiceProvider;
@@ -42,12 +44,14 @@ return [
         PlacementServiceProvider::class,
         SmsServiceProvider::class,
         CustomerServiceProvider::class,
+        CrmServiceProvider::class,
         CheckoutServiceProvider::class,
         CouponServiceProvider::class,
         ShippingServiceProvider::class,
         OrderServiceProvider::class,
         PaymentServiceProvider::class,
         ReviewsServiceProvider::class,
+        CommentsServiceProvider::class,
         IntegrationServiceProvider::class,
         WordPressImportServiceProvider::class,
     ],

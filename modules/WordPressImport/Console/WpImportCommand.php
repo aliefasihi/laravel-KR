@@ -16,7 +16,7 @@ use Throwable;
 
 class WpImportCommand extends Command
 {
-    protected $signature = 'wp:import {steps?* : '.'taxonomies products posts customers coupons orders reviews redirects links (or "all")}
+    protected $signature = 'wp:import {steps?* : '.'taxonomies products posts customers coupons orders reviews comments redirects links (or "all")}
         {--dry-run : Count only, write nothing}
         {--limit= : Only the first N records of each step (for a trial)}
         {--source= : An uploaded database (id from wp:import:load, or "latest"); default: the WP_DB_* connection}';

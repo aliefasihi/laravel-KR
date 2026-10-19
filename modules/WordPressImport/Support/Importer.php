@@ -15,6 +15,7 @@ use App\Core\Support\StoreCache;
 use Illuminate\Support\Facades\Cache;
 use Modules\WordPressImport\Models\ImportRun;
 use Modules\WordPressImport\Models\ImportSource;
+use Modules\WordPressImport\Support\Steps\CommentsStep;
 use Modules\WordPressImport\Support\Steps\CouponsStep;
 use Modules\WordPressImport\Support\Steps\CustomersStep;
 use Modules\WordPressImport\Support\Steps\LinksStep;
@@ -30,7 +31,7 @@ use Throwable;
 
 class Importer
 {
-    public const ORDER = ['taxonomies', 'products', 'posts', 'customers', 'coupons', 'orders', 'reviews', 'redirects', 'links'];
+    public const ORDER = ['taxonomies', 'products', 'posts', 'customers', 'coupons', 'orders', 'reviews', 'comments', 'redirects', 'links'];
 
     public function __construct(private Source $wp, private MediaImporter $media) {}
 
@@ -61,6 +62,7 @@ class Importer
             new CouponsStep($this->wp),
             new OrdersStep($this->wp),
             new ReviewsStep($this->wp),
+            new CommentsStep($this->wp),
             new RedirectsStep($this->wp, $this->media),
             new LinksStep($this->wp),
         ];

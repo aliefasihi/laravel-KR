@@ -38,16 +38,8 @@
                     <h2 id="newsletter-title" class="text-2xl font-black text-navy">عضویت در باشگاه خبری خانه رمانتیک</h2>
                     <p class="mt-2 leading-7 text-muted">اولین نفری باشید که از تخفیف‌ها، کالکشن‌های تازه و ایده‌های چیدمان خبردار می‌شود.</p>
                 </div>
-                <form method="post" action="{{ route('newsletter.subscribe') }}" class="glass-strong flex items-center gap-2 rounded-full p-1.5 ps-5">
-                    @csrf
-                    <label for="newsletter-contact" class="sr-only">ایمیل یا شماره موبایل</label>
-                    <input id="newsletter-contact" name="contact" type="text" inputmode="email" required value="{{ old('contact') }}"
-                           placeholder="ایمیل یا شماره موبایل" class="min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-subtle focus:outline-none">
-                    <button class="btn-rose !px-5 !py-2.5">عضویت</button>
-                </form>
-                {{-- $errors is absent on error pages rendered outside the web middleware --}}
-                @if (isset($errors) && $errors->newsletter->has('contact'))
-                    <p class="text-sm text-rose lg:col-start-2" role="alert">{{ $errors->newsletter->first('contact') }}</p>
+                @if (Route::has('newsletter.subscribe') && class_exists(\Livewire\Livewire::class))
+                    <livewire:content.newsletter />
                 @endif
             </div>
         </section>

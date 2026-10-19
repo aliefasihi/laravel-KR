@@ -17,6 +17,7 @@ use Modules\Order\Models\Order;
 use Modules\Order\Tests\Feature\ShopTestCase;
 use Modules\Reviews\Filament\Resources\Reviews\Pages\ListReviews;
 use Modules\Reviews\Livewire\ReviewForm;
+use Modules\Reviews\Livewire\ReviewList;
 use Modules\Reviews\Models\Review;
 
 class ReviewsTest extends ShopTestCase
@@ -32,6 +33,7 @@ class ReviewsTest extends ShopTestCase
     public function test_guests_are_asked_to_log_in_and_come_back(): void
     {
         Auth::guard('customer')->logout();
+        Settings::set(['reviews.allow_guests' => false]);
 
         $this->get($this->pan->url())->assertOk()
             ->assertSee('href="#reviews"', false)
@@ -42,6 +44,40 @@ class ReviewsTest extends ShopTestCase
         $this->assertSame(url('/p/goldkish-gk-7710#reviews'), session('url.intended'));
         $this->get('/account/login?back='.urlencode('//evil.example'));
         $this->assertSame(url('/p/goldkish-gk-7710#reviews'), session('url.intended')); // ignored
+    }
+
+    public function test_guest_reviews_helpful_votes_and_sorting(): void
+    {
+        Auth::guard('customer')->logout();
+        $this->get($this->pan->url())->assertOk()->assertSee('نمایش داده نمی‌شود')->assertSee('وارد شوید');
+
+        Livewire::test(ReviewForm::class, ['productId' => $this->pan->id])
+            ->set('rating', 5)->set('body', 'خیلی زیبا و سنگین است، راضی هستم.')->call('submit')->assertHasErrors(['name', 'mobile'])
+            ->set('name', 'مریم')->set('mobile', '۰۹۳۵۱۲۳۴۵۶۷')->call('submit')->assertHasNoErrors()->assertSet('sent', true);
+        $guest = Review::query()->sole();
+        $this->assertNull($guest->customer_id);
+        $this->assertSame('09351234567', $guest->mobile);
+        $this->assertSame('pending', $guest->status);                       // guests: always after approval
+        $this->assertFalse($guest->is_verified_buyer);
+        $this->assertDatabaseHas('form_submissions', ['form' => 'product_review', 'subject_id' => $guest->id]);
+        $this->assertDatabaseHas('contacts', ['mobile' => '09351234567', 'name' => 'مریم']);
+
+        // the same guest again replaces their review
+        Livewire::test(ReviewForm::class, ['productId' => $this->pan->id])
+            ->set('rating', 4)->set('name', 'مریم')->set('mobile', '09351234567')->set('body', 'بعد از یک ماه هنوز مثل روز اول است.')->call('submit');
+        $this->assertSame(1, Review::query()->count());
+
+        Review::query()->update(['status' => 'approved']);
+        $low = Review::create(['product_id' => $this->pan->id, 'name' => 'رضا', 'rating' => 2, 'body' => 'دسته‌اش داغ می‌شود.', 'status' => 'approved']);
+
+        $before = fn ($list, string $first, string $second) => $this->assertLessThan(strpos($list->html(), $second), strpos($list->html(), $first));
+        $list = Livewire::test(ReviewList::class, ['productId' => $this->pan->id]);
+        $before($list, 'دسته‌اش داغ', 'بعد از یک ماه');                     // newest first
+        $before($list->set('sort', 'highest'), 'بعد از یک ماه', 'دسته‌اش داغ');
+        $list->call('helpful', $low->id)->call('helpful', $low->id);
+        $this->assertSame(1, $low->fresh()->helpful);                       // once per visitor
+        $before($list->set('sort', 'helpful'), 'دسته‌اش داغ', 'بعد از یک ماه');
+        $list->assertSee('(۱)');
     }
 
     public function test_moderation_stars_and_schema(): void
