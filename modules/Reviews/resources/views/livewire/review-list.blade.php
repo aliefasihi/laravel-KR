@@ -32,7 +32,7 @@
             </div>
             @if ($review->reply)
                 <div class="mt-3 rounded-2xl bg-cream px-4 py-3 text-sm">
-                    <p class="mb-1 text-xs font-bold text-rose">پاسخ خانه رمانتیک</p>
+                    <p class="mb-1 text-xs font-bold text-rose">پاسخ {{ config('khaneh.store.name') }}</p>
                     <p class="leading-7 whitespace-pre-line text-navy">{{ $review->reply }}</p>
                 </div>
             @endif

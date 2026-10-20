@@ -1,5 +1,6 @@
 <?php
 
+use App\Core\Http\Middleware\ApplyDesign;
 use App\Core\Http\Middleware\CanonicalTrailingSlash;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -13,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->appendToGroup('web', CanonicalTrailingSlash::class);
+        $middleware->appendToGroup('web', ApplyDesign::class);   // switchable storefront designs
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

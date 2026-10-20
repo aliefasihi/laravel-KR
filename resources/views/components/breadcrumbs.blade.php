@@ -1,7 +1,7 @@
 {{-- Breadcrumbs + BreadcrumbList schema | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @props(['items' => []]) {{-- ['label' => 'url', … ] last item may have null url --}}
 @php
-    $trail = array_merge(['خانه رمانتیک' => route('home')], $items);
+    $trail = array_merge([config('khaneh.store.name') => route('home')], $items);
     $schema = [
         '@context' => 'https://schema.org',
         '@type' => 'BreadcrumbList',

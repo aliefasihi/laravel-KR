@@ -18,7 +18,7 @@
         @open-menu.window="menu = true"
         @keydown.escape.window="mega = false; menu = false">
 
-    <div class="glass frost mx-auto max-w-7xl rounded-[1.75rem] transition-[background-color,box-shadow] duration-300"
+    <div class="glass frost relative mx-auto max-w-7xl rounded-[1.75rem] transition-[background-color,box-shadow] duration-300"
          :class="scrolled && '!bg-surface/80 shadow-[0_16px_40px_-20px_rgb(35_40_79/0.35)]'"
          @mouseleave="mega = false">
 
@@ -74,8 +74,10 @@
         <div id="mega-menu" x-show="mega" x-cloak
              x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="opacity-0 -translate-y-2"
              x-transition:leave="transition duration-150" x-transition:leave-end="opacity-0"
-             class="hidden px-3 pb-3 lg:block">
-            <div class="grid grid-cols-[15rem_1fr] gap-3 rounded-[1.4rem] bg-surface/80 p-3 shadow-[inset_0_1px_0_white]">
+             class="absolute inset-x-0 top-full z-40 hidden pt-2 lg:block">
+            {{-- floats over the page (doesn't push it down); the top padding keeps the hover alive between bar and panel --}}
+            <div class="rounded-[1.75rem] border border-glint bg-surface p-3 shadow-[0_28px_60px_-24px_rgb(35_40_79/0.45)]">
+            <div class="grid grid-cols-[15rem_1fr] gap-3 rounded-[1.4rem] bg-cream/40 p-3">
                 <ul class="space-y-0.5 border-e border-navy/5 pe-3">
                     @foreach ($navCategories as $category)
                         <li>
@@ -116,6 +118,7 @@
                         </div>
                     @endforeach
                 </div>
+            </div>
             </div>
         </div>
     </div>

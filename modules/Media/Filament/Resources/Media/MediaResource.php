@@ -65,7 +65,7 @@ class MediaResource extends Resource
             ->columns([
                 // small WebP version instead of the (often multi-MB) original
                 ImageColumn::make('thumb')->label('')->imageHeight(160)
-                    ->state(fn (Media $record) => $record->urlFor(320)),
+                    ->state(fn (Media $record) => $record->absoluteUrlFor(320)),
                 TextColumn::make('title')->label('عنوان')->searchable()->placeholder('بدون عنوان'),
                 TextColumn::make('dimensions')->label('ابعاد')
                     ->state(fn (Media $record) => $record->width ? PersianText::toPersianDigits("{$record->width}×{$record->height}") : null)

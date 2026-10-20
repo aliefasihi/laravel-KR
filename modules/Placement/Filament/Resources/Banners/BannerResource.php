@@ -87,7 +87,7 @@ class BannerResource extends Resource
             ->defaultSort('id', 'desc')
             ->columns([
                 ImageColumn::make('thumb')->label('')->imageHeight(48)
-                    ->state(fn ($record) => $record->desktopMedia?->urlFor(320)),
+                    ->state(fn ($record) => $record->desktopMedia?->absoluteUrlFor(320)),
                 TextColumn::make('title')->label('عنوان')->searchable(),
                 TextColumn::make('placement.name')->label('جایگاه'),
                 TextColumn::make('status')->label('وضعیت')->badge()

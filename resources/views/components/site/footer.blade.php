@@ -35,7 +35,7 @@
             <div class="blob -bottom-20 end-10 size-64 text-caramel/25" aria-hidden="true"></div>
             <div class="relative grid items-center gap-6 lg:grid-cols-[1fr_28rem]">
                 <div>
-                    <h2 id="newsletter-title" class="text-2xl font-black text-navy">عضویت در باشگاه خبری خانه رمانتیک</h2>
+                    <h2 id="newsletter-title" class="text-2xl font-black text-navy">عضویت در باشگاه خبری {{ config('khaneh.store.name') }}</h2>
                     <p class="mt-2 leading-7 text-muted">اولین نفری باشید که از تخفیف‌ها، کالکشن‌های تازه و ایده‌های چیدمان خبردار می‌شود.</p>
                 </div>
                 @if (Route::has('newsletter.subscribe') && class_exists(\Livewire\Livewire::class))
@@ -58,7 +58,7 @@
                     <h2 class="mb-4 text-sm font-black text-caramel">دسترسی سریع</h2>
                     <ul class="space-y-2.5 text-sm text-white/75">
                         <li><a href="{{ route('catalog.shop') }}" class="hover:text-white">فروشگاه</a></li>
-                        <li><a href="{{ route('content.blog') }}" class="hover:text-white">مجله خانه رمانتیک</a></li>
+                        <li><a href="{{ route('content.blog') }}" class="hover:text-white">مجله {{ config('khaneh.store.name') }}</a></li>
                         <li><a href="{{ route('pages.about') }}" class="hover:text-white">درباره ما</a></li>
                         <li><a href="{{ route('pages.contact') }}" class="hover:text-white">تماس با ما</a></li>
                         <li><a href="{{ route('checkout.cart') }}" class="hover:text-white">سبد خرید</a></li>

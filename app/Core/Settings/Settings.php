@@ -58,6 +58,7 @@ class Settings
 
         Cache::forget(self::CACHE_KEY);
         app(self::class)->values = null;
+        SiteSettings::apply(); // the new name, contact details… for the rest of this request too
         StoreCache::flush(); // pages that show settings (e.g. home sections) are rebuilt
     }
 

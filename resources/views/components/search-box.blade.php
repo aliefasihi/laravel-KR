@@ -13,7 +13,7 @@
                    @keydown.arrow-down.prevent="move(1)" @keydown.arrow-up.prevent="move(-1)" @keydown.enter="enter($event)"
                    role="combobox" aria-autocomplete="list" aria-controls="{{ $id }}-list" :aria-expanded="open"
                    value="{{ $value }}" @if ($autofocus) autofocus @endif
-                   placeholder="{{ $size === 'lg' ? 'نام محصول، برند یا کد کالا…' : 'جستجو در محصولات خانه رمانتیک…' }}"
+                   placeholder="{{ $size === 'lg' ? 'نام محصول، برند یا کد کالا…' : 'جستجو در محصولات '.config('khaneh.store.name').'…' }}"
                    @class([
                        'w-full rounded-full border border-glint/80 bg-surface/70 ps-5 pe-12 text-ink [&::-webkit-search-cancel-button]:appearance-none shadow-[inset_0_1px_2px_rgb(35_40_79/0.06)] placeholder:text-subtle transition focus:border-rose/30 focus:bg-surface focus:ring-4 focus:ring-rose/10 focus:outline-none',
                        'py-3 text-sm' => $size !== 'lg',

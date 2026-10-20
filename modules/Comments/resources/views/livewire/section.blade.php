@@ -15,7 +15,7 @@
                     <span @class(['grid size-10 shrink-0 place-items-center rounded-full text-sm font-black', 'bg-rose text-white' => $comment->is_staff, 'bg-cream text-caramel-600' => ! $comment->is_staff])>{{ $avatar($comment->name) }}</span>
                     <div class="min-w-0 flex-1">
                         <p class="flex flex-wrap items-center gap-2 text-sm">
-                            <span class="font-bold text-navy">{{ $comment->is_staff ? 'خانه رمانتیک' : $comment->name }}</span>
+                            <span class="font-bold text-navy">{{ $comment->is_staff ? config('khaneh.store.name') : $comment->name }}</span>
                             <span class="text-xs text-subtle">{{ Jalali::format($comment->created_at) }}</span>
                         </p>
                         <p class="mt-2 text-sm leading-7 whitespace-pre-line text-muted">{{ $comment->body }}</p>
@@ -36,7 +36,7 @@
                                 <span @class(['grid size-8 shrink-0 place-items-center rounded-full text-xs font-black', 'bg-rose text-white' => $reply->is_staff, 'bg-cream text-caramel-600' => ! $reply->is_staff])>{{ $avatar($reply->name) }}</span>
                                 <div class="min-w-0 flex-1">
                                     <p class="flex flex-wrap items-center gap-2 text-xs">
-                                        <span @class(['font-bold', 'text-rose' => $reply->is_staff, 'text-navy' => ! $reply->is_staff])>{{ $reply->is_staff ? 'پاسخ خانه رمانتیک' : $reply->name }}</span>
+                                        <span @class(['font-bold', 'text-rose' => $reply->is_staff, 'text-navy' => ! $reply->is_staff])>{{ $reply->is_staff ? 'پاسخ '.config('khaneh.store.name') : $reply->name }}</span>
                                         <span class="text-subtle">{{ Jalali::format($reply->created_at) }}</span>
                                     </p>
                                     <p class="mt-1.5 text-sm leading-7 whitespace-pre-line text-navy">{{ $reply->body }}</p>
@@ -70,7 +70,7 @@
             <form wire:submit="submit" class="grid gap-4 sm:grid-cols-2" novalidate>
                 <p class="font-black text-navy sm:col-span-2">
                     @if ($replyingTo)
-                        پاسخ به {{ $replyingTo->is_staff ? 'خانه رمانتیک' : $replyingTo->name }}
+                        پاسخ به {{ $replyingTo->is_staff ? config('khaneh.store.name') : $replyingTo->name }}
                         <button type="button" wire:click="cancelReply" class="ms-2 text-xs font-bold text-rose">انصراف</button>
                     @else
                         نظر شما

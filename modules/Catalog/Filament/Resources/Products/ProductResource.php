@@ -126,7 +126,7 @@ class ProductResource extends Resource
             ->defaultSort('id', 'desc')
             ->columns([
                 ImageColumn::make('thumb')->label('')->square()
-                    ->state(fn (Product $record) => $record->media->first()?->urlFor(160)),
+                    ->state(fn (Product $record) => $record->media->first()?->absoluteUrlFor(160)),
                 TextColumn::make('name')->label('نام')->searchable()->sortable()->limit(50)->wrap(),
                 TextColumn::make('brand.name_fa')->label('برند')->sortable(),
                 TextColumn::make('sku')->label('SKU')->searchable()->copyable()->fontFamily(FontFamily::Mono),

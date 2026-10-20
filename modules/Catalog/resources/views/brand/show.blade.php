@@ -2,7 +2,7 @@
 @extends('layouts.app')
 
 @section('title', $brand->meta_title ?: 'محصولات '.$brand->name_fa)
-@section('meta_description', $brand->meta_description ?: 'خرید محصولات اورجینال '.$brand->name_fa.' ('.$brand->name_en.') با ضمانت اصالت کالا از خانه رمانتیک.')
+@section('meta_description', $brand->meta_description ?: 'خرید محصولات اورجینال '.$brand->name_fa.' ('.$brand->name_en.') با ضمانت اصالت کالا از '.config('khaneh.store.name').'.')
 @section('canonical', $brand->url().($products->currentPage() > 1 ? '?page='.$products->currentPage() : ''))
 
 @section('content')

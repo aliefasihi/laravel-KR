@@ -37,7 +37,7 @@
                 <span wire:loading wire:target="send">در حال ارسال…</span>
             </button>
         </form>
-        <p class="mt-6 text-center text-xs leading-6 text-subtle">ورود شما یعنی پذیرش <a href="{{ route('pages.about') }}" class="text-rose hover:underline">قوانین خانه رمانتیک</a>.</p>
+        <p class="mt-6 text-center text-xs leading-6 text-subtle">ورود شما یعنی پذیرش <a href="{{ route('pages.about') }}" class="text-rose hover:underline">قوانین {{ config('khaneh.store.name') }}</a>.</p>
     @else
         <button type="button" wire:click="editMobile" class="mb-6 inline-flex items-center gap-1.5 text-sm font-bold text-muted hover:text-rose">
             <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7.2 4.2a.75.75 0 0 0 0 1.06L11.94 10 7.2 14.74a.75.75 0 1 0 1.06 1.06l5.27-5.27a.75.75 0 0 0 0-1.06L8.26 4.2a.75.75 0 0 0-1.06 0Z"/></svg>

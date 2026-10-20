@@ -65,7 +65,7 @@ class BrandResource extends Resource
             ->modifyQueryUsing(fn ($query) => $query->with('media'))
             ->columns([
                 ImageColumn::make('thumb')->label('')->circular()
-                    ->state(fn (Brand $record) => $record->media->first()?->urlFor(160)),
+                    ->state(fn (Brand $record) => $record->media->first()?->absoluteUrlFor(160)),
                 TextColumn::make('name_fa')->label('نام')->searchable()->sortable(),
                 TextColumn::make('name_en')->label('English')->searchable(),
                 TextColumn::make('slug')->label('اسلاگ')->fontFamily(FontFamily::Mono),

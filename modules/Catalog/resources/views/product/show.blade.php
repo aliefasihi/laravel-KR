@@ -14,7 +14,7 @@
         'name' => $product->name,
         'sku' => $product->sku,
         'brand' => ['@type' => 'Brand', 'name' => $product->brand->name_fa],
-        'image' => $images->map(fn ($m) => $m->url())->values()->all(),
+        'image' => $images->map(fn ($m) => $m->absoluteUrl())->values()->all(),
         'description' => $product->meta_description ?: strip_tags((string) $product->short_description),
         'offers' => $offers->map(fn ($v) => [
             '@type' => 'Offer',
@@ -51,7 +51,7 @@
 @section('meta_description', (string) ($product->meta_description ?: \Illuminate\Support\Str::limit(strip_tags((string) ($product->short_description ?: $product->description)), 155)))
 @section('canonical', $product->url())
 @if ($images->isNotEmpty())
-    @section('og_image', $images->first()->url())
+    @section('og_image', $images->first()->absoluteUrl())
 @endif
 
 @push('head')

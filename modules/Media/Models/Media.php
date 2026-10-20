@@ -84,6 +84,17 @@ class Media extends Model
             ->implode(', ');
     }
 
+    /** Full address with the site's host (og:image, structured data, admin image columns). */
+    public function absoluteUrl(): string
+    {
+        return url($this->url());
+    }
+
+    public function absoluteUrlFor(int $width = 320): string
+    {
+        return url($this->urlFor($width));
+    }
+
     /** Smallest version that is at least $width px wide (for admin thumbnails, og images, …). */
     public function urlFor(int $width = 320): string
     {

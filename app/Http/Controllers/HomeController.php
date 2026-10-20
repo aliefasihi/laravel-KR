@@ -12,6 +12,7 @@
 namespace App\Http\Controllers;
 
 use App\Core\Modules\Modules;
+use App\Core\Support\Designs;
 use App\Core\Support\StoreCache;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
@@ -30,7 +31,7 @@ class HomeController
     {
         // The whole body is rendered once and kept as HTML: a cached home page costs one cache read.
         $sections = StoreCache::remember(
-            'home.sections',
+            'home.sections.'.Designs::signature(),   // one cached copy per design
             fn () => view('home.sections', $this->data($listing))->render(),
             fn () => $this->nextSwitch(),
         );

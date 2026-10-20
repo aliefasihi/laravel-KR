@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Core\Settings\SiteSettings;
 use App\Filament\Support\Formats;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
@@ -20,5 +21,9 @@ class AppServiceProvider extends ServiceProvider
 
         // ->jalali(), ->faDigits(), ->toman(), ->labels() on admin table columns and infolist entries
         Formats::register();
+
+        // «تنظیمات عمومی» (name, logo, contact…) over config('khaneh.store')
+        SiteSettings::register();
+        SiteSettings::apply();
     }
 }

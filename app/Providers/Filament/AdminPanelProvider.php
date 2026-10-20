@@ -11,6 +11,7 @@
 namespace App\Providers\Filament;
 
 use App\Core\Modules\ModuleRegistry;
+use App\Core\Settings\SiteSettings;
 use App\Filament\Auth\Login;
 use App\Filament\AvatarProviders\InitialsAvatarProvider;
 use Filament\FontProviders\LocalFontProvider;
@@ -41,8 +42,12 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->passwordReset()
             ->profile()
-            ->brandName('خانه رمانتیک')
-            ->favicon(asset('favicon.ico'))
+            // name, logo and favicon from تنظیمات ← عمومی
+            ->brandName(fn () => config('khaneh.store.name'))
+            ->brandLogo(fn () => SiteSettings::logoUrl())
+            ->darkModeBrandLogo(fn () => SiteSettings::logoUrl(light: true) ?? SiteSettings::logoUrl())
+            ->brandLogoHeight('2.5rem')
+            ->favicon(fn () => SiteSettings::faviconUrl())
             ->colors([
                 // brand rose; 500–700 a little deeper than Filament's generated shades so primary
                 // buttons get white text (AA contrast) instead of a pale pink fill

@@ -97,4 +97,18 @@ class Product extends Model
     {
         return route('catalog.product', $this->slug);
     }
+
+    /**
+     * What a product card shows (every card design): the cheapest variant in stock (null = sold out)
+     * and whether one tap can add it (a single active variant). Uses the loaded variants.
+     *
+     * @return array{variant: ?ProductVariant, single: bool}
+     */
+    public function cardSummary(): array
+    {
+        $active = $this->variants->where('is_active', true);
+        $variant = $active->where('stock', '>', 0)->sortBy(fn (ProductVariant $v) => $v->currentPrice())->first();
+
+        return ['variant' => $variant, 'single' => $active->count() === 1 && $variant !== null];
+    }
 }

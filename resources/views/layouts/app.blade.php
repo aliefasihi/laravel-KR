@@ -6,6 +6,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#23284f">
+    <link rel="icon" href="{{ \App\Core\Settings\SiteSettings::faviconUrl() }}">
+    <link rel="apple-touch-icon" href="{{ \App\Core\Settings\SiteSettings::faviconUrl() }}">
     <title>@yield('title', $store['tagline']) | {{ $store['name'] }}</title>
     @hasSection('meta_description')
         <meta name="description" content="@yield('meta_description')">

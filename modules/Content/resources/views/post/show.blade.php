@@ -5,20 +5,11 @@
 @section('meta_description', (string) ($post->meta_description ?: $post->excerpt ?: \Illuminate\Support\Str::limit(strip_tags((string) $post->body_html), 155)))
 @section('canonical', $post->url())
 @if ($cover = $post->media->first())
-    @section('og_image', $cover->url())
+    @section('og_image', $cover->absoluteUrl())
 @endif
 
 @push('head')
-    <script type="application/ld+json">{!! json_encode(array_filter([
-        '@context' => 'https://schema.org',
-        '@type' => 'BlogPosting',
-        'headline' => $post->title,
-        'datePublished' => $post->published_at?->toIso8601String(),
-        'dateModified' => $post->updated_at?->toIso8601String(),
-        'image' => $post->media->first()?->url(),
-        'mainEntityOfPage' => $post->url(),
-        'publisher' => ['@type' => 'Organization', 'name' => config('khaneh.store.name')],
-    ]), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+    @include('content::post.schema')
 @endpush
 
 @section('content')

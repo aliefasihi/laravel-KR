@@ -10,6 +10,8 @@
  *  - the choice is kept in the browser (localStorage "kr-theme": light | dark | system)
  *  - «خودکار» follows the device setting and changes live with it
  * Switched off = the storefront is always light.
+ *
+ * Also the «طرح‌های سایت» tab: pick a demo (or a design per page part) — App\Core\Support\Designs.
  */
 
 namespace Modules\Appearance\Providers;
@@ -17,9 +19,15 @@ namespace Modules\Appearance\Providers;
 use App\Core\Modules\ModuleServiceProvider;
 use App\Core\Settings\Settings;
 use App\Core\Settings\SettingsSection;
+use App\Core\Support\Designs;
 use App\Core\Support\StorefrontHooks;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Support\HtmlString;
 
 class AppearanceServiceProvider extends ModuleServiceProvider
 {
@@ -42,6 +50,38 @@ class AppearanceServiceProvider extends ModuleServiceProvider
             schema: fn () => [
                 Radio::make('default')->label('حالت پیش‌فرض برای بازدیدکننده‌ی تازه')->options(self::MODES)->required(),
                 Toggle::make('toggle')->label('دکمه‌ی تغییر حالت در هدر و منوی موبایل نمایش داده شود'),
+            ],
+        ));
+
+        StorefrontHooks::add('body.start', fn () => Designs::previewing() ? view('appearance::design-preview', ['demo' => Designs::DEMOS[Designs::previewing()]]) : null, 1);
+
+        Settings::section(new SettingsSection(
+            key: 'design',
+            title: 'طرح‌های سایت',
+            icon: 'heroicon-o-swatch',
+            sort: 11,
+            defaults: ['demo' => 'demo1'] + array_fill_keys(array_keys(Designs::SLOTS), 'classic'),
+            schema: fn () => [
+                Radio::make('demo')->label('دمو')
+                    ->options(array_map(fn (array $demo) => $demo['label'], Designs::DEMOS) + ['custom' => 'ترکیبی (هر بخش جدا)'])
+                    ->descriptions(array_map(fn (array $demo) => $demo['description'], Designs::DEMOS) + ['custom' => 'برای هر بخش طرح دلخواه را پایین انتخاب کنید.'])
+                    ->helperText(new HtmlString('پیش‌نمایش قبل از ذخیره (فقط برای شما نمایش داده می‌شود): '.implode(' · ', array_map(
+                        fn (string $key, array $demo) => '<a href="'.e(url('/').'?design='.$key).'" target="_blank" class="font-bold text-primary-600 underline">'.e($demo['label']).'</a>',
+                        array_keys(Designs::DEMOS), Designs::DEMOS,
+                    ))))
+                    ->live()
+                    ->afterStateUpdated(function (?string $state, Set $set) {
+                        foreach (Designs::DEMOS[$state]['slots'] ?? [] as $slot => $variant) {
+                            $set($slot, $variant);
+                        }
+                    }),
+                Fieldset::make('طرح هر بخش')->columns(2)->schema(array_values(array_map(
+                    fn (string $slot, array $meta) => Select::make($slot)->label($meta['label'])->options($meta['variants'])->required()->native(false)->live()
+                        ->afterStateUpdated(fn (Get $get, Set $set) => $set('demo', Designs::demoFor(
+                            collect(array_keys(Designs::SLOTS))->mapWithKeys(fn (string $s) => [$s => $get($s)])->all(),
+                        ) ?? 'custom')),
+                    array_keys(Designs::SLOTS), Designs::SLOTS,
+                ))),
             ],
         ));
     }

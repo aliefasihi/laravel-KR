@@ -168,7 +168,7 @@
         {{-- ── Brand logos ──────────────────────────────────────────────── --}}
         @if ($brands->isNotEmpty())
             <section aria-labelledby="brands-title" class="space-y-7">
-                <x-section-title id="brands-title" accent="برندهای" title="خانه رمانتیک" ghost="Our Brands" />
+                <x-section-title id="brands-title" accent="برندهای" title="{{ config('khaneh.store.name') }}" ghost="Our Brands" />
                 <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                     @foreach ($brands as $brand)
                         <li>

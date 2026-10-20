@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // off: /storage/… belongs to public uploads (Media module serves them if the link is missing)
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
@@ -41,7 +42,9 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // Relative by default: images work on whatever address the site is opened with (APP_URL
+            // can differ: php artisan serve, phone on Wi-Fi, a test domain). A CDN: MEDIA_URL=https://cdn…/storage
+            'url' => env('MEDIA_URL', '/storage'),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

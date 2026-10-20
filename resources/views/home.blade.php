@@ -3,8 +3,8 @@
 
 @php($store = config('khaneh.store'))
 
-@section('title', 'لوازم آشپزخانه، سرو و پذیرایی و اکسسوری دکوراتیو')
-@section('meta_description', 'فروشگاه اینترنتی خانه رمانتیک؛ مرجع تخصصی لوازم و اکسسوری خانه و آشپزخانه با ضمانت اصالت کالا و ارسال به سراسر ایران.')
+@section('title', \App\Core\Settings\Settings::get('site.home_title'))
+@section('meta_description', \App\Core\Settings\Settings::get('site.home_description'))
 @section('canonical', url('/'))
 
 @push('head')

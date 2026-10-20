@@ -10,7 +10,7 @@
         <div class="blob -bottom-24 start-10 -z-10 size-64 text-caramel/25" aria-hidden="true"></div>
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
-                <p class="text-sm text-white/70">باشگاه مشتریان خانه رمانتیک</p>
+                <p class="text-sm text-white/70">باشگاه مشتریان {{ config('khaneh.store.name') }}</p>
                 <h1 class="mt-1 text-2xl font-black">
                     @if ($level)
                         سطح <span style="color: {{ $level->color }}">{{ $level->name }}</span>
@@ -128,10 +128,10 @@
                     <button type="button" @click="copy(@js($referral['link']))" class="btn-navy shrink-0 !px-4 !py-2 text-xs"><span x-show="! copied">کپی لینک</span><span x-show="copied" x-cloak>کپی شد ✓</span></button>
                 </div>
             </div>
-            @php($share = 'از خانه رمانتیک خرید کن و هدیه بگیر: '.$referral['link'])
+            @php($share = 'از '.config('khaneh.store.name').' خرید کن و هدیه بگیر: '.$referral['link'])
             <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
                 <a href="https://wa.me/?text={{ urlencode($share) }}" target="_blank" rel="noopener" class="btn-glass !py-2 text-xs">واتس‌اپ</a>
-                <a href="https://t.me/share/url?url={{ urlencode($referral['link']) }}&text={{ urlencode('از خانه رمانتیک خرید کن و هدیه بگیر') }}" target="_blank" rel="noopener" class="btn-glass !py-2 text-xs">تلگرام</a>
+                <a href="https://t.me/share/url?url={{ urlencode($referral['link']) }}&text={{ urlencode('از '.config('khaneh.store.name').' خرید کن و هدیه بگیر') }}" target="_blank" rel="noopener" class="btn-glass !py-2 text-xs">تلگرام</a>
                 <a href="sms:?body={{ rawurlencode($share) }}" class="btn-glass !py-2 text-xs">پیامک</a>
                 <span class="ms-auto text-xs text-muted">{{ $fa($referral['invited']) }} نفر عضو شده‌اند · {{ $fa($referral['rewarded']) }} نفر خرید کرده‌اند</span>
             </div>

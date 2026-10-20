@@ -7,7 +7,7 @@
     @if ($welcome || ! $customer->fullName())
         <div class="relative overflow-hidden rounded-[var(--radius-glass)] bg-gradient-to-l from-cream via-rose-100 to-caramel-100 p-6">
             <div class="blob -top-16 -end-10 size-56 text-rose/20" aria-hidden="true"></div>
-            <p class="relative text-xl font-black text-navy">به خانه رمانتیک خوش آمدید 🌸</p>
+            <p class="relative text-xl font-black text-navy">به {{ config('khaneh.store.name') }} خوش آمدید 🌸</p>
             <p class="relative mt-1 text-sm text-muted">نام خود را وارد کنید تا سفارش‌ها و فاکتورها به نام شما ثبت شوند.</p>
         </div>
     @endif

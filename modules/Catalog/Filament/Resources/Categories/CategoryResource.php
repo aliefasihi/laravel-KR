@@ -89,7 +89,7 @@ class CategoryResource extends Resource
             ->defaultSort('sort')
             ->columns([
                 ImageColumn::make('thumb')->label('')->circular()
-                    ->state(fn (Category $record) => $record->media->first()?->urlFor(160)),
+                    ->state(fn (Category $record) => $record->media->first()?->absoluteUrlFor(160)),
                 TextColumn::make('name')->label('نام')->searchable()->sortable(),
                 TextColumn::make('parent.name')->label('والد')->placeholder('—'),
                 TextColumn::make('path')->label('مسیر')->limit(40)->tooltip(fn (Category $record) => $record->path),
