@@ -1,5 +1,6 @@
 {{-- Light/dark before first paint + the tiny API the switches use | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @php($default = \App\Core\Settings\Settings::get('appearance.default', 'system'))
+@php($bar = [\App\Core\Support\Designs::themeColor(), \App\Core\Support\Designs::themeColor(dark: true)])   {{-- phone browser bar: [light, dark] of the chosen design --}}
 <meta name="color-scheme" content="light dark">
 <script>
 (() => {
@@ -15,7 +16,7 @@
             setTimeout(() => root.classList.remove('theme-switching'), 350);
         }
         root.classList.toggle('dark', dark);
-        document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#101226' : '#23284f');
+        document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? @js($bar[1]) : @js($bar[0]));
         window.dispatchEvent(new CustomEvent('theme-changed', { detail: { mode: mode(), dark } }));
     };
     window.krTheme = {

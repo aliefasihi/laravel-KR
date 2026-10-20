@@ -14,6 +14,8 @@
  *
  * The chosen variants' folders are put in front of the normal view paths for the request
  * (ApplyDesign middleware); anything a variant doesn't override falls back to the classic view.
+ * The "theme" slot is the palette, fonts and surface style (html[data-theme] + resources/css/themes.css),
+ * so shared pages (cart, checkout, account…) follow the chosen demo too.
  * A demo is a preset of variants for every slot, applied with one click in
  * تنظیمات فروشگاه ← طرح‌های سایت. Admins can preview a demo first: /?design=demo2 (/?design=off).
  */
@@ -29,17 +31,35 @@ final class Designs
 {
     public const SESSION_KEY = 'design.preview';
 
-    /** page part => [label, variants] — "classic" is the original design and always exists */
+    /** page part => [label, variants] — "classic" is the original design and always exists.
+     *  "theme" has no views: it is the palette, fonts and surfaces (html[data-theme], resources/css/themes.css). */
     public const SLOTS = [
-        'home' => ['label' => 'صفحه‌ی اصلی', 'variants' => ['classic' => 'شیشه‌ای', 'minimal' => 'مینیمال']],
-        'listing' => ['label' => 'لیست محصولات (دسته، فروشگاه، برند، جستجو)', 'variants' => ['classic' => 'فیلتر کناری', 'minimal' => 'فیلتر کشویی، تمام‌عرض']],
-        'card' => ['label' => 'کارت محصول', 'variants' => ['classic' => 'کارت شیشه‌ای', 'minimal' => 'بدون قاب']],
-        'blog' => ['label' => 'مجله (لیست مقاله‌ها و صفحه‌ی مقاله)', 'variants' => ['classic' => 'کارت‌های شیشه‌ای', 'minimal' => 'مجله‌ای']],
+        'theme' => ['label' => 'رنگ‌ها و فونت', 'variants' => ['classic' => 'صورتی و سرمه‌ای، شیشه‌ای', 'noir' => 'مشکی و طلایی', 'pop' => 'رنگی و پرانرژی', 'arch' => 'کرم و زیتونی', 'bazaar' => 'سفید و آبی، فروشگاهی']],
+        'chrome' => ['label' => 'هدر و فوتر', 'variants' => ['classic' => 'هدر شیشه‌ای شناور', 'noir' => 'لوگو وسط، مشکی', 'pop' => 'قاب‌دار و رنگی', 'arch' => 'لوگو وسط، خطی و آرام', 'bazaar' => 'جستجوی بزرگ، منوی فروشگاهی']],
+        'home' => ['label' => 'صفحه‌ی اصلی', 'variants' => ['classic' => 'شیشه‌ای', 'minimal' => 'مینیمال', 'noir' => 'ادیتوریال تمام‌صفحه', 'pop' => 'بنتو و رنگی', 'arch' => 'طاق‌ها و فضای آرام', 'bazaar' => 'فروشگاهی و پرمحصول']],
+        'listing' => ['label' => 'لیست محصولات (دسته، فروشگاه، برند، جستجو)', 'variants' => ['classic' => 'فیلتر کناری', 'minimal' => 'فیلتر کشویی، تمام‌عرض', 'noir' => 'فیلتر بازشونده بالای صفحه', 'pop' => 'فیلترهای چیپی', 'arch' => 'فیلتر کناری روشن', 'bazaar' => 'فیلتر جعبه‌ای، شبکه‌ی فشرده']],
+        'card' => ['label' => 'کارت محصول', 'variants' => ['classic' => 'کارت شیشه‌ای', 'minimal' => 'بدون قاب', 'noir' => 'تیره با قیمت طلایی', 'pop' => 'قاب ضخیم و سایه‌ی تخت', 'arch' => 'تصویر طاقی', 'bazaar' => 'فشرده و قاب‌دار']],
+        'product' => ['label' => 'صفحه‌ی محصول', 'variants' => ['classic' => 'گالری و پنل شیشه‌ای', 'noir' => 'تصاویر بلند، جزئیات ثابت', 'pop' => 'رنگی با برچسب قیمت', 'arch' => 'طاقی و آرام', 'bazaar' => 'سه‌ستونه با باکس خرید']],
+        'blog' => ['label' => 'مجله (لیست مقاله‌ها و صفحه‌ی مقاله)', 'variants' => ['classic' => 'کارت‌های شیشه‌ای', 'minimal' => 'مجله‌ای', 'noir' => 'فهرست شماره‌دار', 'pop' => 'کارت‌های رنگی', 'arch' => 'طاقی دوستونه', 'bazaar' => 'لیست با ستون کناری']],
     ];
 
+    /** a demo = one variant per slot (all the same name, except demo 2 which keeps the classic chrome) */
     public const DEMOS = [
-        'demo1' => ['label' => 'دمو ۱ — شیشه‌ای', 'description' => 'طرح فعلی: کارت‌ها و پنل‌های شیشه‌ای، رنگی و پرجزئیات.', 'slots' => ['home' => 'classic', 'listing' => 'classic', 'card' => 'classic', 'blog' => 'classic']],
-        'demo2' => ['label' => 'دمو ۲ — مینیمال', 'description' => 'سفید و خلوت، تصاویر بزرگ، خط‌های نازک به‌جای شیشه؛ تمرکز روی محصول.', 'slots' => ['home' => 'minimal', 'listing' => 'minimal', 'card' => 'minimal', 'blog' => 'minimal']],
+        'demo1' => ['label' => 'دمو ۱ — شیشه‌ای', 'description' => 'طرح فعلی: کارت‌ها و پنل‌های شیشه‌ای، رنگی و پرجزئیات.', 'slots' => ['theme' => 'classic', 'chrome' => 'classic', 'home' => 'classic', 'listing' => 'classic', 'card' => 'classic', 'product' => 'classic', 'blog' => 'classic']],
+        'demo2' => ['label' => 'دمو ۲ — مینیمال', 'description' => 'سفید و خلوت، تصاویر بزرگ، خط‌های نازک به‌جای شیشه؛ تمرکز روی محصول.', 'slots' => ['theme' => 'classic', 'chrome' => 'classic', 'home' => 'minimal', 'listing' => 'minimal', 'card' => 'minimal', 'product' => 'classic', 'blog' => 'minimal']],
+        'demo3' => ['label' => 'دمو ۳ — شب طلایی', 'description' => 'تیره و لوکس: مشکی و طلایی، تیترهای نسخ، عکس‌های تمام‌صفحه؛ حس گالری و بوتیک.', 'slots' => ['theme' => 'noir', 'chrome' => 'noir', 'home' => 'noir', 'listing' => 'noir', 'card' => 'noir', 'product' => 'noir', 'blog' => 'noir']],
+        'demo4' => ['label' => 'دمو ۴ — پاپ', 'description' => 'شاد و جسور: رنگ‌های تند، قاب‌های ضخیم مشکی، سایه‌ی تخت و برچسب؛ برای مخاطب جوان.', 'slots' => ['theme' => 'pop', 'chrome' => 'pop', 'home' => 'pop', 'listing' => 'pop', 'card' => 'pop', 'product' => 'pop', 'blog' => 'pop']],
+        'demo5' => ['label' => 'دمو ۵ — طاق', 'description' => 'آرام و طبیعی: کرم و زیتونی، قاب‌های طاقی‌شکل، فضای باز؛ حس خانه و دست‌ساز.', 'slots' => ['theme' => 'arch', 'chrome' => 'arch', 'home' => 'arch', 'listing' => 'arch', 'card' => 'arch', 'product' => 'arch', 'blog' => 'arch']],
+        'demo6' => ['label' => 'دمو ۶ — بازار', 'description' => 'فروشگاهی و پرمحصول: جستجوی بزرگ، منوی دسته‌ها کنار اسلایدر، شبکه‌ی فشرده؛ برای کاتالوگ بزرگ.', 'slots' => ['theme' => 'bazaar', 'chrome' => 'bazaar', 'home' => 'bazaar', 'listing' => 'bazaar', 'card' => 'bazaar', 'product' => 'bazaar', 'blog' => 'bazaar']],
+    ];
+
+    /** browser bar colour on phones, per palette: [light, dark mode] */
+    public const THEME_COLORS = [
+        'classic' => ['#23284f', '#101226'],
+        'noir' => ['#0e0e0f', '#0e0e0f'],
+        'pop' => ['#ffc21a', '#161616'],
+        'arch' => ['#f3eee4', '#1c1e18'],
+        'bazaar' => ['#ffffff', '#121418'],
     ];
 
     /** @var array<string, string>|null slot => variant for this request */
@@ -100,6 +120,11 @@ final class Designs
     public static function current(string $slot): string
     {
         return (self::$active ?? self::saved())[$slot] ?? 'classic';
+    }
+
+    public static function themeColor(bool $dark = false): string
+    {
+        return (self::THEME_COLORS[self::current('theme')] ?? self::THEME_COLORS['classic'])[(int) $dark];
     }
 
     /** Changes whenever any part of the design changes — part of cached HTML keys. */

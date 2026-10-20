@@ -11,6 +11,7 @@ namespace Tests\Feature;
 use App\Core\Settings\Settings;
 use App\Core\Support\Designs;
 use App\Models\User;
+use Modules\Catalog\Models\Product;
 use Modules\Content\Models\Post;
 use Modules\Search\Tests\Feature\SearchTestCase;
 
@@ -33,6 +34,8 @@ class DesignsTest extends SearchTestCase
             'search' => $this->get('/search?q=ماهیتابه')->assertOk()->getContent(),
             'blog' => $this->get('/blog')->assertOk()->getContent(),
             'post' => $this->get('/blog/table-setting')->assertOk()->getContent(),
+            'product' => $this->get(Product::query()->firstOrFail()->url())->assertOk()->getContent(),
+            'cart' => $this->get('/cart')->assertOk()->getContent(),   // a page no demo redesigns: only the palette changes
         ];
     }
 
@@ -65,13 +68,36 @@ class DesignsTest extends SearchTestCase
         $this->assertStringNotContainsString('x-trap.noscroll="sheet"', $again['shop']);
     }
 
+    public function test_the_four_new_demos_render_every_page_with_their_own_look(): void
+    {
+        $markers = [
+            'demo3' => ['theme' => 'noir', 'home' => 'هنر سفره‌آرایی', 'shop' => 'noir-filters', 'product' => 'noir-rule', 'blog' => 'The Journal'],
+            'demo4' => ['theme' => 'pop', 'home' => 'خونه‌ت رو', 'shop' => 'همه‌ی فیلترها', 'product' => 'pop-frame', 'blog' => 'ایده بگیر'],
+            'demo5' => ['theme' => 'arch', 'home' => 'آرام</span> گرفتن', 'shop' => 'rounded-t-[2.5rem] bg-cream', 'product' => 'arch-frame', 'blog' => 'یادداشت‌هایی از خانه'],
+            'demo6' => ['theme' => 'bazaar', 'home' => 'همه‌چیز برای آشپزخانه و خانه', 'shop' => 'مرتب‌سازی:', 'product' => 'مشخصات فنی', 'blog' => 'تازه‌ترین مطالب'],
+        ];
+        foreach ($markers as $demo => $marker) {
+            $this->useDemo($demo);
+            $pages = $this->pages();
+            foreach ($pages as $page => $html) {
+                $this->assertStringContainsString('data-theme="'.$marker['theme'].'"', $html, "$demo $page: palette");
+            }
+            foreach (['home', 'shop', 'product', 'blog'] as $page) {
+                $this->assertStringContainsString($marker[$page], $pages[$page], "$demo $page: its own template");
+            }
+            $this->assertStringContainsString('"@type":"Product"', $pages['product']);      // same structured data in every design
+            $this->assertStringContainsString('BlogPosting', $pages['post']);
+            $this->assertStringContainsString('noindex', $this->get('/shop?brand[]=riton')->getContent());   // same SEO rules
+        }
+    }
+
     public function test_one_part_can_differ_from_the_rest(): void
     {
         Settings::set(['design.card' => 'minimal']);
         $html = $this->get('/shop')->assertOk()->getContent();
         $this->assertStringContainsString('aspect-[4/5] overflow-hidden rounded-2xl bg-cream/70', $html);   // minimal card
         $this->assertStringNotContainsString('x-trap.noscroll="sheet"', $html);                            // classic listing
-        $this->assertSame('classic-classic-minimal-classic', Designs::signature());
+        $this->assertSame('classic-classic-classic-classic-minimal-classic-classic', Designs::signature());
     }
 
     public function test_admins_preview_a_demo_visitors_never_see_it(): void

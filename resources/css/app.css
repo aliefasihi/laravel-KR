@@ -22,6 +22,7 @@
  *  always-dark panels (footer, glass-navy) and stay white in both modes.
  */
 @import 'tailwindcss';
+@import './themes.css'; /* the other demos' palettes and fonts (data-theme) */
 
 /* Self-hosted Vazirmatn (variable, OFL) — inlined here so the storefront needs no extra CSS request. */
 @font-face {
@@ -56,6 +57,7 @@
 @theme {
     --font-sans: var(--font-brand, 'Vazirmatn'), 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
     --font-latin: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+    --font-display: var(--font-heading, var(--font-sans)); /* headings: a palette may set --font-heading */
 
     --color-navy: #23284f;
     --color-navy-700: #2e3466;
@@ -77,6 +79,11 @@
     --color-muted: #66717f;
     --color-subtle: #98a2ae;
     --color-line: rgb(35 40 79 / 0.09);
+    /* extra accents used by some demos (themes.css) */
+    --color-pop-teal: #13a89e;
+    --color-pop-lilac: #b9a6ff;
+    --color-pop-pink: #ff8fb8;
+    --color-sage: #8a9a72;
 
     --radius-glass: 1.5rem;
     --radius-card: 1.25rem;

@@ -1,62 +1,9 @@
-{{-- Catalog: product page | نویسنده: علی فصیحی (Ali Fasihi) --}}
+{{-- Catalog: product page (data: Modules\Catalog\Support\ProductPage; head: product/head) | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @extends('layouts.app')
 
-@php
-    use App\Core\Support\Money;
-    use App\Core\Support\PersianText;
-    $store = config('khaneh.store');
-    $images = $product->media;
-    $offers = $product->variants->where('is_active', true);
-    $best = $offers->where('stock', '>', 0)->sortBy(fn ($v) => $v->currentPrice())->first() ?? $offers->first();
-    $schema = [
-        '@context' => 'https://schema.org',
-        '@type' => 'Product',
-        'name' => $product->name,
-        'sku' => $product->sku,
-        'brand' => ['@type' => 'Brand', 'name' => $product->brand->name_fa],
-        'image' => $images->map(fn ($m) => $m->absoluteUrl())->values()->all(),
-        'description' => $product->meta_description ?: strip_tags((string) $product->short_description),
-        'offers' => $offers->map(fn ($v) => [
-            '@type' => 'Offer',
-            'sku' => $v->sku,
-            'price' => $v->currentPrice(),
-            'priceCurrency' => 'IRR', // ISO 4217 — Rials
-            'availability' => $v->stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-            'url' => $product->url(),
-        ])->values()->all(),
-    ];
-    $crumbs = ($category ? $category->trail() : []) + [$product->name => null];
-    $specs = array_filter([
-        'برند' => $product->brand->name_fa,
-        'شناسه محصول' => $product->sku,
-        'دسته‌بندی' => $category?->name,
-        'گارانتی' => $store['warranty'],
-    ]) + collect($offers->first()?->options ?? [])->all();
-    // full specs from the Attributes module (if switched on), in the category template's order
-    foreach ($attributeSpecs ?? [] as $row) {
-        $specs[$row['name']] = $row['value'];
-    }
-    if (! empty($attributeSpecs)) {
-        $schema['additionalProperty'] = array_map(fn ($row) => ['@type' => 'PropertyValue', 'name' => $row['name'], 'value' => $row['value']], $attributeSpecs);
-    }
-    $schema = \Modules\Catalog\Support\ProductSchema::apply($product, $schema); // reviews (aggregateRating)…
-    $tabs = array_filter([
-        'description' => $product->description ? 'معرفی محصول' : null,
-        'specs' => 'مشخصات',
-        'related' => $related->isNotEmpty() ? 'محصولات مرتبط' : null,
-    ]);
-@endphp
-
-@section('title', $product->meta_title ?: $product->name)
-@section('meta_description', (string) ($product->meta_description ?: \Illuminate\Support\Str::limit(strip_tags((string) ($product->short_description ?: $product->description)), 155)))
-@section('canonical', $product->url())
-@if ($images->isNotEmpty())
-    @section('og_image', $images->first()->absoluteUrl())
-@endif
-
-@push('head')
-    <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
-@endpush
+@php use App\Core\Support\{Money, PersianText}; @endphp
+@php(extract(\Modules\Catalog\Support\ProductPage::data($product, $category, $related, $attributeSpecs ?? [])))
+@include('catalog::product.head')
 
 @section('content')
     <div class="mx-auto max-w-7xl space-y-6 px-3 pt-5 sm:px-4 sm:pt-6">
