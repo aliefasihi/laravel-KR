@@ -27,9 +27,15 @@ class AddToCart extends Component
 
     public ?string $message = null;
 
+    /** the page's already-loaded variants, for the first render only */
+    private ?Collection $preloaded = null;
+
     public function mount(Product $product): void
     {
         $this->productId = $product->id;
+        if ($product->relationLoaded('variants')) {
+            $this->preloaded = $product->variants->where('is_active', true)->sortBy([['price', 'asc'], ['id', 'asc']])->values();
+        }
 
         $this->variantId = $this->variants->firstWhere(fn (ProductVariant $v) => $v->stock > 0)?->id
             ?? $this->variants->first()?->id;
@@ -39,10 +45,10 @@ class AddToCart extends Component
     #[Computed]
     public function variants(): Collection
     {
-        return ProductVariant::query()
+        return $this->preloaded ?? ProductVariant::query()
             ->where('product_id', $this->productId)
             ->where('is_active', true)
-            ->orderBy('price')
+            ->orderBy('price')->orderBy('id')
             ->get();
     }
 

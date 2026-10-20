@@ -7,7 +7,6 @@
 
 namespace Modules\Loyalty\Filament\Resources\Levels;
 
-use App\Core\Support\Money;
 use App\Core\Support\PersianText;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
@@ -71,7 +70,7 @@ class LevelResource extends Resource
             ->columns([
                 ColorColumn::make('color')->label(''),
                 TextColumn::make('name')->label('سطح')->weight('bold'),
-                TextColumn::make('min_spent')->label('از خرید (تومان)')->formatStateUsing(fn ($state) => Money::toman((int) $state)),
+                TextColumn::make('min_spent')->label('از خرید (تومان)')->toman(),
                 TextColumn::make('points_multiplier')->label('ضریب امتیاز')->formatStateUsing(fn ($state) => '×'.PersianText::toPersianDigits(rtrim(rtrim(number_format((float) $state, 2), '0'), '.'))),
                 TextColumn::make('members')->label('اعضا')->state(fn (Level $l) => PersianText::toPersianDigits(DB::table('loyalty_customer_levels')->where('level_id', $l->id)->count())),
                 IconColumn::make('is_active')->label('فعال')->boolean(),

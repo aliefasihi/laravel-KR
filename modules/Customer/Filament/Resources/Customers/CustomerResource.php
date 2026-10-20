@@ -7,8 +7,6 @@
 
 namespace Modules\Customer\Filament\Resources\Customers;
 
-use App\Core\Support\Jalali;
-use App\Core\Support\PersianText;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
@@ -68,19 +66,19 @@ class CustomerResource extends Resource
             ->defaultSort('id', 'desc')
             ->columns([
                 TextColumn::make('mobile')->label('موبایل')->searchable()->copyable()
-                    ->formatStateUsing(fn (string $state) => PersianText::toPersianDigits($state))->extraAttributes(['dir' => 'ltr']),
+                    ->faDigits()->extraAttributes(['dir' => 'ltr']),
                 TextColumn::make('name')->label('نام')->state(fn (Customer $record) => $record->fullName() ?: '—')
                     ->searchable(['first_name', 'last_name']),
                 TextColumn::make('addresses_count')->label('نشانی')->counts('addresses')->numeric(),
                 IconColumn::make('newsletter')->label('خبرنامه')->boolean(),
                 TextColumn::make('created_at')->label('عضویت')->sortable()
-                    ->formatStateUsing(fn ($state) => Jalali::format($state)),
+                    ->jalali(),
                 TextColumn::make('last_login_at')->label('آخرین ورود')->sortable()
-                    ->formatStateUsing(fn ($state) => $state ? Jalali::format($state).' '.PersianText::toPersianDigits($state->setTimezone(config('khaneh.display_timezone'))->format('H:i')) : '—'),
+                    ->jalali(time: true)->placeholder('—'),
             ])
             ->filters([
-                Filter::make('no_name')->label('بدون نام')->query(fn (Builder $q) => $q->whereNull('first_name')),
-                Filter::make('newsletter')->label('عضو خبرنامه')->query(fn (Builder $q) => $q->where('newsletter', true)),
+                Filter::make('no_name')->label('بدون نام')->query(fn (Builder $query) => $query->whereNull('first_name')),
+                Filter::make('newsletter')->label('عضو خبرنامه')->query(fn (Builder $query) => $query->where('newsletter', true)),
             ])
             ->recordActions([EditAction::make()]);
     }

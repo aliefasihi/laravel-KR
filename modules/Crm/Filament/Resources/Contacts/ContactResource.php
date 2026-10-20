@@ -91,7 +91,7 @@ class ContactResource extends Resource
         return $schema->columns(1)->components([
             Section::make()->columns(3)->schema([
                 TextEntry::make('name')->label('نام')->placeholder('—'),
-                TextEntry::make('mobile')->label('موبایل')->placeholder('—')->formatStateUsing(fn ($state) => PersianText::toPersianDigits($state))
+                TextEntry::make('mobile')->label('موبایل')->placeholder('—')->faDigits()
                     ->url(fn (Contact $c) => $c->mobile ? 'tel:'.$c->mobile : null),
                 TextEntry::make('email')->label('ایمیل')->placeholder('—'),
                 TextEntry::make('customer.mobile')->label('حساب مشتری')->placeholder('ندارد')
@@ -100,8 +100,8 @@ class ContactResource extends Resource
                         ? rescue(fn () => CustomerResource::getUrl('edit', ['record' => $c->customer_id]), null, false) : null),
                 TextEntry::make('tags')->label('برچسب‌ها')->badge()->placeholder('—'),
                 TextEntry::make('source')->label('اولین آشنایی')->formatStateUsing(fn ($state) => Inbox::formLabel((string) $state))->placeholder('—'),
-                TextEntry::make('first_seen_at')->label('اولین بار')->formatStateUsing(fn ($state) => $state ? Jalali::format($state) : '—'),
-                TextEntry::make('last_seen_at')->label('آخرین بار')->formatStateUsing(fn ($state) => $state ? Jalali::format($state) : '—'),
+                TextEntry::make('first_seen_at')->label('اولین بار')->jalali()->placeholder('—'),
+                TextEntry::make('last_seen_at')->label('آخرین بار')->jalali()->placeholder('—'),
                 TextEntry::make('utm')->label('کمپین ورود')->placeholder('—')
                     ->formatStateUsing(fn (Contact $c) => $c->utm ? collect($c->utm)->map(fn ($v, $k) => $k.'='.$v)->implode(' · ') : null),
                 IconEntry::make('newsletter_sms')->label('خبرنامه‌ی پیامکی')->boolean(),
@@ -130,10 +130,10 @@ class ContactResource extends Resource
                 TextColumn::make('tags')->label('برچسب')->badge()->toggleable(),
                 TextColumn::make('source')->label('اولین آشنایی')->formatStateUsing(fn ($state) => Inbox::formLabel((string) $state))->toggleable(),
                 TextColumn::make('submissions_count')->label('فرم‌ها')->numeric()->sortable()
-                    ->formatStateUsing(fn ($state) => PersianText::toPersianDigits($state)),
+                    ->faDigits(),
                 IconColumn::make('newsletter_sms')->label('خبرنامه')->boolean()
                     ->state(fn (Contact $c) => $c->newsletter_sms || $c->newsletter_email),
-                TextColumn::make('last_seen_at')->label('آخرین بار')->sortable()->formatStateUsing(fn ($state) => $state ? Jalali::format($state) : '—'),
+                TextColumn::make('last_seen_at')->label('آخرین بار')->sortable()->jalali()->placeholder('—'),
             ])
             ->filters([
                 TernaryFilter::make('customer_id')->label('حساب مشتری')->nullable()->trueLabel('دارد')->falseLabel('ندارد'),

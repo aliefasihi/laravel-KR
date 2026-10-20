@@ -93,7 +93,7 @@
                     <textarea id="comment-body" rows="4" wire:model="body" maxlength="3000" class="field" placeholder="نظر یا سؤال خود را بنویسید…"></textarea>
                     @error('body')<p class="mt-1 text-xs text-rose">{{ $message }}</p>@enderror
                 </div>
-                <div class="hidden" aria-hidden="true"><input type="text" wire:model="website" tabindex="-1" autocomplete="off"></div>
+                <x-ui.honeypot />
                 <div class="sm:col-span-2">
                     <button type="submit" class="btn-rose" wire:loading.attr="disabled">ثبت نظر</button>
                 </div>

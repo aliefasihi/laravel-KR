@@ -28,11 +28,11 @@
                     </li>
                 @endforeach
             </ul>
-            <livewire:reviews.form :product-id="$product->id" />
+            <livewire:reviews.form :product-id="$product->id" :product-url="$product->url()" />
         </div>
 
         <div>
-            <livewire:reviews.list :product-id="$product->id" :key="'reviews-'.$product->id" />
+            <livewire:reviews.list :product-id="$product->id" :total="$count" :key="'reviews-'.$product->id" />
         </div>
     </div>
 </section>

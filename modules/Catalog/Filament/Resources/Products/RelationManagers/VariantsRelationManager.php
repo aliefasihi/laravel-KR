@@ -65,7 +65,7 @@ class VariantsRelationManager extends RelationManager
                 TextColumn::make('sku')->label('SKU')->fontFamily(FontFamily::Mono),
                 TextColumn::make('options')->label('ویژگی‌ها')
                     ->state(fn (ProductVariant $record) => $record->options ? implode(' · ', $record->options) : '—'),
-                TextColumn::make('price')->label('قیمت')->formatStateUsing(fn ($state) => Money::toman((int) $state).' تومان'),
+                TextColumn::make('price')->label('قیمت')->toman(unit: true),
                 TextColumn::make('current')->label('قیمت فعلی')
                     ->state(fn (ProductVariant $record) => Money::toman($record->currentPrice()).' تومان')
                     ->color(fn (ProductVariant $record) => $record->currentPrice() < $record->price ? 'danger' : null),

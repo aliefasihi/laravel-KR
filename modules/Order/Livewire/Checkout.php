@@ -9,14 +9,13 @@
 
 namespace Modules\Order\Livewire;
 
-use App\Core\Support\PersianText;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Modules\Checkout\Support\Cart;
 use Modules\Checkout\Support\Pricing\Quote;
 use Modules\Customer\Models\Address;
-use Modules\Customer\Support\Mobile;
+use Modules\Customer\Support\AddressForm;
 use Modules\Order\Payments\PaymentMethods;
 use Modules\Order\Support\OrderException;
 use Modules\Order\Support\PlaceOrder;
@@ -69,27 +68,9 @@ class Checkout extends Component
 
     public function saveAddress(): void
     {
-        $this->address['recipient_mobile'] = Mobile::normalize($this->address['recipient_mobile'] ?? '') ?? ($this->address['recipient_mobile'] ?? '');
-        $this->address['postal_code'] = PersianText::toLatinDigits((string) ($this->address['postal_code'] ?? ''));
+        $data = AddressForm::validate($this, 'address');
 
-        $data = $this->validate([
-            'address.recipient_name' => ['required', 'string', 'max:80'],
-            'address.recipient_mobile' => ['required', 'regex:/^09\d{9}$/'],
-            'address.province' => ['required', 'in:'.implode(',', config('modules.customer.provinces'))],
-            'address.city' => ['required', 'string', 'max:60'],
-            'address.address' => ['required', 'string', 'max:500'],
-            'address.plaque' => ['nullable', 'string', 'max:20'],
-            'address.unit' => ['nullable', 'string', 'max:20'],
-            'address.postal_code' => ['nullable', 'digits:10'],
-        ], [
-            'address.recipient_mobile.regex' => 'شماره‌ی موبایل گیرنده درست نیست.',
-            'address.postal_code.digits' => 'کد پستی ۱۰ رقم است.',
-        ], [
-            'address.recipient_name' => 'نام گیرنده', 'address.recipient_mobile' => 'موبایل گیرنده', 'address.province' => 'استان',
-            'address.city' => 'شهر', 'address.address' => 'نشانی',
-        ])['address'];
-
-        $created = $this->customer()->addresses()->create(array_map(fn ($v) => $v === '' ? null : $v, $data));
+        $created = $this->customer()->addresses()->create($data);
         $this->addressId = $created->id;
         $this->addingAddress = false;
         $this->shippingMethod = null;
@@ -123,9 +104,9 @@ class Checkout extends Component
         $this->redirect($url ?? route('customer.orders.show', ['order' => $order, 'placed' => 1]));
     }
 
-    private function quote(Cart $cart): Quote
+    private function quote(Cart $cart, ?Address $address = null): Quote
     {
-        $address = $this->selectedAddress();
+        $address ??= $this->selectedAddress();
 
         return $cart->quote([
             'province' => $address?->province,
@@ -147,23 +128,21 @@ class Checkout extends Component
 
     private function resetAddressForm(): void
     {
-        $customer = $this->customer();
-        $this->address = [
-            'recipient_name' => $customer->fullName(), 'recipient_mobile' => $customer->mobile, 'province' => 'تهران',
-            'city' => '', 'address' => '', 'plaque' => '', 'unit' => '', 'postal_code' => '',
-        ];
+        $this->address = AddressForm::blank($this->customer());
     }
 
     public function render(Cart $cart)
     {
-        $quote = $this->quote($cart);
+        $addresses = $this->customer()->addresses()->get();
+        $address = $this->addressId ? $addresses->firstWhere('id', $this->addressId) : null;
+        $quote = $this->quote($cart, $address);
         $shippingOptions = collect($quote->meta['shipping_options'] ?? []);
         $payments = PaymentMethods::availableFor($quote);
 
         // keep the choices valid as the address / cart change
         if ($shippingOptions->isNotEmpty() && ! $shippingOptions->contains('code', $this->shippingMethod)) {
             $this->shippingMethod = $shippingOptions->first()['code'];
-            $quote = $this->quote($cart);
+            $quote = $this->quote($cart, $address);
         }
         if (! array_key_exists((string) $this->paymentMethod, $payments)) {
             $this->paymentMethod = array_key_first($payments);
@@ -174,10 +153,9 @@ class Checkout extends Component
         return view('order::livewire.checkout', [
             'quote' => $quote,
             'lines' => $quote->context->lines,
-            'addresses' => $this->customer()->addresses()->get(),
+            'addresses' => $addresses,
             'shippingOptions' => $shippingOptions,
             'payments' => $payments,
-            'provinces' => config('modules.customer.provinces'),
         ]);
     }
 }

@@ -114,6 +114,18 @@ final class Jalali
         return PersianText::toPersianDigits($d).' '.self::MONTHS[$m].' '.PersianText::toPersianDigits($y);
     }
 
+    /** "۲۵ مهر ۱۴۰۵، ۱۴:۳۰" — date and time in the store's display timezone (the given date is not changed). */
+    public static function dateTime(DateTimeInterface $date, string $glue = '، '): string
+    {
+        return self::format($date).$glue.self::time($date);
+    }
+
+    /** "۱۴:۳۰" in the store's display timezone. */
+    public static function time(DateTimeInterface $date): string
+    {
+        return PersianText::toPersianDigits(Carbon::instance($date)->setTimezone(config('khaneh.display_timezone', 'Asia/Tehran'))->format('H:i'));
+    }
+
     public static function year(?DateTimeInterface $date = null): int
     {
         $local = Carbon::instance($date ?? now())->setTimezone(config('khaneh.display_timezone', 'Asia/Tehran'));

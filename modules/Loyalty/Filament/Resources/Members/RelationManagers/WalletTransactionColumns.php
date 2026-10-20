@@ -20,26 +20,26 @@ final class WalletTransactionColumns
     public static function make(bool $withCustomer = false): array
     {
         return array_values(array_filter([
-            TextColumn::make('created_at')->label('تاریخ')->sortable()->formatStateUsing(fn ($state) => Jalali::format($state))
-                ->description(fn (WalletTransaction $t) => PersianText::toPersianDigits($t->created_at->copy()->setTimezone(config('khaneh.display_timezone'))->format('H:i'))),
+            TextColumn::make('created_at')->label('تاریخ')->sortable()->jalali()
+                ->description(fn (WalletTransaction $t) => Jalali::time($t->created_at)),
             $withCustomer ? TextColumn::make('customer.mobile')->label('مشتری')->state(fn (WalletTransaction $t) => $t->customer?->displayName() ?? 'حذف‌شده')
                 ->searchable(query: fn ($query, string $search) => $query->whereHas('customer', fn ($c) => $c->where('mobile', 'like', '%'.PersianText::toLatinDigits($search).'%')->orWhere('last_name', 'like', "%{$search}%"))) : null,
-            TextColumn::make('reason')->label('بابت')->badge()->color('gray')->formatStateUsing(fn ($state) => WalletTransaction::REASONS[$state] ?? $state),
+            TextColumn::make('reason')->label('بابت')->badge()->color('gray')->labels(WalletTransaction::REASONS),
             TextColumn::make('description')->label('توضیح')->limit(50)->placeholder('—')
                 ->description(fn (WalletTransaction $t) => $t->order_id ? 'سفارش #'.$t->order_id : null),
             TextColumn::make('amount')->label('مبلغ (تومان)')->state(fn (WalletTransaction $t) => ($t->type === 'credit' ? '+' : '−').Money::toman($t->amount))
                 ->color(fn (WalletTransaction $t) => $t->type === 'credit' ? 'success' : 'danger'),
-            TextColumn::make('balance_after')->label('مانده')->formatStateUsing(fn ($state) => Money::toman((int) $state)),
+            TextColumn::make('balance_after')->label('مانده')->toman(),
         ]));
     }
 
     public static function points(bool $withCustomer = false): array
     {
         return array_values(array_filter([
-            TextColumn::make('created_at')->label('تاریخ')->sortable()->formatStateUsing(fn ($state) => Jalali::format($state)),
+            TextColumn::make('created_at')->label('تاریخ')->sortable()->jalali(),
             $withCustomer ? TextColumn::make('customer.mobile')->label('مشتری')->state(fn (PointsTransaction $t) => $t->customer?->displayName() ?? 'حذف‌شده')
                 ->searchable(query: fn ($query, string $search) => $query->whereHas('customer', fn ($c) => $c->where('mobile', 'like', '%'.PersianText::toLatinDigits($search).'%')->orWhere('last_name', 'like', "%{$search}%"))) : null,
-            TextColumn::make('type')->label('نوع')->badge()->color('gray')->formatStateUsing(fn ($state) => PointsTransaction::TYPES[$state] ?? $state),
+            TextColumn::make('type')->label('نوع')->badge()->color('gray')->labels(PointsTransaction::TYPES),
             TextColumn::make('description')->label('توضیح')->limit(50)->placeholder('—'),
             TextColumn::make('amount')->label('امتیاز')->state(fn (PointsTransaction $t) => ($t->amount > 0 ? '+' : '−').Loyalty::fa((int) abs($t->amount)))
                 ->color(fn (PointsTransaction $t) => $t->amount > 0 ? 'success' : 'danger'),

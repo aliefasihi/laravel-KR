@@ -45,7 +45,7 @@
                 <textarea id="cf-message" rows="5" wire:model="message" maxlength="3000" class="field" placeholder="سؤال یا درخواست خود را بنویسید…"></textarea>
                 @error('message')<p class="mt-1 text-xs text-rose">{{ $message }}</p>@enderror
             </div>
-            <div class="hidden" aria-hidden="true"><input type="text" wire:model="website" tabindex="-1" autocomplete="off"></div>
+            <x-ui.honeypot />
             <div class="sm:col-span-2">
                 <button type="submit" class="btn-rose" wire:loading.attr="disabled">
                     <span wire:loading.remove wire:target="send">ارسال پیام</span>

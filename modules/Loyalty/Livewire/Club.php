@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Modules\Customer\Models\Customer;
 use Modules\Loyalty\Models\PointsTransaction;
 use Modules\Loyalty\Models\Referral;
 use Modules\Loyalty\Models\WalletTransaction;
@@ -114,7 +115,8 @@ class Club extends Component
     {
         $id = $this->customerId();
         $customer = Auth::guard('customer')->user();
-        $level = Levels::current($id);
+        $spent = Levels::totalSpent($id);
+        $levels = Loyalty::on('levels');
         $history = $this->history === 'points'
             ? PointsTransaction::query()->where('customer_id', $id)->latest('id')->limit($this->perPage + 1)->get()
             : WalletTransaction::query()->where('customer_id', $id)->latest('id')->limit($this->perPage + 1)->get();
@@ -125,23 +127,33 @@ class Club extends Component
             'pointValue' => Loyalty::pointValue(),
             'earnPer' => Loyalty::earnPer(),
             'minRedeem' => (int) Loyalty::get('points_min_redeem'),
-            'level' => $level,
-            'next' => Loyalty::on('levels') ? Levels::next($id) : null,
-            'levels' => Loyalty::on('levels') ? Levels::all() : collect(),
-            'spent' => Levels::totalSpent($id),
-            'referral' => Loyalty::on('referral') ? [
-                'code' => Referrals::codeFor($id),
-                'link' => Referrals::link($id),
-                'invited' => Referral::query()->where('referrer_id', $id)->count(),
-                'rewarded' => Referral::query()->where('referrer_id', $id)->where('status', 'rewarded')->count(),
-                'referrer_reward' => Loyalty::rials('referral_referrer_reward'),
-                'referred_reward' => Loyalty::rials('referral_referred_reward'),
-                'min_order' => Loyalty::rials('referral_min_order'),
-                'can_enter' => Referrals::canEnter($customer),
-                'invited_by' => Referral::query()->where('referred_id', $id)->with('referrer')->first(),
-            ] : null,
+            'level' => $levels ? Levels::forSpent($spent) : null,
+            'next' => $levels ? Levels::nextFor($spent) : null,
+            'levels' => $levels ? Levels::all() : collect(),
+            'spent' => $spent,
+            'referral' => Loyalty::on('referral') ? $this->referral($customer) : null,
             'rows' => $history->take($this->perPage),
             'hasMore' => $history->count() > $this->perPage,
         ]);
+    }
+
+    private function referral(Customer $customer): array
+    {
+        $code = Referrals::codeFor($customer->id);
+        $counts = Referral::query()->where('referrer_id', $customer->id)
+            ->selectRaw('count(*) as invited, sum(case when status = ? then 1 else 0 end) as rewarded', ['rewarded'])->first();
+        $invitedBy = Referral::query()->where('referred_id', $customer->id)->with('referrer')->first();
+
+        return [
+            'code' => $code,
+            'link' => Referrals::linkFor($code),
+            'invited' => (int) $counts?->invited,
+            'rewarded' => (int) $counts?->rewarded,
+            'referrer_reward' => Loyalty::rials('referral_referrer_reward'),
+            'referred_reward' => Loyalty::rials('referral_referred_reward'),
+            'min_order' => Loyalty::rials('referral_min_order'),
+            'can_enter' => $invitedBy === null && Referrals::stillNew($customer),
+            'invited_by' => $invitedBy,
+        ];
     }
 }

@@ -48,7 +48,12 @@ final class Levels
     /** @return array{level: Level, remaining: int, progress: int}|null the next level and how far it is */
     public static function next(int $customerId): ?array
     {
-        $spent = self::totalSpent($customerId);
+        return self::nextFor(self::totalSpent($customerId));
+    }
+
+    /** @return array{level: Level, remaining: int, progress: int}|null same as next(), from a known total */
+    public static function nextFor(int $spent): ?array
+    {
         $current = self::forSpent($spent);
         $next = self::all()->first(fn (Level $l) => $l->min_spent > $spent);
         if (! $next) {

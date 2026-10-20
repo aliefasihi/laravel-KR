@@ -1,6 +1,5 @@
 {{-- Review form | نویسنده: علی فصیحی (Ali Fasihi) --}}
 <div>
-    @php($loginUrl = route('customer.login', ['back' => parse_url(\Modules\Catalog\Models\Product::find($productId)?->url() ?? '/', PHP_URL_PATH).'#reviews']))
     @if (! $customer && ! $guests)
         <div class="rounded-[var(--radius-card)] bg-surface/60 p-5 text-center ring-1 ring-line">
             <p class="font-bold text-navy">نظر خود را درباره‌ی این محصول بنویسید</p>
@@ -50,7 +49,7 @@
                 <textarea id="rv-body" rows="4" wire:model="body" maxlength="2000" class="field" placeholder="تجربه‌ی خود از کیفیت، اندازه و رنگ را بنویسید…"></textarea>
                 @error('body')<p class="mt-1 text-xs text-rose">{{ $message }}</p>@enderror
             </div>
-            <div class="hidden" aria-hidden="true"><input type="text" wire:model="website" tabindex="-1" autocomplete="off"></div>
+            <x-ui.honeypot />
             <button type="submit" class="btn-rose" wire:loading.attr="disabled">ثبت نظر</button>
         </form>
     @endif

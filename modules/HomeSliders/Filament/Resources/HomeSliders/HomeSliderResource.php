@@ -104,7 +104,7 @@ class HomeSliderResource extends Resource
                         'brand' => 'برند: '.($record->brand?->name_fa ?? '—'),
                         default => HomeSlider::SOURCES[$record->source] ?? $record->source,
                     }),
-                TextColumn::make('slot')->label('جا')->formatStateUsing(fn (string $state) => HomeSlider::SLOTS[$state] ?? $state)->badge()->color('gray'),
+                TextColumn::make('slot')->label('جا')->labels(HomeSlider::SLOTS)->badge()->color('gray'),
                 TextColumn::make('style')->label('طرح')->formatStateUsing(fn (string $state) => $state === 'band' ? 'نوار رنگی' : 'ساده'),
                 TextColumn::make('limit')->label('تعداد')->numeric(),
                 ToggleColumn::make('is_active')->label('فعال'),

@@ -21,6 +21,7 @@ use Modules\Checkout\Support\Pricing\Quoter;
 use Modules\Customer\Models\Address;
 use Modules\Customer\Models\Customer;
 use Modules\Order\Models\Order;
+use Modules\Order\Models\OrderItem;
 use Modules\Order\Payments\PaymentMethods;
 
 class PlaceOrder
@@ -103,19 +104,7 @@ class PlaceOrder
             $order->assignNumber();
 
             foreach ($lines as $line) {
-                $variant = $line->variant;
-                $order->items()->create([
-                    'product_id' => $variant->product_id,
-                    'variant_id' => $variant->id,
-                    'name' => $variant->product->name,
-                    'sku' => $variant->sku,
-                    'brand' => $variant->product->brand?->name_fa,
-                    'options' => $variant->options ?: null,
-                    'regular_price' => $variant->price,
-                    'unit_price' => $line->unitPrice(),
-                    'quantity' => $line->quantity,
-                    'total' => $line->total(),
-                ]);
+                $order->items()->create(OrderItem::snapshot($line->variant, $line->unitPrice(), $line->quantity));
             }
 
             $this->stock->reduce($order->load('items'));

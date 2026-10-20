@@ -7,8 +7,8 @@
 
 namespace Modules\Reviews\Filament\Resources\Reviews;
 
-use App\Core\Support\Jalali;
 use App\Core\Support\PersianText;
+use App\Filament\Support\NavigationBadge;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -24,14 +24,13 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Cache;
 use Modules\Reviews\Filament\Resources\Reviews\Pages\ListReviews;
 use Modules\Reviews\Models\Review;
 use UnitEnum;
 
 class ReviewResource extends Resource
 {
-    public const BADGE_CACHE_KEY = 'admin.badge.reviews';
+    public const BADGE_CACHE_KEY = Review::BADGE_KEY;
 
     protected static ?string $model = Review::class;
 
@@ -49,9 +48,7 @@ class ReviewResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = rescue(fn () => Cache::remember(self::BADGE_CACHE_KEY, 60, fn () => Review::query()->where('status', 'pending')->count()), 0, report: false);
-
-        return $count ? PersianText::toPersianDigits($count) : null;
+        return NavigationBadge::count(self::BADGE_CACHE_KEY, fn () => Review::query()->where('status', 'pending')->count());
     }
 
     public static function canCreate(): bool
@@ -62,7 +59,6 @@ class ReviewResource extends Resource
     private static function setStatus(Review $review, string $status): void
     {
         $review->update(['status' => $status]);
-        Cache::forget(self::BADGE_CACHE_KEY);
     }
 
     public static function table(Table $table): Table
@@ -79,12 +75,11 @@ class ReviewResource extends Resource
                     ->url(fn (Review $r) => $r->product?->url(), shouldOpenInNewTab: true),
                 TextColumn::make('name')->label('مشتری')->searchable(['name', 'mobile'])
                     ->description(fn (Review $r) => $r->is_verified_buyer ? 'خریدار این محصول' : ($r->customer_id ? 'مشتری سایت' : ($r->mobile ? 'مهمان · '.PersianText::toPersianDigits($r->mobile) : null))),
-                TextColumn::make('helpful')->label('مفید')->formatStateUsing(fn ($state) => PersianText::toPersianDigits($state))->sortable()->toggleable(),
+                TextColumn::make('helpful')->label('مفید')->faDigits()->sortable()->toggleable(),
                 TextColumn::make('status')->label('وضعیت')->badge()
-                    ->formatStateUsing(fn (string $state) => Review::STATUSES[$state] ?? $state)
-                    ->color(fn (string $state) => Review::COLORS[$state] ?? 'gray'),
+                    ->labels(Review::STATUSES, Review::COLORS),
                 IconColumn::make('reply')->label('پاسخ')->boolean()->state(fn (Review $r) => filled($r->reply)),
-                TextColumn::make('created_at')->label('تاریخ')->sortable()->formatStateUsing(fn ($state) => Jalali::format($state)),
+                TextColumn::make('created_at')->label('تاریخ')->sortable()->jalali(),
             ])
             ->filters([
                 SelectFilter::make('status')->label('وضعیت')->options(Review::STATUSES)->default('pending'),
@@ -100,10 +95,7 @@ class ReviewResource extends Resource
                 Action::make('reply')->label('پاسخ')->icon('heroicon-o-chat-bubble-left')
                     ->fillForm(fn (Review $r) => ['reply' => $r->reply])
                     ->schema([Textarea::make('reply')->label('پاسخ فروشگاه (زیر نظر نمایش داده می‌شود)')->rows(4)])
-                    ->action(function (Review $r, array $data) {
-                        $r->update(['reply' => $data['reply'] ?: null, 'replied_at' => $data['reply'] ? now() : null, 'status' => 'approved']);
-                        Cache::forget(self::BADGE_CACHE_KEY);
-                    }),
+                    ->action(fn (Review $r, array $data) => $r->update(['reply' => $data['reply'] ?: null, 'replied_at' => $data['reply'] ? now() : null, 'status' => 'approved'])),
                 DeleteAction::make()->label(''),
             ])
             ->toolbarActions([

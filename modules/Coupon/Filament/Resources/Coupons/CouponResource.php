@@ -7,7 +7,6 @@
 
 namespace Modules\Coupon\Filament\Resources\Coupons;
 
-use App\Core\Support\Jalali;
 use App\Core\Support\PersianText;
 use App\Filament\Forms\TomanInput;
 use BackedEnum;
@@ -126,7 +125,7 @@ class CouponResource extends Resource
                 TextColumn::make('used_count')->label('استفاده')->sortable()
                     ->formatStateUsing(fn (Coupon $record) => PersianText::toPersianDigits($record->used_count).($record->usage_limit ? ' از '.PersianText::toPersianDigits($record->usage_limit) : '')),
                 TextColumn::make('ends_at')->label('پایان')->sortable()
-                    ->formatStateUsing(fn ($state) => $state ? Jalali::format($state) : null)->placeholder('بدون پایان')
+                    ->jalali()->placeholder('بدون پایان')
                     ->color(fn (Coupon $record) => $record->ends_at?->isPast() ? 'danger' : null),
                 ToggleColumn::make('is_active')->label('فعال'),
             ])

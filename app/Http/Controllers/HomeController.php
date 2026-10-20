@@ -72,6 +72,7 @@ class HomeController
             ->orderByRaw('sale_ends_at IS NULL, sale_ends_at')
             ->first();
         $special = $specialVariant?->product()->with(['brand', 'variants', 'media'])->first();
+        $specialVariant?->setRelation('product', $special);
 
         // Countdown for the offers band: earliest sale end, otherwise midnight in Tehran.
         $dealsEnd = ProductVariant::query()->where($onSale)->whereNotNull('sale_ends_at')->min('sale_ends_at');
@@ -84,10 +85,17 @@ class HomeController
             ->orderByDesc('products_count')
             ->get();
 
-        $showcase = $brands->where('products_count', '>', 0)->take(4)->map(fn (Brand $brand) => [
+        // the newest 8 of each of the top 4 brands — one query for all four (window function)
+        $top = $brands->where('products_count', '>', 0)->take(4);
+        $newestPerBrand = Product::query()->active()->whereIn('brand_id', $top->modelKeys())
+            ->select('products.*')->selectRaw('ROW_NUMBER() OVER (PARTITION BY brand_id ORDER BY id DESC) AS brand_rank');
+        $byBrand = Product::query()->fromSub($newestPerBrand, 'products')->where('brand_rank', '<=', 8)
+            ->with(['variants', 'media'])->orderByDesc('id')->get()->groupBy('brand_id');
+
+        $showcase = $top->map(fn (Brand $brand) => [
             'brand' => $brand,
-            'products' => Product::query()->active()->where('brand_id', $brand->id)
-                ->with(['brand', 'variants', 'media'])->latest('id')->limit(8)->get()
+            'products' => $byBrand->get($brand->id, collect())
+                ->each(fn (Product $product) => $product->setRelation('brand', $brand))
                 // full rows only in the 4-column grid (no orphan card on a second row)
                 ->pipe(fn ($c) => $c->count() > 4 ? $c->take(intdiv($c->count(), 4) * 4) : $c),
         ])->values();

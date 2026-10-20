@@ -115,14 +115,7 @@
                 <div class="relative grid items-center gap-5 lg:grid-cols-[13rem_1fr]">
                     <div class="flex flex-col items-start gap-4 text-white lg:items-center lg:text-center">
                         <h2 id="amazing-title" class="text-3xl leading-tight font-black drop-shadow-sm">محصولات<br class="max-lg:hidden"> شگفت‌انگیز</h2>
-                        <div x-data="countdown('{{ $dealsEnd->toIso8601String() }}')" class="flex gap-1.5" aria-label="زمان باقی‌مانده تا پایان تخفیف">
-                            @foreach (['h' => 'ساعت', 'm' => 'دقیقه', 's' => 'ثانیه'] as $key => $label)
-                                <span class="w-14 rounded-2xl bg-white/25 py-2 text-center">
-                                    <span class="block text-xl leading-none font-black" x-text="parts.{{ $key }}">۰۰</span>
-                                    <span class="mt-1 block text-[10px] text-white/80">{{ $label }}</span>
-                                </span>
-                            @endforeach
-                        </div>
+                        <x-ui.deals-countdown :until="$dealsEnd" />
                         <a href="{{ route('catalog.shop', ['sale' => 1, 'sort' => 'discount']) }}" class="btn !bg-surface !px-5 !py-2.5 text-navy hover:!bg-cream">مشاهده همه</a>
                         <div class="hidden gap-2 lg:flex">
                             <button type="button" @click="scroll(1)" class="grid size-10 place-items-center rounded-full bg-white/25 text-white hover:bg-surface/40" aria-label="قبلی">

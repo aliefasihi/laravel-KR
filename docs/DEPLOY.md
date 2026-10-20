@@ -8,7 +8,7 @@
 ### ۱-۱. سرور
 - PHP 8.3 با افزونه‌های `pdo_mysql`, `mbstring`, `intl`, `gd` یا `imagick`, `zip`, `bcmath`, `opcache`, `redis`
 - Composer 2، Node 20+ (فقط برای build؛ روی سرور یا در CI)
-- MariaDB/MySQL، Redis، و در صورت استفاده Meilisearch
+- MariaDB 10.2+ یا MySQL 8+، Redis، و در صورت استفاده Meilisearch
 
 ### ۱-۲. پروژه
 ```bash

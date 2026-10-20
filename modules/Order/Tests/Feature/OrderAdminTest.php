@@ -44,6 +44,12 @@ class OrderAdminTest extends ShopTestCase
         Livewire::test(ListOrders::class)->assertCanSeeTableRecords([$this->order])
             ->set('activeTab', 'completed')->assertCanNotSeeTableRecords([$this->order]);
 
+        // filters and sorting really filter (closure parameters must be named $query)
+        Livewire::test(ListOrders::class)->filterTable('coupon', true)->assertCanNotSeeTableRecords([$this->order])
+            ->filterTable('coupon', false)->assertCanSeeTableRecords([$this->order]);
+        Livewire::test(ListOrders::class)->filterTable('created_at', ['from' => now()->addDay()->toDateString()])->assertCanNotSeeTableRecords([$this->order]);
+        Livewire::test(ListOrders::class)->sortTable('number', 'desc')->assertCanSeeTableRecords([$this->order]);
+
         Livewire::test(ViewOrder::class, ['record' => $this->order->number])
             ->callAction('ship', ['tracking_code' => '۱۲۳۴۵'])
             ->assertHasNoActionErrors();

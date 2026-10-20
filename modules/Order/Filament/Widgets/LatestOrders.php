@@ -7,7 +7,6 @@
 
 namespace Modules\Order\Filament\Widgets;
 
-use App\Core\Support\Money;
 use App\Core\Support\PersianText;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -33,9 +32,8 @@ class LatestOrders extends TableWidget
                 TextColumn::make('number')->label('سفارش')->formatStateUsing(fn ($state) => '#'.PersianText::toPersianDigits($state))->weight('bold'),
                 TextColumn::make('customer_name')->label('مشتری')->formatStateUsing(fn (Order $r) => $r->customer_name ?: $r->recipient_name),
                 TextColumn::make('status')->label('وضعیت')->badge()
-                    ->formatStateUsing(fn (string $state) => Order::STATUSES[$state] ?? $state)
-                    ->color(fn (string $state) => Order::COLORS[$state] ?? 'gray'),
-                TextColumn::make('total')->label('مبلغ')->formatStateUsing(fn ($state) => Money::toman((int) $state).' تومان'),
+                    ->labels(Order::STATUSES, Order::COLORS),
+                TextColumn::make('total')->label('مبلغ')->toman(unit: true),
                 TextColumn::make('created_at')->label('زمان')->since(),
             ]);
     }

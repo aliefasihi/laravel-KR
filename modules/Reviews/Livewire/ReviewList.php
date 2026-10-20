@@ -22,9 +22,14 @@ class ReviewList extends Component
 
     public int $perPage = 6;
 
-    public function mount(int $productId): void
+    /** approved reviews of the product (the section already counted them) */
+    #[Locked]
+    public int $total = 0;
+
+    public function mount(int $productId, ?int $total = null): void
     {
         $this->productId = $productId;
+        $this->total = $total ?? Review::query()->approved()->where('product_id', $productId)->count();
     }
 
     public function updatedSort(): void
@@ -51,7 +56,6 @@ class ReviewList extends Component
     public function render()
     {
         $query = Review::query()->approved()->where('product_id', $this->productId);
-        $total = (clone $query)->count();
         match ($this->sort) {
             'helpful' => $query->orderByDesc('helpful')->latest('id'),
             'highest' => $query->orderByDesc('rating')->latest('id'),
@@ -61,7 +65,7 @@ class ReviewList extends Component
 
         return view('reviews::livewire.review-list', [
             'reviews' => $query->limit($this->perPage)->get(),
-            'total' => $total,
+            'total' => $this->total,
             'voted' => (array) session('reviews.helpful', []),
         ]);
     }

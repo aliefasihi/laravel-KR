@@ -7,7 +7,7 @@
 
 namespace Modules\Content\Filament\Resources\Posts;
 
-use App\Core\Support\Jalali;
+use App\Filament\Support\Fields;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -28,7 +28,6 @@ use Modules\Content\Filament\Resources\Posts\Pages\CreatePost;
 use Modules\Content\Filament\Resources\Posts\Pages\EditPost;
 use Modules\Content\Filament\Resources\Posts\Pages\ListPosts;
 use Modules\Content\Models\Post;
-use Modules\Media\Models\Media;
 use UnitEnum;
 
 class PostResource extends Resource
@@ -67,10 +66,7 @@ class PostResource extends Resource
                     Textarea::make('excerpt')->label('خلاصه')->rows(3),
                     RichEditor::make('body_html')->label('متن')->required(),
                 ]),
-                Section::make('سئو')->schema([
-                    TextInput::make('meta_title')->label('عنوان سئو')->maxLength(70),
-                    Textarea::make('meta_description')->label('توضیحات متا')->maxLength(160)->rows(2),
-                ])->collapsible(),
+                Fields::seo(),
             ])->columnSpan(['lg' => 2]),
             Group::make([
                 Section::make('انتشار')->schema([
@@ -79,13 +75,7 @@ class PostResource extends Resource
                         ->helperText('مقاله‌ی منتشرشده تا این زمان روی سایت نمایش داده نمی‌شود.'),
                 ]),
                 Section::make('تصویر شاخص')->schema([
-                    Select::make('media')
-                        ->hiddenLabel()
-                        ->relationship('media', 'path')
-                        ->getOptionLabelFromRecordUsing(fn (Media $record) => $record->title ?: basename($record->path))
-                        ->multiple()
-                        ->maxItems(1)
-                        ->searchable(),
+                    Fields::media()->hiddenLabel(),
                 ]),
                 Section::make('سینک')->schema([
                     TextInput::make('external_id')->label('شناسه در ai-platform')->disabled()->dehydrated(false),
@@ -101,10 +91,10 @@ class PostResource extends Resource
             ->columns([
                 TextColumn::make('title')->label('عنوان')->searchable()->limit(60)->wrap(),
                 TextColumn::make('status')->label('وضعیت')->badge()
-                    ->formatStateUsing(fn (string $state) => self::STATUSES[$state] ?? $state)
+                    ->labels(self::STATUSES)
                     ->color(fn (string $state) => $state === Post::STATUS_PUBLISHED ? 'success' : 'gray'),
                 TextColumn::make('published_at')->label('انتشار')->sortable()
-                    ->formatStateUsing(fn ($state) => $state ? Jalali::format($state) : null),
+                    ->jalali(),
             ])
             ->filters([
                 SelectFilter::make('status')->label('وضعیت')->options(self::STATUSES),

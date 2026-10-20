@@ -43,3 +43,7 @@ php artisan test       # همه‌ی تست‌ها، از جمله modules/*/Tes
 - migration جدید فقط داخل `modules/{Name}/database/migrations`
 - هیچ داده‌ی واقعی (dump دیتابیس، اکسپورت کراول، `.env`) وارد گیت نشود؛ مسیرها در `.gitignore` هستند
 - هر تغییر در سیاست URL ← به‌روزرسانی `docs/URL-POLICY.md` و نوشتن یک ADR
+- Filament: پارامترهای closure با **نام** پر می‌شوند — همیشه `$query`، `$state`، `$record`، `$data`، `$get`، `$set` (نه `$q` یا `$s`؛ وگرنه فیلتر بی‌صدا کار نمی‌کند). `tests/Feature/AdminPagesTest.php` همه‌ی صفحه‌های پنل را باز می‌کند.
+- ستون‌های پنل: تاریخ `->jalali()`، عدد `->faDigits()`، مبلغ `->toman()`، وضعیت `->labels(STATUSES, COLORS)`؛ فرم: `Fields::seo()`، `Fields::media()`؛ شمارنده‌ی منو `NavigationBadge::count()` — دوباره ننویس.
+- فرم‌های عمومی: `use StopsBots` + `<x-ui.honeypot />`؛ فرم نشانی: `AddressForm` + `customer::partials.address-fields`.
+- لیست‌ها: رابطه‌هایی که در view استفاده می‌شوند با `with()` بیایند؛ چیزی که چند بار در یک درخواست لازم است یک بار حساب شود.

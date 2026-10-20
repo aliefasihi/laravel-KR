@@ -74,8 +74,8 @@ class FormSubmissionResource extends Resource
 
         $columns = [
             TextColumn::make('created_at')->label('تاریخ')->sortable()
-                ->formatStateUsing(fn ($state) => Jalali::format($state))
-                ->description(fn (FormSubmission $s) => PersianText::toPersianDigits($s->created_at->copy()->setTimezone(config('khaneh.display_timezone'))->format('H:i'))),
+                ->jalali()
+                ->description(fn (FormSubmission $s) => Jalali::time($s->created_at)),
             TextColumn::make('form')->label('فرم')->badge()->color('gray')->visible(! $form)
                 ->formatStateUsing(fn (string $state) => Inbox::formLabel($state)),
             TextColumn::make('contact.name')->label('فرستنده')
@@ -95,8 +95,7 @@ class FormSubmissionResource extends Resource
             $columns[] = TextColumn::make('summary')->label('خلاصه')->wrap()->state(fn (FormSubmission $s) => Inbox::summary($s));
         }
         $columns[] = TextColumn::make('status')->label('وضعیت')->badge()
-            ->formatStateUsing(fn (string $state) => FormSubmission::STATUSES[$state] ?? $state)
-            ->color(fn (string $state) => FormSubmission::COLORS[$state] ?? 'gray');
+            ->labels(FormSubmission::STATUSES, FormSubmission::COLORS);
         $columns[] = TextColumn::make('utm.utm_source')->label('منبع')->toggleable(isToggledHiddenByDefault: true)
             ->state(fn (FormSubmission $s) => $s->utm['utm_source'] ?? null);
         $columns[] = TextColumn::make('page_url')->label('صفحه')->limit(40)->toggleable(isToggledHiddenByDefault: true);

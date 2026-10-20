@@ -28,13 +28,27 @@ document.addEventListener('input', (event) => {
     }
 }, true);
 
+// Shared by the slider and the product gallery: an index that wraps around.
+const cycle = (count) => ({
+    active: 0,
+    count,
+    go(index) {
+        this.active = (index + this.count) % this.count;
+    },
+    next() {
+        this.go(this.active + 1);
+    },
+    prev() {
+        this.go(this.active - 1);
+    },
+});
+
 document.addEventListener('alpine:init', () => {
     const Alpine = window.Alpine;
 
     // Auto-playing slider (hero banners). Pauses on hover/focus and when the tab is hidden.
     Alpine.data('slider', (count = 1, interval = 6000) => ({
-        active: 0,
-        count,
+        ...cycle(count),
         timer: null,
         init() {
             this.play();
@@ -48,15 +62,6 @@ document.addEventListener('alpine:init', () => {
         },
         stop() {
             clearInterval(this.timer);
-        },
-        go(index) {
-            this.active = (index + this.count) % this.count;
-        },
-        next() {
-            this.go(this.active + 1);
-        },
-        prev() {
-            this.go(this.active - 1);
         },
     }));
 
@@ -84,18 +89,8 @@ document.addEventListener('alpine:init', () => {
 
     // Product gallery: thumbnails + swipe on touch
     Alpine.data('gallery', (count = 1) => ({
-        active: 0,
-        count,
+        ...cycle(count),
         startX: null,
-        go(index) {
-            this.active = (index + this.count) % this.count;
-        },
-        next() {
-            this.go(this.active + 1);
-        },
-        prev() {
-            this.go(this.active - 1);
-        },
         touchStart(e) {
             this.startX = e.touches[0].clientX;
         },

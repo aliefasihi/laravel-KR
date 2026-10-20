@@ -88,7 +88,7 @@ class MemberResource extends Resource
     {
         return $schema->columns(1)->components([
             Section::make()->columns(4)->schema([
-                TextEntry::make('mobile')->label('موبایل')->formatStateUsing(fn ($state) => PersianText::toPersianDigits($state)),
+                TextEntry::make('mobile')->label('موبایل')->faDigits(),
                 TextEntry::make('wallet')->label('کیف پول')->state(fn (Customer $c) => Money::toman(Wallet::balance($c->id)).' تومان'),
                 TextEntry::make('points')->label('امتیاز')->state(fn (Customer $c) => Loyalty::fa((int) Points::balance($c->id))),
                 TextEntry::make('level')->label('سطح')->badge()->state(fn (Customer $c) => Levels::current($c->id)?->name ?? '—'),
@@ -108,11 +108,11 @@ class MemberResource extends Resource
                 TextColumn::make('first_name')->label('مشتری')->state(fn (Customer $c) => $c->displayName())
                     ->description(fn (Customer $c) => $c->fullName() ? PersianText::toPersianDigits($c->mobile) : null)
                     ->searchable(['first_name', 'last_name', 'mobile']),
-                TextColumn::make('wallet_balance')->label('کیف پول (تومان)')->sortable()->formatStateUsing(fn ($state) => Money::toman((int) $state))->placeholder('۰'),
+                TextColumn::make('wallet_balance')->label('کیف پول (تومان)')->sortable()->toman()->placeholder('۰'),
                 TextColumn::make('points_balance')->label('امتیاز')->sortable()->formatStateUsing(fn ($state) => Loyalty::fa((int) $state))->placeholder('۰')
                     ->color(fn ($state) => (int) $state < 0 ? 'danger' : null),
                 TextColumn::make('level_id')->label('سطح')->badge()->formatStateUsing(fn ($state) => Level::find($state)?->name)->placeholder('—'),
-                TextColumn::make('total_spent')->label('مجموع خرید (تومان)')->sortable()->formatStateUsing(fn ($state) => Money::toman((int) $state))->placeholder('۰'),
+                TextColumn::make('total_spent')->label('مجموع خرید (تومان)')->sortable()->toman()->placeholder('۰'),
             ])
             ->filters([
                 SelectFilter::make('level')->label('سطح')->options(fn () => Level::query()->orderBy('min_spent')->pluck('name', 'id')->all())

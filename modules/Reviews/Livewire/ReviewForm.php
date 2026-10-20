@@ -7,6 +7,7 @@
 
 namespace Modules\Reviews\Livewire;
 
+use App\Core\Livewire\StopsBots;
 use App\Core\Settings\Settings;
 use App\Core\Support\PersianText;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,8 @@ use Modules\Reviews\Support\Buyers;
 
 class ReviewForm extends Component
 {
+    use StopsBots;
+
     #[Locked]
     public int $productId;
 
@@ -34,13 +37,17 @@ class ReviewForm extends Component
 
     public string $mobile = '';     // guests
 
-    public string $website = '';    // honeypot
-
     public bool $sent = false;
 
-    public function mount(int $productId): void
+    /** «log in to review» link back to this product's reviews (built once, not on every render) */
+    #[Locked]
+    public string $loginUrl = '';
+
+    public function mount(int $productId, ?string $productUrl = null): void
     {
         $this->productId = $productId;
+        $path = parse_url($productUrl ?? Product::query()->find($productId)?->url() ?? '/', PHP_URL_PATH) ?: '/';
+        $this->loginUrl = route('customer.login', ['back' => $path.'#reviews']);
     }
 
     private function guestsAllowed(): bool
@@ -62,7 +69,7 @@ class ReviewForm extends Component
             'mobile' => [$customer ? 'nullable' : 'required', fn ($a, $v, $fail) => $customer || Mobile::normalize($v) ? null : $fail('شماره‌ی موبایل درست نیست.')],
         ], ['rating.between' => 'امتیاز را با ستاره‌ها انتخاب کنید.'], ['body' => 'متن نظر', 'title' => 'عنوان', 'name' => 'نام', 'mobile' => 'موبایل']);
 
-        if ($this->website !== '') {
+        if ($this->looksLikeBot(minSeconds: 0)) {
             $this->sent = true;
 
             return;

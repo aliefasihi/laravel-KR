@@ -7,7 +7,6 @@
 
 namespace Modules\Content\Filament\Resources\Pages;
 
-use App\Core\Support\Jalali;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -78,7 +77,7 @@ class PageResource extends Resource
             ->columns([
                 TextColumn::make('title')->label('صفحه')->weight('bold')->description(fn (Page $p) => urldecode(parse_url($p->url(), PHP_URL_PATH) ?: '/')),
                 TextColumn::make('blocks')->label('بلوک‌ها')->state(fn (Page $p) => count($p->blockList()).' بلوک'),
-                TextColumn::make('updated_at')->label('آخرین تغییر')->formatStateUsing(fn ($state) => Jalali::format($state)),
+                TextColumn::make('updated_at')->label('آخرین تغییر')->jalali(),
             ])
             ->recordActions([
                 EditAction::make(),

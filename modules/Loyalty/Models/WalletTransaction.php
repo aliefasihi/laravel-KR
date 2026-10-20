@@ -7,13 +7,15 @@
 
 namespace Modules\Loyalty\Models;
 
+use App\Core\Concerns\AppendOnly;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use LogicException;
 use Modules\Customer\Models\Customer;
 
 class WalletTransaction extends Model
 {
+    use AppendOnly;
+
     public const UPDATED_AT = null;
 
     public const REASONS = [
@@ -34,12 +36,6 @@ class WalletTransaction extends Model
     protected function casts(): array
     {
         return ['amount' => 'integer', 'balance_before' => 'integer', 'balance_after' => 'integer', 'created_at' => 'datetime'];
-    }
-
-    protected static function booted(): void
-    {
-        static::updating(fn () => throw new LogicException('Wallet ledger entries are immutable.'));
-        static::deleting(fn () => throw new LogicException('Wallet ledger entries are immutable.'));
     }
 
     public function customer(): BelongsTo

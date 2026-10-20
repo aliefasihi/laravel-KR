@@ -10,8 +10,8 @@
 
 namespace Modules\Search\Filament\Resources\SearchTerms;
 
-use App\Core\Support\Jalali;
 use App\Core\Support\PersianText;
+use App\Filament\Support\NavigationBadge;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -50,9 +50,8 @@ class SearchTermResource extends Resource
     /** Badge: searches that found nothing during the last 30 days. */
     public static function getNavigationBadge(): ?string
     {
-        $count = SearchTerm::query()->where('last_results', 0)->where('last_searched_at', '>=', now()->subDays(30))->count();
-
-        return $count ? PersianText::toPersianDigits($count) : null;
+        return NavigationBadge::count('admin.badge.search-terms', fn () => SearchTerm::query()
+            ->where('last_results', 0)->where('last_searched_at', '>=', now()->subDays(30))->count());
     }
 
     public static function getNavigationBadgeColor(): ?string
@@ -78,11 +77,11 @@ class SearchTermResource extends Resource
                     ->badge()->color(fn (int $state) => $state === 0 ? 'danger' : 'success'),
                 TextColumn::make('zero_results')->label('دفعات بی‌نتیجه')->sortable()->formatStateUsing($fa)->toggleable(),
                 TextColumn::make('last_searched_at')->label('آخرین جستجو')->sortable()
-                    ->formatStateUsing(fn ($state) => $state ? Jalali::format($state) : null),
+                    ->jalali(),
             ])
             ->filters([
-                Filter::make('zero')->label('فقط بی‌نتیجه‌ها')->query(fn (Builder $q) => $q->where('last_results', 0))->default(),
-                Filter::make('recent')->label('۳۰ روز اخیر')->query(fn (Builder $q) => $q->where('last_searched_at', '>=', now()->subDays(30))),
+                Filter::make('zero')->label('فقط بی‌نتیجه‌ها')->query(fn (Builder $query) => $query->where('last_results', 0))->default(),
+                Filter::make('recent')->label('۳۰ روز اخیر')->query(fn (Builder $query) => $query->where('last_searched_at', '>=', now()->subDays(30))),
             ])
             ->recordActions([
                 Action::make('try')->label('امتحان در سایت')->icon(Heroicon::OutlinedArrowTopRightOnSquare)

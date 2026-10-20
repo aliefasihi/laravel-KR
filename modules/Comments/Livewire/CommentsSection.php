@@ -7,6 +7,7 @@
 
 namespace Modules\Comments\Livewire;
 
+use App\Core\Livewire\StopsBots;
 use App\Core\Settings\Settings;
 use App\Core\Support\PersianText;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,8 @@ use Modules\Customer\Support\Mobile;
 
 class CommentsSection extends Component
 {
+    use StopsBots;
+
     #[Locked]
     public string $type;
 
@@ -38,18 +41,12 @@ class CommentsSection extends Component
 
     public string $body = '';
 
-    public string $website = '';   // honeypot
-
-    #[Locked]
-    public int $startedAt = 0;
-
     public ?string $notice = null;
 
     public function mount(Model $model): void
     {
         $this->type = $model->getMorphClass();
         $this->modelId = (int) $model->getKey();
-        $this->startedAt = now()->getTimestamp();
         if ($customer = Auth::guard('customer')->user()) {
             $this->name = $customer->fullName();
             $this->mobile = $customer->mobile;
@@ -102,7 +99,7 @@ class CommentsSection extends Component
             'body' => ['required', 'string', 'min:3', 'max:3000'],
         ], [], ['name' => 'نام', 'mobile' => 'موبایل', 'email' => 'ایمیل', 'body' => 'متن نظر']);
 
-        if ($this->website !== '' || now()->getTimestamp() - $this->startedAt < 3) {
+        if ($this->looksLikeBot()) {
             $this->notice = 'ممنون! نظر شما پس از بررسی منتشر می‌شود.';
             $this->reset(['body', 'replyTo']);
 

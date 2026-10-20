@@ -7,8 +7,7 @@
 
 namespace Modules\Payment\Filament\Resources\Payments;
 
-use App\Core\Support\Jalali;
-use App\Core\Support\Money;
+use App\Filament\Support\NavigationBadge;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -45,9 +44,7 @@ class PaymentResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = rescue(fn () => Cache::remember(self::BADGE_CACHE_KEY, 60, fn () => Payment::query()->where('status', 'review')->count()), 0, report: false);
-
-        return $count ? (string) $count : null;
+        return NavigationBadge::count(self::BADGE_CACHE_KEY, fn () => Payment::query()->where('status', 'review')->count());
     }
 
     public static function getNavigationBadgeTooltip(): ?string
@@ -69,14 +66,13 @@ class PaymentResource extends Resource
                 TextColumn::make('order.number')->label('سفارش')->searchable()
                     ->url(fn (Payment $r) => OrderResource::getUrl('view', ['record' => $r->order])),
                 TextColumn::make('method')->label('روش')->formatStateUsing(fn (string $state) => PaymentMethods::titles()[$state] ?? $state),
-                TextColumn::make('amount')->label('مبلغ')->formatStateUsing(fn ($state) => Money::toman((int) $state).' تومان')->sortable(),
+                TextColumn::make('amount')->label('مبلغ')->toman(unit: true)->sortable(),
                 TextColumn::make('status')->label('وضعیت')->badge()
-                    ->formatStateUsing(fn (string $state) => Payment::STATUSES[$state] ?? $state)
-                    ->color(fn (string $state) => Payment::COLORS[$state] ?? 'gray'),
+                    ->labels(Payment::STATUSES, Payment::COLORS),
                 TextColumn::make('reference')->label('کد پیگیری')->searchable()->copyable()->placeholder('—'),
                 TextColumn::make('card_pan')->label('کارت')->placeholder('—')->extraAttributes(['dir' => 'ltr']),
                 TextColumn::make('created_at')->label('تاریخ')->sortable()
-                    ->formatStateUsing(fn ($state) => Jalali::format($state).' '.$state->setTimezone(config('khaneh.display_timezone'))->format('H:i')),
+                    ->jalali(time: true),
             ])
             ->filters([
                 SelectFilter::make('status')->label('وضعیت')->options(Payment::STATUSES),

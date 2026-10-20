@@ -8,6 +8,7 @@
 namespace Modules\Catalog\Models;
 
 use App\Core\Concerns\FlushesStoreCache;
+use App\Core\Support\StoreCache;
 use App\Core\Support\UrlPath;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -64,15 +65,32 @@ class Category extends Model
     /** This category plus every descendant id (WooCommerce archives include subcategories). */
     public function descendantIds(): array
     {
-        $ids = [$this->id];
+        $children = self::childMap();
+        $ids = [$this->id => true];
         $frontier = [$this->id];
 
         while ($frontier !== []) {
-            $frontier = self::query()->whereIn('parent_id', $frontier)->pluck('id')->diff($ids)->all();
-            $ids = array_merge($ids, $frontier);
+            $next = [];
+            foreach ($frontier as $id) {
+                foreach ($children[$id] ?? [] as $child) {
+                    if (! isset($ids[$child])) {
+                        $ids[$child] = true;
+                        $next[] = $child;
+                    }
+                }
+            }
+            $frontier = $next;
         }
 
-        return $ids;
+        return array_keys($ids);
+    }
+
+    /** parent id → child ids for the whole tree: one cached read instead of a query per level. */
+    public static function childMap(): array
+    {
+        return StoreCache::remember('categories.children', fn () => self::query()->whereNotNull('parent_id')
+            ->orderBy('id')->get(['id', 'parent_id'])
+            ->groupBy('parent_id')->map(fn ($group) => $group->pluck('id')->all())->all());
     }
 
     /** Breadcrumb trail from the root to this category: [name => url]. */

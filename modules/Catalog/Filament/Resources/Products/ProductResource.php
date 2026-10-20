@@ -9,6 +9,7 @@ namespace Modules\Catalog\Filament\Resources\Products;
 
 use App\Core\Modules\Modules;
 use App\Core\Support\Money;
+use App\Filament\Support\Fields;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -40,7 +41,6 @@ use Modules\Catalog\Filament\Resources\Products\Pages\ListProducts;
 use Modules\Catalog\Filament\Resources\Products\RelationManagers\VariantsRelationManager;
 use Modules\Catalog\Models\Product;
 use Modules\FileManager\Filament\Forms\ProductImages;
-use Modules\Media\Models\Media;
 use UnitEnum;
 
 class ProductResource extends Resource
@@ -85,10 +85,7 @@ class ProductResource extends Resource
                     RichEditor::make('description')->label('معرفی کامل'),
                 ]),
                 ...(Modules::enabled('Attributes') ? [ProductAttributesSection::make()] : []),
-                Section::make('سئو')->schema([
-                    TextInput::make('meta_title')->label('عنوان سئو')->maxLength(70),
-                    Textarea::make('meta_description')->label('توضیحات متا')->maxLength(160)->rows(2),
-                ])->collapsible(),
+                Fields::seo(),
             ])->columnSpan(['lg' => 2]),
 
             Group::make([
@@ -115,12 +112,7 @@ class ProductResource extends Resource
                     // File manager on: the product's own folder opens in a picker (upload, multi-select in order).
                     Modules::enabled('FileManager')
                         ? ProductImages::make('media_ids')->hiddenLabel()
-                        : Select::make('media')
-                            ->hiddenLabel()
-                            ->relationship('media', 'path')
-                            ->getOptionLabelFromRecordUsing(fn (Media $record) => $record->title ?: basename($record->path))
-                            ->multiple()
-                            ->searchable()
+                        : Fields::media(max: null)->hiddenLabel()
                             ->helperText('اول از «کتابخانه تصاویر» آپلود کن. اولین تصویر، تصویر اصلی است.'),
                 ]),
             ])->columnSpan(['lg' => 1]),
@@ -146,7 +138,7 @@ class ProductResource extends Resource
                 TextColumn::make('variants_sum_stock')->label('موجودی')->sum('variants', 'stock')->sortable()
                     ->color(fn ($state) => (int) $state < 1 ? 'danger' : null),
                 TextColumn::make('status')->label('وضعیت')->badge()
-                    ->formatStateUsing(fn (string $state) => Product::STATUSES[$state] ?? $state)
+                    ->labels(Product::STATUSES)
                     ->color(fn (string $state) => match ($state) {
                         Product::STATUS_ACTIVE => 'success',
                         Product::STATUS_DRAFT => 'gray',

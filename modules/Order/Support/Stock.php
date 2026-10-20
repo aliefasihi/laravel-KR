@@ -8,6 +8,7 @@
 namespace Modules\Order\Support;
 
 use App\Core\Support\StoreCache;
+use Illuminate\Support\Facades\DB;
 use Modules\Catalog\Models\ProductVariant;
 use Modules\Order\Models\Order;
 use Modules\Search\Support\SearchSync;
@@ -16,30 +17,38 @@ class Stock
 {
     public function reduce(Order $order): void
     {
-        if ($order->stock_reduced) {
-            return;
-        }
-        foreach ($order->items as $item) {
-            if ($item->variant_id) {
-                ProductVariant::query()->whereKey($item->variant_id)->decrement('stock', $item->quantity - $item->refunded_quantity);
-            }
-        }
-        $order->forceFill(['stock_reduced' => true])->save();
-        $this->changed($order);
+        $this->move($order, reduce: true);
     }
 
     public function restore(Order $order): void
     {
-        if (! $order->stock_reduced) {
-            return;
-        }
-        foreach ($order->items as $item) {
-            if ($item->variant_id) {
-                ProductVariant::query()->whereKey($item->variant_id)->increment('stock', $item->quantity - $item->refunded_quantity);
+        $this->move($order, reduce: false);
+    }
+
+    /**
+     * Take the order's (not refunded) quantities out of stock, or put them back — once each way,
+     * even when two requests change the same order at the same moment (the order row is locked).
+     */
+    private function move(Order $order, bool $reduce): void
+    {
+        $moved = DB::transaction(function () use ($order, $reduce) {
+            if ((bool) Order::query()->whereKey($order->id)->lockForUpdate()->value('stock_reduced') === $reduce) {
+                return false;
             }
+            foreach ($order->items as $item) {
+                if ($item->variant_id) {
+                    ProductVariant::query()->whereKey($item->variant_id)
+                        ->{$reduce ? 'decrement' : 'increment'}('stock', $item->quantity - $item->refunded_quantity);
+                }
+            }
+            $order->forceFill(['stock_reduced' => $reduce])->save();
+
+            return true;
+        });
+
+        if ($moved) {
+            $this->changed($order);
         }
-        $order->forceFill(['stock_reduced' => false])->save();
-        $this->changed($order);
     }
 
     /** Give back part of an order's stock (refunded items). */

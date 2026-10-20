@@ -7,6 +7,7 @@
 
 namespace Modules\Content\Livewire;
 
+use App\Core\Livewire\StopsBots;
 use App\Core\Support\PersianText;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -17,6 +18,8 @@ use Modules\Customer\Support\Mobile;
 
 class ContactForm extends Component
 {
+    use StopsBots;
+
     public const DEFAULT_SUBJECTS = ['مشاوره‌ی خرید', 'پیگیری سفارش', 'خرید عمده و همکاری', 'پیشنهاد و انتقاد', 'سایر'];
 
     /** @var list<string> */
@@ -35,18 +38,12 @@ class ContactForm extends Component
 
     public string $message = '';
 
-    public string $website = '';   // honeypot
-
-    #[Locked]
-    public int $startedAt = 0;
-
     public ?int $sentId = null;
 
     public function mount(array $subjects = []): void
     {
         $this->subjects = array_values(array_filter($subjects)) ?: self::DEFAULT_SUBJECTS;
         $this->subject = $this->subjects[0];
-        $this->startedAt = now()->getTimestamp();
         if ($customer = Auth::guard('customer')->user()) {
             $this->name = $customer->fullName();
             $this->mobile = $customer->mobile;
@@ -67,7 +64,7 @@ class ContactForm extends Component
         ], [], ['name' => 'نام', 'mobile' => 'موبایل', 'email' => 'ایمیل', 'subject' => 'موضوع', 'message' => 'پیام']);
 
         // bots: filled the hidden field or sent faster than a person can type
-        if ($this->website !== '' || now()->getTimestamp() - $this->startedAt < 3) {
+        if ($this->looksLikeBot()) {
             $this->sentId = 0;
 
             return;

@@ -11,49 +11,7 @@
     @if ($editing !== null)
         <form wire:submit="save" class="mb-6 grid gap-4 rounded-[var(--radius-card)] bg-surface/60 p-4 ring-1 ring-line sm:grid-cols-2 sm:p-6" novalidate>
             <p class="font-black text-navy sm:col-span-2">{{ $editing ? 'ویرایش نشانی' : 'نشانی تازه' }}</p>
-            @php
-                $input = fn ($name, $label, $attrs = '') => ['name' => $name, 'label' => $label, 'attrs' => $attrs];
-                $fields = [
-                    $input('title', 'عنوان (مثلاً خانه)'),
-                    $input('recipient_name', 'نام گیرنده', 'autocomplete=name'),
-                    $input('recipient_mobile', 'موبایل گیرنده', 'dir=ltr inputmode=numeric autocomplete=tel'),
-                ];
-            @endphp
-            @foreach ($fields as $f)
-                <div>
-                    <label for="a-{{ $f['name'] }}" class="mb-1.5 block text-sm font-bold text-navy">{{ $f['label'] }}</label>
-                    <input id="a-{{ $f['name'] }}" type="text" wire:model="form.{{ $f['name'] }}" {!! $f['attrs'] !!} class="field">
-                    @error('form.'.$f['name'])<p class="mt-1.5 text-xs text-rose">{{ $message }}</p>@enderror
-                </div>
-            @endforeach
-            <div>
-                <label for="a-province" class="mb-1.5 block text-sm font-bold text-navy">استان</label>
-                <select id="a-province" wire:model="form.province" class="field">
-                    @foreach ($provinces as $province)
-                        <option value="{{ $province }}">{{ $province }}</option>
-                    @endforeach
-                </select>
-                @error('form.province')<p class="mt-1.5 text-xs text-rose">{{ $message }}</p>@enderror
-            </div>
-            <div>
-                <label for="a-city" class="mb-1.5 block text-sm font-bold text-navy">شهر</label>
-                <input id="a-city" type="text" wire:model="form.city" autocomplete="address-level2" class="field">
-                @error('form.city')<p class="mt-1.5 text-xs text-rose">{{ $message }}</p>@enderror
-            </div>
-            <div class="sm:col-span-2">
-                <label for="a-address" class="mb-1.5 block text-sm font-bold text-navy">نشانی کامل</label>
-                <textarea id="a-address" rows="2" wire:model="form.address" autocomplete="street-address" class="field" placeholder="خیابان، کوچه، …"></textarea>
-                @error('form.address')<p class="mt-1.5 text-xs text-rose">{{ $message }}</p>@enderror
-            </div>
-            <div class="grid grid-cols-3 gap-3 sm:col-span-2">
-                @foreach (['plaque' => 'پلاک', 'unit' => 'واحد', 'postal_code' => 'کد پستی'] as $name => $label)
-                    <div>
-                        <label for="a-{{ $name }}" class="mb-1.5 block text-sm font-bold text-navy">{{ $label }}</label>
-                        <input id="a-{{ $name }}" type="text" wire:model="form.{{ $name }}" @if ($name === 'postal_code') dir="ltr" inputmode="numeric" autocomplete="postal-code" @endif class="field">
-                        @error('form.'.$name)<p class="mt-1.5 text-xs text-rose">{{ $message }}</p>@enderror
-                    </div>
-                @endforeach
-            </div>
+            @include('customer::partials.address-fields', ['model' => 'form', 'id' => 'a', 'withTitle' => true])
             <label class="flex cursor-pointer items-center gap-3 sm:col-span-2">
                 <input type="checkbox" wire:model="form.is_default" class="size-[18px] rounded-md accent-rose">
                 <span class="text-sm text-navy">نشانی پیش‌فرض باشد</span>

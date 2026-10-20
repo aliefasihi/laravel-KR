@@ -8,7 +8,6 @@
 namespace Modules\Content\Filament\Resources\NewsletterSubscribers;
 
 use App\Core\Support\Jalali;
-use App\Core\Support\PersianText;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -59,11 +58,11 @@ class NewsletterSubscriberResource extends Resource
             ->defaultSort('id', 'desc')
             ->columns([
                 TextColumn::make('contact')->label('شماره / ایمیل')->searchable()->copyable()
-                    ->formatStateUsing(fn ($state) => PersianText::toPersianDigits($state))->extraAttributes(['dir' => 'ltr', 'class' => 'justify-end']),
-                TextColumn::make('channel')->label('نوع')->badge()->formatStateUsing(fn ($state) => NewsletterSubscriber::CHANNELS[$state] ?? $state)
+                    ->faDigits()->extraAttributes(['dir' => 'ltr', 'class' => 'justify-end']),
+                TextColumn::make('channel')->label('نوع')->badge()->labels(NewsletterSubscriber::CHANNELS)
                     ->color(fn ($state) => $state === 'sms' ? 'info' : 'gray'),
-                TextColumn::make('source')->label('از کجا')->formatStateUsing(fn ($state) => NewsletterSubscriber::SOURCES[$state] ?? $state),
-                TextColumn::make('created_at')->label('عضویت')->sortable()->formatStateUsing(fn ($state) => Jalali::format($state)),
+                TextColumn::make('source')->label('از کجا')->labels(NewsletterSubscriber::SOURCES),
+                TextColumn::make('created_at')->label('عضویت')->sortable()->jalali(),
                 TextColumn::make('unsubscribed_at')->label('وضعیت')->badge()
                     ->state(fn (NewsletterSubscriber $s) => $s->unsubscribed_at ? 'لغو شده' : 'فعال')
                     ->color(fn (NewsletterSubscriber $s) => $s->unsubscribed_at ? 'gray' : 'success'),

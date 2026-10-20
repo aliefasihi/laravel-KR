@@ -18,6 +18,7 @@ use Modules\Catalog\Models\ProductVariant;
 use Modules\Customer\Models\Customer;
 use Modules\Customer\Support\Mobile;
 use Modules\Order\Models\Order;
+use Modules\Order\Models\OrderItem;
 
 class AdminOrders
 {
@@ -58,7 +59,7 @@ class AdminOrders
                 'shipping_method' => $data['shipping_method'] ?? null,
                 'shipping_method_title' => $data['shipping_title'] ?? null,
                 'subtotal' => $subtotal,
-                'sale_savings' => array_sum(array_map(fn ($l) => max(0, $l['regular_price'] - $l['unit_price']) * $l['quantity'], $lines)),
+                'sale_savings' => self::savings($lines),
                 'discount' => $discount,
                 'coupon_code' => ($data['coupon_code'] ?? null) ?: null,
                 'shipping_total' => $shipping,
@@ -125,7 +126,7 @@ class AdminOrders
 
             $subtotal = array_sum(array_column($lines, 'total'));
             $order->subtotal = $subtotal;
-            $order->sale_savings = array_sum(array_map(fn ($l) => max(0, $l['regular_price'] - $l['unit_price']) * $l['quantity'], $lines));
+            $order->sale_savings = self::savings($lines);
             $order->discount = min($discount ?? $order->discount, $subtotal);
             $order->shipping_total = $shippingTotal ?? $order->shipping_total;
             // store credit (wallet) already used still pays its part
@@ -167,18 +168,7 @@ class AdminOrders
             $wanted[$variant->id] = ($wanted[$variant->id] ?? 0) + $qty;
             $unit = isset($item['unit_price']) && $item['unit_price'] !== null && $item['unit_price'] !== '' ? (int) $item['unit_price'] : $variant->currentPrice();
 
-            $lines[] = [
-                'product_id' => $variant->product_id,
-                'variant_id' => $variant->id,
-                'name' => $variant->product->name,
-                'sku' => $variant->sku,
-                'brand' => $variant->product->brand?->name_fa,
-                'options' => $variant->options ?: null,
-                'regular_price' => max($variant->price, $unit),
-                'unit_price' => $unit,
-                'quantity' => $qty,
-                'total' => $unit * $qty,
-            ];
+            $lines[] = OrderItem::snapshot($variant, $unit, $qty, regularPrice: max($variant->price, $unit));
         }
 
         if (! $allowBackorder) {
@@ -191,5 +181,11 @@ class AdminOrders
         }
 
         return $lines;
+    }
+
+    /** What the shopper saves against regular prices on these lines. */
+    private static function savings(array $lines): int
+    {
+        return array_sum(array_map(fn (array $line) => max(0, $line['regular_price'] - $line['unit_price']) * $line['quantity'], $lines));
     }
 }

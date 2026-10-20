@@ -17,10 +17,14 @@ use Modules\Catalog\Models\ProductVariant;
 use Modules\Checkout\Support\Pricing\Quote;
 use Modules\Checkout\Support\Pricing\QuoteContext;
 use Modules\Checkout\Support\Pricing\Quoter;
+use WeakMap;
 
 class Cart
 {
     private const KEY = 'cart.items';
+
+    /** lines already priced in this request (checkout asks several times), keyed by the request */
+    private ?WeakMap $memo = null;
 
     public function __construct(private Session $session) {}
 
@@ -84,6 +88,12 @@ class Cart
             return collect();
         }
 
+        $this->memo ??= new WeakMap;
+        $request = request();
+        if (($hit = $this->memo[$request] ?? null) && $hit['items'] === $items) {
+            return $hit['lines'];
+        }
+
         $variants = $this->purchasable()
             ->with('product.brand', 'product.media')
             ->whereIn('id', array_keys($items))
@@ -104,6 +114,7 @@ class Cart
         if ($clean !== $items) {
             $this->session->put(self::KEY, $clean);
         }
+        $this->memo[$request] = ['items' => $clean, 'lines' => $lines];
 
         return $lines;
     }

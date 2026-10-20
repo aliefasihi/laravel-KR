@@ -12,10 +12,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Customer\Concerns\HasPostalAddress;
 use Modules\Customer\Models\Customer;
 
 class Order extends Model
 {
+    use HasPostalAddress;
+
     /** WooCommerce-like statuses (+ «ارسال شده», the step Iranian shoppers ask about most). */
     public const STATUSES = [
         'pending' => 'در انتظار پرداخت',
@@ -121,16 +124,6 @@ class Order extends Model
     public function displayNumber(): string
     {
         return PersianText::toPersianDigits((string) $this->number);
-    }
-
-    public function addressLine(): string
-    {
-        return collect([
-            $this->province.'، '.$this->city,
-            $this->address,
-            $this->plaque ? 'پلاک '.$this->plaque : null,
-            $this->unit ? 'واحد '.$this->unit : null,
-        ])->filter()->implode('، ');
     }
 
     public function itemCount(): int

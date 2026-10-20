@@ -7,7 +7,6 @@
 
 namespace Modules\Attributes\Filament\Resources\AttributeGroups;
 
-use App\Core\Support\PersianText;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -87,7 +86,7 @@ class AttributeGroupResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')->label('نام')->searchable()->weight('bold'),
-                TextColumn::make('items_count')->label('ویژگی‌ها')->counts('items')->formatStateUsing(fn ($s) => PersianText::toPersianDigits($s)),
+                TextColumn::make('items_count')->label('ویژگی‌ها')->counts('items')->faDigits(),
                 TextColumn::make('categories.name')->label('دسته‌بندی‌ها')->badge()->limitList(4)->placeholder('—'),
             ])
             ->recordActions([EditAction::make(), DeleteAction::make()]);

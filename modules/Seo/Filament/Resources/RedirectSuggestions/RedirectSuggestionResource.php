@@ -10,8 +10,8 @@
 
 namespace Modules\Seo\Filament\Resources\RedirectSuggestions;
 
-use App\Core\Support\Jalali;
 use App\Core\Support\PersianText;
+use App\Filament\Support\NavigationBadge;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -50,11 +50,12 @@ class RedirectSuggestionResource extends Resource
         return false;
     }
 
+    public const BADGE_CACHE_KEY = 'admin.badge.redirect-suggestions';
+
     public static function getNavigationBadge(): ?string
     {
-        $count = RedirectSuggestion::query()->where('status', RedirectSuggestion::PENDING)->count();
-
-        return $count ? PersianText::toPersianDigits($count) : null;
+        return NavigationBadge::count(self::BADGE_CACHE_KEY, fn () => RedirectSuggestion::query()
+            ->where('status', RedirectSuggestion::PENDING)->count());
     }
 
     public static function getNavigationBadgeColor(): ?string
@@ -78,11 +79,11 @@ class RedirectSuggestionResource extends Resource
                         ? 'کد کالا'
                         : PersianText::toPersianDigits((string) round($state * 100)).'٪')
                     ->badge()->color(fn ($state) => $state >= 0.9 ? 'success' : ($state >= 0.75 ? 'info' : 'warning')),
-                TextColumn::make('hits')->label('بازدید')->sortable()->formatStateUsing(fn ($state) => PersianText::toPersianDigits($state)),
+                TextColumn::make('hits')->label('بازدید')->sortable()->faDigits(),
                 TextColumn::make('last_hit_at')->label('آخرین بازدید')->sortable()
-                    ->formatStateUsing(fn ($state) => $state ? Jalali::format($state) : null),
+                    ->jalali(),
                 TextColumn::make('status')->label('وضعیت')->badge()
-                    ->formatStateUsing(fn (string $state) => RedirectSuggestion::STATUSES[$state] ?? $state)
+                    ->labels(RedirectSuggestion::STATUSES)
                     ->color(fn (string $state) => match ($state) {
                         RedirectSuggestion::APPROVED => 'success',
                         RedirectSuggestion::REJECTED => 'gray',

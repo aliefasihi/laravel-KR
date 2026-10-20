@@ -6,7 +6,6 @@
     $data = $submission->data ?? [];
     $ordered = collect($fields)->keys()->merge(array_keys($data))->unique()->filter(fn ($k) => array_key_exists($k, $data));
     $contact = $submission->contact;
-    $local = $submission->created_at->copy()->setTimezone(config('khaneh.display_timezone'));
 @endphp
 <div class="grid gap-4 text-sm">
     <dl class="grid gap-3 rounded-xl bg-gray-50 p-4 dark:bg-white/5">
@@ -35,7 +34,7 @@
             @endif
         </div>
         <div class="rounded-xl border border-gray-200 p-3 text-xs text-gray-600 dark:border-white/10 dark:text-gray-300">
-            <div>{{ Jalali::format($submission->created_at) }} — ساعت {{ PersianText::toPersianDigits($local->format('H:i')) }}</div>
+            <div>{{ Jalali::format($submission->created_at) }} — ساعت {{ Jalali::time($submission->created_at) }}</div>
             @if ($submission->page_url) <div class="mt-1 truncate" dir="ltr"><a href="{{ $submission->page_url }}" target="_blank" class="hover:underline">{{ urldecode($submission->page_url) }}</a></div> @endif
             @if ($submission->utm) <div class="mt-1" dir="ltr">{{ collect($submission->utm)->map(fn ($v, $k) => $k.'='.$v)->implode(' · ') }}</div> @endif
             @if ($subjectUrl) <div class="mt-2"><a href="{{ $subjectUrl }}" class="font-medium text-primary-600 hover:underline dark:text-primary-400">مشاهده‌ی مورد مربوط ←</a></div> @endif

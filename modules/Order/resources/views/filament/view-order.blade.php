@@ -3,7 +3,7 @@
     use App\Core\Support\{Jalali, Money, PersianText};
     use Modules\Order\Models\Order;
     $fa = fn ($v) => PersianText::toPersianDigits((string) $v);
-    $time = fn ($d) => $d ? Jalali::format($d).' — '.$fa($d->setTimezone(config('khaneh.display_timezone'))->format('H:i')) : '—';
+    $time = fn ($d) => $d ? Jalali::dateTime($d, ' — ') : '—';
     $toman = fn ($v) => Money::toman((int) $v).' تومان';
 @endphp
 <x-filament-panels::page>

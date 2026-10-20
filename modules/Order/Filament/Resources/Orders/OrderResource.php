@@ -8,8 +8,8 @@
 namespace Modules\Order\Filament\Resources\Orders;
 
 use App\Core\Support\Jalali;
-use App\Core\Support\Money;
 use App\Core\Support\PersianText;
+use App\Filament\Support\NavigationBadge;
 use BackedEnum;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
@@ -64,9 +64,7 @@ class OrderResource extends Resource
     /** Orders that need someone: paid and waiting to be sent, or a payment to check. */
     public static function getNavigationBadge(): ?string
     {
-        $count = rescue(fn () => Cache::remember(self::BADGE_CACHE_KEY, 60, fn () => Order::query()->whereIn('status', ['processing', 'on_hold'])->count()), 0, report: false);
-
-        return $count ? PersianText::toPersianDigits($count) : null;
+        return NavigationBadge::count(self::BADGE_CACHE_KEY, fn () => Order::query()->whereIn('status', ['processing', 'on_hold'])->count());
     }
 
     public static function getNavigationBadgeTooltip(): ?string
@@ -83,15 +81,14 @@ class OrderResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->withSum('items as items_quantity', 'quantity'))
             ->recordUrl(fn (Order $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
-                TextColumn::make('number')->label('سفارش')->searchable()->sortable(query: fn (Builder $q, string $direction) => $q->orderBy('id', $direction))
+                TextColumn::make('number')->label('سفارش')->searchable()->sortable(query: fn (Builder $query, string $direction) => $query->orderBy('id', $direction))
                     ->weight('bold')->formatStateUsing(fn ($state) => '#'.$fa($state))
                     ->description(fn (Order $r) => $r->customer_name ?: $r->recipient_name),
                 TextColumn::make('created_at')->label('تاریخ')->sortable()
-                    ->formatStateUsing(fn ($state) => Jalali::format($state).' '.$fa($state->setTimezone(config('khaneh.display_timezone'))->format('H:i')))
+                    ->jalali(time: true)
                     ->description(fn (Order $r) => $r->created_at->diffForHumans()),
                 TextColumn::make('status')->label('وضعیت')->badge()
-                    ->formatStateUsing(fn (string $state) => Order::STATUSES[$state] ?? $state)
-                    ->color(fn (string $state) => Order::COLORS[$state] ?? 'gray'),
+                    ->labels(Order::STATUSES, Order::COLORS),
                 TextColumn::make('payment_method_title')->label('پرداخت')->toggleable()
                     ->description(fn (Order $r) => $r->paymentStatusLabel()),
                 TextColumn::make('customer_mobile')->label('موبایل')->searchable()->toggleable()
@@ -100,16 +97,16 @@ class OrderResource extends Resource
                     ->formatStateUsing(fn (Order $r) => $r->province.'، '.$r->city)->description(fn (Order $r) => $r->shipping_method_title),
                 TextColumn::make('items_quantity')->label('کالا')->formatStateUsing(fn ($state) => $fa((int) $state))->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total')->label('مبلغ')->sortable()->weight('bold')
-                    ->formatStateUsing(fn ($state) => Money::toman((int) $state).' تومان')
+                    ->toman(unit: true)
                     ->description(fn (Order $r) => $r->coupon_code ? 'کد '.$r->coupon_code : null),
                 TextColumn::make('source')->label('کانال')->toggleable(isToggledHiddenByDefault: true)
-                    ->formatStateUsing(fn (?string $state) => AdminOrders::SOURCES[$state] ?? $state),
+                    ->labels(AdminOrders::SOURCES),
                 TextColumn::make('tracking_code')->label('رهگیری')->searchable()->toggleable(isToggledHiddenByDefault: true)->copyable(),
             ])
             ->filters([
                 Filter::make('created_at')->label('تاریخ')
                     ->schema([DatePicker::make('from')->label('از'), DatePicker::make('until')->label('تا')])
-                    ->query(fn (Builder $q, array $data) => $q
+                    ->query(fn (Builder $query, array $data) => $query
                         ->when($data['from'] ?? null, fn ($w, $d) => $w->where('created_at', '>=', Carbon::parse($d, config('khaneh.display_timezone'))->startOfDay()->utc()))
                         ->when($data['until'] ?? null, fn ($w, $d) => $w->where('created_at', '<=', Carbon::parse($d, config('khaneh.display_timezone'))->endOfDay()->utc())))
                     ->indicateUsing(fn (array $data) => array_filter([
@@ -124,7 +121,7 @@ class OrderResource extends Resource
                     ->options(fn () => array_combine(config('modules.customer.provinces'), config('modules.customer.provinces'))),
                 SelectFilter::make('source')->label('کانال فروش')->options(AdminOrders::SOURCES),
                 TernaryFilter::make('coupon')->label('با کد تخفیف')
-                    ->queries(true: fn ($q) => $q->whereNotNull('coupon_code'), false: fn ($q) => $q->whereNull('coupon_code')),
+                    ->queries(true: fn ($query) => $query->whereNotNull('coupon_code'), false: fn ($query) => $query->whereNull('coupon_code')),
             ])
             ->recordActions([
                 ViewAction::make()->label('')->tooltip('مشاهده'),

@@ -7,7 +7,6 @@
 
 namespace Modules\Loyalty\Filament\Resources\Referrals;
 
-use App\Core\Support\Jalali;
 use App\Core\Support\Money;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -53,10 +52,10 @@ class ReferralResource extends Resource
                 TextColumn::make('referred.mobile')->label('دوست معرفی‌شده')->state(fn (Referral $r) => $r->referred?->displayName())
                     ->url(fn (Referral $r) => MemberResource::getUrl('view', ['record' => $r->referred_id])),
                 TextColumn::make('status')->label('وضعیت')->badge()
-                    ->formatStateUsing(fn ($state) => Referral::STATUSES[$state] ?? $state)->color(fn ($state) => Referral::COLORS[$state] ?? 'gray'),
+                    ->labels(Referral::STATUSES, Referral::COLORS),
                 TextColumn::make('rewards')->label('هدیه‌ها (تومان)')->state(fn (Referral $r) => $r->status === 'pending' ? '—' : Money::toman($r->referrer_reward).' + '.Money::toman($r->referred_reward)),
-                TextColumn::make('created_at')->label('عضویت')->formatStateUsing(fn ($state) => Jalali::format($state))->sortable(),
-                TextColumn::make('rewarded_at')->label('اولین خرید')->formatStateUsing(fn ($state) => $state ? Jalali::format($state) : '—'),
+                TextColumn::make('created_at')->label('عضویت')->jalali()->sortable(),
+                TextColumn::make('rewarded_at')->label('اولین خرید')->jalali()->placeholder('—'),
             ])
             ->filters([SelectFilter::make('status')->label('وضعیت')->options(Referral::STATUSES)]);
     }

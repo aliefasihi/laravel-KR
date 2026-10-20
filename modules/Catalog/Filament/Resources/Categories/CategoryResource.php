@@ -8,12 +8,12 @@
 namespace Modules\Catalog\Filament\Resources\Categories;
 
 use App\Core\Modules\Modules;
+use App\Filament\Support\Fields;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -32,7 +32,6 @@ use Modules\Catalog\Filament\Resources\Categories\Pages\CreateCategory;
 use Modules\Catalog\Filament\Resources\Categories\Pages\EditCategory;
 use Modules\Catalog\Filament\Resources\Categories\Pages\ListCategories;
 use Modules\Catalog\Models\Category;
-use Modules\Media\Models\Media;
 use UnitEnum;
 
 class CategoryResource extends Resource
@@ -72,21 +71,12 @@ class CategoryResource extends Resource
                     RichEditor::make('description')->label('توضیحات پایین صفحه')->columnSpanFull(),
                 ])->columns(2),
                 ...(Modules::enabled('Attributes') ? [CategoryAttributesSection::make()] : []),
-                Section::make('سئو')->schema([
-                    TextInput::make('meta_title')->label('عنوان سئو')->maxLength(70),
-                    Textarea::make('meta_description')->label('توضیحات متا')->maxLength(160)->rows(2),
-                ])->collapsible(),
+                Fields::seo(),
             ])->columnSpan(['lg' => 2]),
             Section::make('نمایش')->schema([
                 Toggle::make('is_active')->label('فعال')->default(true),
                 TextInput::make('sort')->label('ترتیب')->numeric()->default(0),
-                Select::make('media')
-                    ->label('تصویر دسته')
-                    ->relationship('media', 'path')
-                    ->getOptionLabelFromRecordUsing(fn (Media $record) => $record->title ?: basename($record->path))
-                    ->multiple()
-                    ->maxItems(1)
-                    ->searchable()
+                Fields::media()->label('تصویر دسته')
                     ->helperText('در منوی دسته‌بندی‌ها و دایره‌های صفحه‌ی اصلی نمایش داده می‌شود؛ تصویر مربعی با پس‌زمینه‌ی روشن بهترین نتیجه را می‌دهد.'),
             ])->columnSpan(['lg' => 1]),
         ])->columns(3);

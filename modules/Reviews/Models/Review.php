@@ -11,6 +11,7 @@ use App\Core\Support\StoreCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Modules\Catalog\Models\Product;
 use Modules\Customer\Models\Customer;
@@ -30,9 +31,15 @@ class Review extends Model
         return ['rating' => 'integer', 'is_verified_buyer' => 'boolean', 'helpful' => 'integer', 'replied_at' => 'datetime'];
     }
 
+    /** cache key of the pending-reviews counter in the admin sidebar */
+    public const BADGE_KEY = 'admin.badge.reviews';
+
     protected static function booted(): void
     {
-        $refresh = fn (Review $review) => self::refreshProduct($review->product_id);
+        $refresh = function (Review $review) {
+            self::refreshProduct($review->product_id);
+            Cache::forget(self::BADGE_KEY);
+        };
         static::saved($refresh);
         static::deleted($refresh);
     }

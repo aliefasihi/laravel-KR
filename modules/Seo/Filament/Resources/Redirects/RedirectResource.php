@@ -7,8 +7,6 @@
 
 namespace Modules\Seo\Filament\Resources\Redirects;
 
-use App\Core\Support\Jalali;
-use App\Core\Support\PersianText;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -61,10 +59,10 @@ class RedirectResource extends Resource
                     ->formatStateUsing(fn (string $state) => rawurldecode($state)),
                 TextColumn::make('status_code')->label('نوع')->badge()
                     ->color(fn (int $state) => $state === 410 ? 'danger' : ($state === 302 ? 'warning' : 'success')),
-                TextColumn::make('source')->label('منبع')->formatStateUsing(fn (string $state) => self::SOURCES[$state] ?? $state)->toggleable(),
-                TextColumn::make('hits')->label('بازدید')->sortable()->formatStateUsing(fn ($state) => PersianText::toPersianDigits($state)),
+                TextColumn::make('source')->label('منبع')->labels(self::SOURCES)->toggleable(),
+                TextColumn::make('hits')->label('بازدید')->sortable()->faDigits(),
                 TextColumn::make('last_hit_at')->label('آخرین بازدید')->sortable()
-                    ->formatStateUsing(fn ($state) => $state ? Jalali::format($state) : null)->placeholder('—'),
+                    ->jalali()->placeholder('—'),
             ])
             ->filters([
                 SelectFilter::make('status_code')->label('نوع')->options(Redirect::STATUSES),

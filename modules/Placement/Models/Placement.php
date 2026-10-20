@@ -42,14 +42,33 @@ class Placement extends Model
             ->get();
     }
 
+    /**
+     * All active slots by key, the site-wide ones with their live banners already loaded:
+     * two queries per request however many slots a page shows (contextual slots still ask per context).
+     */
+    public static function active(): Collection
+    {
+        return once(function () {
+            $slots = static::query()->where('is_active', true)->get()->keyBy('key');
+            $slots->whereNull('context_type')->load(['banners' => fn ($query) => $query->live()
+                ->with(['desktopMedia', 'mobileMedia'])->orderByDesc('priority')]);
+
+            return $slots;
+        });
+    }
+
     /** Live banners for a slot key, memoized for the request. */
     public static function liveFor(string $key, ?int $contextId = null): Collection
     {
-        return once(fn () => static::query()
-            ->where('key', $key)
-            ->where('is_active', true)
-            ->first()
-            ?->liveBanners($contextId) ?? collect());
+        return once(function () use ($key, $contextId) {
+            $slot = static::active()->get($key);
+
+            return match (true) {
+                $slot === null => collect(),
+                $slot->context_type === null && $slot->relationLoaded('banners') => $slot->banners->take($slot->max_items)->values(),
+                default => $slot->liveBanners($contextId),
+            };
+        });
     }
 
     public static function hasLive(string $key, ?int $contextId = null): bool

@@ -7,8 +7,8 @@
 
 namespace Modules\Comments\Filament\Resources\Comments;
 
-use App\Core\Support\Jalali;
 use App\Core\Support\PersianText;
+use App\Filament\Support\NavigationBadge;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -26,7 +26,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Modules\Comments\Filament\Resources\Comments\Pages\ListComments;
 use Modules\Comments\Models\Comment;
@@ -50,9 +49,7 @@ class CommentResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $n = (int) rescue(fn () => Cache::remember(Comment::BADGE_KEY, 60, fn () => Comment::query()->where('status', 'pending')->count()), 0, report: false);
-
-        return $n ? PersianText::toPersianDigits($n) : null;
+        return NavigationBadge::count(Comment::BADGE_KEY, fn () => Comment::query()->where('status', 'pending')->count());
     }
 
     public static function getNavigationBadgeColor(): ?string
@@ -104,10 +101,9 @@ class CommentResource extends Resource
                     ->state(fn (Comment $c) => $c->is_staff ? 'خانه رمانتیک (پاسخ)' : $c->name)
                     ->description(fn (Comment $c) => $c->mobile ? PersianText::toPersianDigits($c->mobile) : $c->email),
                 TextColumn::make('status')->label('وضعیت')->badge()
-                    ->formatStateUsing(fn (string $state) => Comment::STATUSES[$state] ?? $state)
-                    ->color(fn (string $state) => Comment::COLORS[$state] ?? 'gray'),
-                TextColumn::make('likes')->label('پسند')->formatStateUsing(fn ($state) => PersianText::toPersianDigits($state))->toggleable(),
-                TextColumn::make('created_at')->label('تاریخ')->sortable()->formatStateUsing(fn ($state) => Jalali::format($state)),
+                    ->labels(Comment::STATUSES, Comment::COLORS),
+                TextColumn::make('likes')->label('پسند')->faDigits()->toggleable(),
+                TextColumn::make('created_at')->label('تاریخ')->sortable()->jalali(),
             ])
             ->filters([
                 SelectFilter::make('status')->label('وضعیت')->options(Comment::STATUSES),

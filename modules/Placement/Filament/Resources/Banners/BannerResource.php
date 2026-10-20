@@ -7,7 +7,6 @@
 
 namespace Modules\Placement\Filament\Resources\Banners;
 
-use App\Core\Support\Jalali;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -92,14 +91,14 @@ class BannerResource extends Resource
                 TextColumn::make('title')->label('عنوان')->searchable(),
                 TextColumn::make('placement.name')->label('جایگاه'),
                 TextColumn::make('status')->label('وضعیت')->badge()
-                    ->formatStateUsing(fn (string $state) => Banner::STATUSES[$state] ?? $state)
+                    ->labels(Banner::STATUSES)
                     ->color(fn (string $state) => match ($state) {
                         'approved' => 'success',
                         'archived' => 'warning',
                         default => 'gray',
                     }),
                 TextColumn::make('ends_at')->label('پایان')
-                    ->formatStateUsing(fn ($state) => $state ? Jalali::format($state) : null)->placeholder('بدون پایان'),
+                    ->jalali()->placeholder('بدون پایان'),
                 TextColumn::make('priority')->label('اولویت')->sortable(),
             ])
             ->filters([

@@ -9,9 +9,12 @@ namespace Modules\Customer\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Customer\Concerns\HasPostalAddress;
 
 class Address extends Model
 {
+    use HasPostalAddress;
+
     protected $table = 'customer_addresses';
 
     protected $guarded = ['id'];
@@ -49,11 +52,6 @@ class Address extends Model
     /** One line for lists and invoices. */
     public function line(): string
     {
-        return collect([
-            $this->province.'، '.$this->city,
-            $this->address,
-            $this->plaque ? 'پلاک '.$this->plaque : null,
-            $this->unit ? 'واحد '.$this->unit : null,
-        ])->filter()->implode('، ');
+        return $this->addressLine();
     }
 }

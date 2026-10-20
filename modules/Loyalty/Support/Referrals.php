@@ -47,7 +47,12 @@ final class Referrals
 
     public static function link(int $customerId): string
     {
-        return url('/').'?ref='.self::codeFor($customerId);
+        return self::linkFor(self::codeFor($customerId));
+    }
+
+    public static function linkFor(string $code): string
+    {
+        return url('/').'?ref='.$code;
     }
 
     /** " kr-7xm2q ", "ن ق۷ط…" (Persian layout still on) → "KR7XM2Q"; junk → null */
@@ -69,11 +74,16 @@ final class Referrals
     /** Can this (already registered) customer still add who invited them? */
     public static function canEnter(Customer $customer): bool
     {
+        return self::stillNew($customer) && ! Referral::query()->where('referred_id', $customer->id)->exists();
+    }
+
+    /** Within «referral_late_days» of signing up and no completed order yet (referral not checked). */
+    public static function stillNew(Customer $customer): bool
+    {
         $days = (int) Loyalty::get('referral_late_days');
 
         return Loyalty::on('referral') && $days > 0
             && $customer->created_at?->greaterThanOrEqualTo(now()->subDays($days))
-            && ! Referral::query()->where('referred_id', $customer->id)->exists()
             && ! Order::query()->where('customer_id', $customer->id)->where('status', 'completed')->exists();
     }
 

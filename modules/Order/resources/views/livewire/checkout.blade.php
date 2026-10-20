@@ -16,38 +16,7 @@
 
             @if ($addingAddress)
                 <form wire:submit="saveAddress" class="grid gap-3 sm:grid-cols-2" novalidate>
-                    @foreach (['recipient_name' => ['نام گیرنده', 'name', ''], 'recipient_mobile' => ['موبایل گیرنده', 'tel', 'ltr']] as $field => [$label, $auto, $dir])
-                        <div>
-                            <label for="co-{{ $field }}" class="mb-1.5 block text-sm font-bold text-navy">{{ $label }}</label>
-                            <input id="co-{{ $field }}" type="text" wire:model="address.{{ $field }}" autocomplete="{{ $auto }}" @if ($dir) dir="{{ $dir }}" inputmode="numeric" @endif class="field">
-                            @error('address.'.$field)<p class="mt-1 text-xs text-rose">{{ $message }}</p>@enderror
-                        </div>
-                    @endforeach
-                    <div>
-                        <label for="co-province" class="mb-1.5 block text-sm font-bold text-navy">استان</label>
-                        <select id="co-province" wire:model="address.province" class="field">
-                            @foreach ($provinces as $province)<option value="{{ $province }}">{{ $province }}</option>@endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="co-city" class="mb-1.5 block text-sm font-bold text-navy">شهر</label>
-                        <input id="co-city" type="text" wire:model="address.city" autocomplete="address-level2" class="field">
-                        @error('address.city')<p class="mt-1 text-xs text-rose">{{ $message }}</p>@enderror
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label for="co-address-line" class="mb-1.5 block text-sm font-bold text-navy">نشانی کامل</label>
-                        <textarea id="co-address-line" rows="2" wire:model="address.address" autocomplete="street-address" class="field"></textarea>
-                        @error('address.address')<p class="mt-1 text-xs text-rose">{{ $message }}</p>@enderror
-                    </div>
-                    <div class="grid grid-cols-3 gap-3 sm:col-span-2">
-                        @foreach (['plaque' => 'پلاک', 'unit' => 'واحد', 'postal_code' => 'کد پستی'] as $field => $label)
-                            <div>
-                                <label for="co-{{ $field }}" class="mb-1.5 block text-sm font-bold text-navy">{{ $label }}</label>
-                                <input id="co-{{ $field }}" type="text" wire:model="address.{{ $field }}" @if ($field === 'postal_code') dir="ltr" inputmode="numeric" @endif class="field">
-                                @error('address.'.$field)<p class="mt-1 text-xs text-rose">{{ $message }}</p>@enderror
-                            </div>
-                        @endforeach
-                    </div>
+                    @include('customer::partials.address-fields', ['model' => 'address', 'id' => 'co'])
                     <div class="flex gap-2 sm:col-span-2">
                         <button type="submit" class="btn-navy">ذخیره‌ی نشانی</button>
                         @if ($addresses->isNotEmpty())
