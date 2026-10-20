@@ -9,6 +9,7 @@ use Modules\Content\Providers\ContentServiceProvider;
 use Modules\Coupon\Providers\CouponServiceProvider;
 use Modules\Crm\Providers\CrmServiceProvider;
 use Modules\Customer\Providers\CustomerServiceProvider;
+use Modules\Feeds\Providers\FeedsServiceProvider;
 use Modules\FileManager\Providers\FileManagerServiceProvider;
 use Modules\HomeSliders\Providers\HomeSlidersServiceProvider;
 use Modules\Integration\Providers\IntegrationServiceProvider;
@@ -55,6 +56,7 @@ return [
         ReviewsServiceProvider::class,
         CommentsServiceProvider::class,
         IntegrationServiceProvider::class,
+        FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,
     ],
 

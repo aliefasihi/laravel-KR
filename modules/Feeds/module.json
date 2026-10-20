@@ -1,0 +1,9 @@
+{
+    "title": "ترب و ایمالز",
+    "description": "اتصال محصولات به ترب (Product API v3 رسمی + وب‌هوک به‌روزرسانی فوری) و وب‌سرویس ایمالز.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": [],
+    "default": true,
+    "icon": "rss"
+}
