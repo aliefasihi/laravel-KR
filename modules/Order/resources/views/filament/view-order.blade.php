@@ -65,7 +65,7 @@
 
                 <dl class="ms-auto mt-4 max-w-sm space-y-2 border-t border-gray-200 pt-4 text-sm dark:border-white/10">
                     <div class="flex justify-between"><dt class="text-gray-500">جمع کالاها</dt><dd>{{ $toman($order->subtotal) }}</dd></div>
-                    @if ($order->discount)<div class="flex justify-between text-danger-600"><dt>کد تخفیف {{ $order->coupon_code }}</dt><dd>{{ $toman($order->discount) }}−</dd></div>@endif
+                    @if ($order->discount)<div class="flex justify-between text-danger-600"><dt>{{ $order->coupon_code ? 'کد تخفیف '.$order->coupon_code : 'تخفیف' }}</dt><dd>{{ $toman($order->discount) }}−</dd></div>@endif
                     @if ($order->shipping_method_title)
                         <div class="flex justify-between"><dt class="text-gray-500">ارسال — {{ $order->shipping_method_title }}</dt><dd>{{ $order->shipping_on_delivery ? 'پس‌کرایه' : ($order->shipping_total ? $toman($order->shipping_total) : 'رایگان') }}</dd></div>
                     @endif
@@ -132,6 +132,8 @@
                     @if ($order->customer_note)
                         <div class="rounded-lg bg-gray-50 p-3 dark:bg-white/5"><dt class="text-xs text-gray-500">توضیح مشتری</dt><dd class="mt-1">{{ $order->customer_note }}</dd></div>
                     @endif
+                    {{-- gift wrap and card message (GiftWrap module)… --}}
+                    @storefrontHook('admin.order.customer', ['order' => $order])
                 </dl>
             </x-filament::section>
 

@@ -61,6 +61,7 @@
                     @unless ($slip)<b>پرداخت:</b> {{ $order->payment_method_title }} ({{ $order->paymentStatusLabel() }})<br>@endunless
                     @if ($order->tracking_code)<b>کد رهگیری:</b> {{ $order->tracking_code }}<br>@endif
                     @if ($order->customer_note)<b>توضیح:</b> {{ $order->customer_note }}@endif
+                    @storefrontHook('admin.order.print', ['order' => $order, 'slip' => $slip])
                 </div>
             </div>
 
@@ -90,8 +91,9 @@
             @unless ($slip)
                 <table class="totals">
                     <tr><td class="muted">جمع کالاها</td><td>{{ Money::toman($order->subtotal) }}</td></tr>
-                    @if ($order->discount)<tr><td class="muted">تخفیف ({{ $order->coupon_code }})</td><td>{{ Money::toman($order->discount) }}−</td></tr>@endif
+                    @if ($order->discount)<tr><td class="muted">تخفیف @if ($order->coupon_code)({{ $order->coupon_code }})@endif</td><td>{{ Money::toman($order->discount) }}−</td></tr>@endif
                     <tr><td class="muted">ارسال</td><td>{{ $order->shipping_on_delivery ? 'پس‌کرایه' : ($order->shipping_total ? Money::toman($order->shipping_total) : 'رایگان') }}</td></tr>
+                    @if ($order->fees_total)<tr><td class="muted">هزینه‌های دیگر</td><td>{{ Money::toman($order->fees_total) }}</td></tr>@endif
                     @if ($order->wallet_used ?? 0)<tr><td class="muted">پرداخت از کیف پول</td><td>{{ Money::toman($order->wallet_used) }}−</td></tr>@endif
                     <tr class="grand"><td>{{ ($order->wallet_used ?? 0) ? 'مبلغ پرداختی (تومان)' : 'مبلغ کل (تومان)' }}</td><td>{{ Money::toman($order->total) }}</td></tr>
                 </table>

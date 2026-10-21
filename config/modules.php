@@ -13,6 +13,7 @@ use Modules\Crm\Providers\CrmServiceProvider;
 use Modules\Customer\Providers\CustomerServiceProvider;
 use Modules\Feeds\Providers\FeedsServiceProvider;
 use Modules\FileManager\Providers\FileManagerServiceProvider;
+use Modules\GiftWrap\Providers\GiftWrapServiceProvider;
 use Modules\HomeSliders\Providers\HomeSlidersServiceProvider;
 use Modules\Integration\Providers\IntegrationServiceProvider;
 use Modules\Loyalty\Providers\LoyaltyServiceProvider;
@@ -63,6 +64,7 @@ return [
         AbandonedCartServiceProvider::class,
         RegistryServiceProvider::class,
         BundlesServiceProvider::class,
+        GiftWrapServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,

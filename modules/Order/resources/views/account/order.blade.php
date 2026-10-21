@@ -84,11 +84,14 @@
         <dl class="mt-4 space-y-2 border-t border-line pt-4 text-sm">
             <div class="flex justify-between"><dt class="text-muted">جمع کالاها</dt><dd class="font-bold text-navy">{{ Money::toman($order->subtotal) }} تومان</dd></div>
             @if ($order->discount)
-                <div class="flex justify-between text-rose"><dt>کد تخفیف {{ $order->coupon_code }}</dt><dd class="font-bold">{{ Money::toman($order->discount) }} تومان</dd></div>
+                <div class="flex justify-between text-rose"><dt>{{ $order->coupon_code ? 'کد تخفیف '.$order->coupon_code : 'تخفیف' }}</dt><dd class="font-bold">{{ Money::toman($order->discount) }} تومان</dd></div>
             @endif
             @if ($order->shipping_method_title)
                 <div class="flex justify-between"><dt class="text-muted">ارسال — {{ $order->shipping_method_title }}</dt>
                     <dd class="font-bold text-navy">{{ $order->shipping_on_delivery ? 'پس‌کرایه' : ($order->shipping_total ? Money::toman($order->shipping_total).' تومان' : 'رایگان') }}</dd></div>
+            @endif
+            @if ($order->fees_total)
+                <div class="flex justify-between"><dt class="text-muted">هزینه‌های دیگر (مثل بسته‌بندی کادو)</dt><dd class="font-bold text-navy">{{ Money::toman($order->fees_total) }} تومان</dd></div>
             @endif
             @if ($order->wallet_used ?? 0)
                 <div class="flex justify-between text-rose"><dt>پرداخت از کیف پول</dt><dd class="font-bold">{{ Money::toman($order->wallet_used) }} تومان</dd></div>
