@@ -23,6 +23,7 @@ use Modules\Search\Providers\SearchServiceProvider;
 use Modules\Seo\Providers\SeoServiceProvider;
 use Modules\Shipping\Providers\ShippingServiceProvider;
 use Modules\Sms\Providers\SmsServiceProvider;
+use Modules\Wishlist\Providers\WishlistServiceProvider;
 use Modules\WordPressImport\Providers\WordPressImportServiceProvider;
 
 /**
@@ -55,6 +56,7 @@ return [
         LoyaltyServiceProvider::class,
         ReviewsServiceProvider::class,
         CommentsServiceProvider::class,
+        WishlistServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,

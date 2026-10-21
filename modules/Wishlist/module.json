@@ -1,0 +1,9 @@
+{
+    "title": "علاقه‌مندی‌ها و اطلاع‌رسانی",
+    "description": "ذخیره‌ی محصول در علاقه‌مندی‌ها، پیامک «موجود شد» و «قیمت کم شد» برای مشتری.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": ["Customer", "Sms"],
+    "default": true,
+    "icon": "heart"
+}

@@ -44,7 +44,7 @@
     @else
         <div class="flex items-center gap-3 rounded-2xl bg-navy/5 px-4 py-4 text-sm text-navy">
             <svg class="size-5 shrink-0 text-rose" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg>
-            این کالا فعلاً موجود نیست؛ برای اطلاع از موجودی با ما در واتس‌اپ در تماس باشید.
+            {{ \App\Core\Modules\Modules::enabled('Wishlist') ? 'این کالا فعلاً موجود نیست.' : 'این کالا فعلاً موجود نیست؛ برای اطلاع از موجودی با ما در واتس‌اپ در تماس باشید.' }}
         </div>
     @endif
 
