@@ -332,6 +332,36 @@ document.addEventListener('alpine:init', () => {
     }));
 
     // Copy the current URL (share)
+    // «Recently viewed»: the ids live only in this browser (localStorage «kr-recent», newest first,
+    // 12 at most); the row's HTML comes from /recently-viewed?ids=… in the live design.
+    Alpine.data('recentlyViewed', (current = 0, endpoint = '/recently-viewed') => ({
+        html: '',
+        key: 'kr-recent',
+        read() {
+            try { return JSON.parse(localStorage.getItem(this.key) || '[]').filter(Number.isInteger); } catch { return []; }
+        },
+        write(ids) {
+            try { localStorage.setItem(this.key, JSON.stringify(ids)); } catch { /* private mode */ }
+        },
+        async init() {
+            let ids = this.read();
+            if (current) {
+                ids = [current, ...ids.filter((id) => id !== current)].slice(0, 12);
+                this.write(ids);
+            }
+            const others = ids.filter((id) => id !== current).slice(0, 10);
+            if (!others.length) return;
+            try {
+                const response = await fetch(endpoint + '?ids=' + others.join(','), { headers: { Accept: 'text/html' } });
+                if (response.status === 200) this.html = await response.text();
+            } catch { /* offline: no row */ }
+        },
+        clear() {
+            this.write(current ? [current] : []);
+            this.html = '';
+        },
+    }));
+
     Alpine.data('share', () => ({
         copied: false,
         async copy(text = null) {   // copy(): this page's address; copy('…'): any text
