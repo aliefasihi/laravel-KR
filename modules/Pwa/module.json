@@ -1,0 +1,9 @@
+{
+    "title": "اپلیکیشن وب (PWA)",
+    "description": "نصب سایت روی صفحه‌ی اصلی گوشی مثل یک اپ، با آیکون و نام فروشگاه، صفحه‌ی آفلاین و بارگذاری سریع‌تر تصاویر و فایل‌ها.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": [],
+    "default": true,
+    "icon": "device-phone-mobile"
+}

@@ -26,6 +26,7 @@ final class TrafficSource
         'telegram' => 'تلگرام',
         'whatsapp_link' => 'واتس‌اپ (لینک)',
         'sms' => 'پیامک‌های فروشگاه',
+        'pwa' => 'اپلیکیشن نصب‌شده (PWA)',
         'other' => 'سایت‌های دیگر',
     ];
 

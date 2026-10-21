@@ -418,9 +418,3 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
-
-// Occasions (Yalda, Nowruz…): their effects load only when one is on — a separate small file
-if (document.documentElement.dataset.occasion) {
-    const runOccasion = () => import('./occasion.js').then((m) => m.default());
-    document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', runOccasion) : runOccasion();
-}
