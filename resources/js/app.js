@@ -334,9 +334,9 @@ document.addEventListener('alpine:init', () => {
     // Copy the current URL (share)
     Alpine.data('share', () => ({
         copied: false,
-        async copy() {
+        async copy(text = null) {   // copy(): this page's address; copy('…'): any text
             try {
-                await navigator.clipboard.writeText(window.location.href);
+                await navigator.clipboard.writeText(typeof text === 'string' ? text : window.location.href);   // @click="copy" passes the event
                 this.copied = true;
                 setTimeout(() => (this.copied = false), 2000);
             } catch {

@@ -19,6 +19,7 @@ use Modules\Media\Providers\MediaServiceProvider;
 use Modules\Order\Providers\OrderServiceProvider;
 use Modules\Payment\Providers\PaymentServiceProvider;
 use Modules\Placement\Providers\PlacementServiceProvider;
+use Modules\Registry\Providers\RegistryServiceProvider;
 use Modules\Reviews\Providers\ReviewsServiceProvider;
 use Modules\Search\Providers\SearchServiceProvider;
 use Modules\Seo\Providers\SeoServiceProvider;
@@ -59,6 +60,7 @@ return [
         CommentsServiceProvider::class,
         WishlistServiceProvider::class,
         AbandonedCartServiceProvider::class,
+        RegistryServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,
