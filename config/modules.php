@@ -3,6 +3,7 @@
 use Modules\AbandonedCart\Providers\AbandonedCartServiceProvider;
 use Modules\Appearance\Providers\AppearanceServiceProvider;
 use Modules\Attributes\Providers\AttributesServiceProvider;
+use Modules\Bundles\Providers\BundlesServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
 use Modules\Checkout\Providers\CheckoutServiceProvider;
 use Modules\Comments\Providers\CommentsServiceProvider;
@@ -61,6 +62,7 @@ return [
         WishlistServiceProvider::class,
         AbandonedCartServiceProvider::class,
         RegistryServiceProvider::class,
+        BundlesServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,

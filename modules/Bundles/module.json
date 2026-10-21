@@ -1,0 +1,9 @@
+{
+    "title": "ست‌ها و خرید با هم",
+    "description": "ست‌های تخفیف‌دار (مثلاً قابلمه + کفگیر + دستگیره) و پیشنهاد «معمولاً با هم خریده می‌شوند» از روی سفارش‌های واقعی.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": ["Catalog", "Checkout"],
+    "default": true,
+    "icon": "squares-plus"
+}
