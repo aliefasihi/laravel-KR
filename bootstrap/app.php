@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->appendToGroup('web', CanonicalTrailingSlash::class);
         $middleware->appendToGroup('web', ApplyDesign::class);   // switchable storefront designs
+        $middleware->validateCsrfTokens(except: ['payment/snapppay/callback']);   // the gateway posts back from its own site
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
