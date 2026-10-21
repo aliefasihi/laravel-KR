@@ -1,0 +1,9 @@
+{
+    "title": "یادآوری سبد رهاشده",
+    "description": "پیامک یادآوری به مشتری‌ای که سبد خریدش را نیمه‌کاره گذاشته، با لینک برگرداندن سبد و کد تخفیف اختیاری.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": ["Checkout", "Customer", "Sms"],
+    "default": true,
+    "icon": "shopping-cart"
+}

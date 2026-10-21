@@ -12,6 +12,7 @@ namespace Modules\Checkout\Support;
 
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Event;
 use Modules\Catalog\Models\Product;
 use Modules\Catalog\Models\ProductVariant;
 use Modules\Checkout\Support\Pricing\Quote;
@@ -49,6 +50,7 @@ class Cart
         }
 
         $this->session->put(self::KEY, $items);
+        Event::dispatch('cart.updated', [$items]);   // e.g. the abandoned-cart reminder keeps a copy for signed-in shoppers
 
         return $qty;
     }
@@ -61,6 +63,13 @@ class Cart
     public function clear(): void
     {
         $this->session->forget([self::KEY, 'checkout.coupon']);
+        Event::dispatch('cart.updated', [[]]);
+    }
+
+    /** variant id => quantity, as stored (no prices) */
+    public function items(): array
+    {
+        return $this->raw();
     }
 
     public function quantityOf(int $variantId): int

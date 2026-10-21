@@ -60,7 +60,12 @@ class OrderServiceProvider extends ModuleServiceProvider
         $notify = fn (string $event) => fn (array $order) => app(OrderNotifier::class)->handle($event, $order);
 
         // «ثبت سفارش» only for orders that don't wait for an online payment (those get «پرداخت موفق»)
-        Event::listen('order.placed', fn (array $order) => $order['status'] !== 'pending' && $notify('placed')($order));
+        // (a block, not `cond && …`: a listener returning false would stop every listener after it)
+        Event::listen('order.placed', function (array $order) use ($notify) {
+            if ($order['status'] !== 'pending') {
+                $notify('placed')($order);
+            }
+        });
         Event::listen('order.paid', $notify('paid'));
         Event::listen('order.shipped', $notify('shipped'));
         Event::listen('order.status_changed', function (array $order) use ($notify) {

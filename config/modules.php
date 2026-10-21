@@ -1,5 +1,6 @@
 <?php
 
+use Modules\AbandonedCart\Providers\AbandonedCartServiceProvider;
 use Modules\Appearance\Providers\AppearanceServiceProvider;
 use Modules\Attributes\Providers\AttributesServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
@@ -57,6 +58,7 @@ return [
         ReviewsServiceProvider::class,
         CommentsServiceProvider::class,
         WishlistServiceProvider::class,
+        AbandonedCartServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,
