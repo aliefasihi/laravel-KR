@@ -10,14 +10,19 @@ namespace Modules\AbandonedCart\Providers;
 use App\Core\Modules\ModuleServiceProvider;
 use App\Core\Settings\Settings;
 use App\Core\Settings\SettingsSection;
+use App\Core\Support\Money;
+use App\Core\Support\PersianText;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Text;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use Modules\AbandonedCart\Models\AbandonedCart;
 use Modules\AbandonedCart\Support\Reminders;
 use Modules\Checkout\Support\Cart;
+use Modules\Order\Support\ReportMetrics;
 
 class AbandonedCartServiceProvider extends ModuleServiceProvider
 {
@@ -39,6 +44,17 @@ class AbandonedCartServiceProvider extends ModuleServiceProvider
             }
         });
         Event::listen('order.placed', fn (array $order) => rescue(fn () => app(Reminders::class)->ordered($order), report: true));
+
+        ReportMetrics::add('abandoned', function (Carbon $from, Carbon $to) {
+            $reminded = AbandonedCart::query()->whereBetween('reminded_at', [$from, $to]);
+            $back = (clone $reminded)->whereNotNull('recovered_at');
+
+            return [
+                ['label' => 'یادآوری سبد رهاشده', 'value' => PersianText::toPersianDigits((clone $reminded)->count()).' پیامک',
+                    'hint' => PersianText::toPersianDigits((clone $back)->count()).' نفر برگشتند و خرید کردند'],
+                ['label' => 'فروش برگشته با یادآوری', 'value' => Money::toman((int) (clone $back)->sum('order_total')).' تومان'],
+            ];
+        });
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->call(fn () => app(Reminders::class)->sendDue())->everyFifteenMinutes()->name('abandoned:remind')->withoutOverlapping();

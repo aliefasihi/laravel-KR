@@ -76,7 +76,7 @@ final class Watchers
         StockAlert::query()->pending()->where('product_id', $product->id)->get()
             ->unique('mobile')
             ->each(function (StockAlert $alert) use ($product, $price, $template) {
-                if ($this->send($alert->mobile, (string) $template, [Money::toman($price), '-', $product->url(), $product->name])) {
+                if ($this->send($alert->mobile, (string) $template, [Money::toman($price), '-', $product->url().'?utm_source=sms', $product->name])) {
                     StockAlert::query()->pending()->where('product_id', $product->id)->where('mobile', $alert->mobile)->update(['notified_at' => now()]);
                 }
             });
@@ -97,7 +97,7 @@ final class Watchers
                 if ($price > $item->watched_price * 0.99 || ! $template || ! $this->canSend() || ! $item->customer?->mobile) {
                     return;
                 }
-                if ($this->send($item->customer->mobile, (string) $template, [Money::toman($price), Money::toman($item->watched_price), $product->url(), $product->name])) {
+                if ($this->send($item->customer->mobile, (string) $template, [Money::toman($price), Money::toman($item->watched_price), $product->url().'?utm_source=sms', $product->name])) {
                     $item->update(['watched_price' => $price, 'price_notified_at' => now()]);
                 }
             });

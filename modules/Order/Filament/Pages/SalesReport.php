@@ -14,6 +14,7 @@ use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Modules\Order\Support\OrdersCsv;
+use Modules\Order\Support\ReportMetrics;
 use Modules\Order\Support\SalesReportData;
 use UnitEnum;
 
@@ -122,6 +123,9 @@ class SalesReport extends Page
             'payments' => $data->byPayment(),
             'shipping' => $data->byShipping(),
             'coupons' => $data->coupons(),
+            'channels' => $data->byChannel(),
+            'brands' => $data->topBrands(),
+            'tools' => ReportMetrics::for($data->from, $data->to),
             'statuses' => $data->statuses(),
             'rangeLabel' => Jalali::format($data->from).' تا '.Jalali::format($data->to),
         ];

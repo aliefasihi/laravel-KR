@@ -7,17 +7,23 @@
 
 namespace Modules\Wishlist\Providers;
 
+use App\Core\Modules\Modules;
 use App\Core\Modules\ModuleServiceProvider;
 use App\Core\Settings\Settings;
 use App\Core\Settings\SettingsSection;
+use App\Core\Support\PersianText;
 use App\Core\Support\StorefrontHooks;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Text;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 use Modules\Catalog\Models\ProductVariant;
+use Modules\Order\Support\ReportMetrics;
 use Modules\Wishlist\Livewire\ProductActions;
+use Modules\Wishlist\Models\StockAlert;
+use Modules\Wishlist\Models\WishlistItem;
 use Modules\Wishlist\Support\Watchers;
 
 class WishlistServiceProvider extends ModuleServiceProvider
@@ -36,6 +42,15 @@ class WishlistServiceProvider extends ModuleServiceProvider
                 dispatch(fn () => app(Watchers::class)->check($productId))->afterResponse();
             }
         });
+
+        if (class_exists(ReportMetrics::class) && Modules::enabled('Order')) {
+            ReportMetrics::add('wishlist', fn (Carbon $from, Carbon $to) => [
+                ['label' => 'افزوده به علاقه‌مندی‌ها', 'value' => PersianText::toPersianDigits(WishlistItem::query()->whereBetween('created_at', [$from, $to])->count()),
+                    'hint' => PersianText::toPersianDigits(WishlistItem::query()->whereBetween('price_notified_at', [$from, $to])->count()).' پیامک «قیمت کم شد»'],
+                ['label' => 'درخواست «موجود شد خبرم کن»', 'value' => PersianText::toPersianDigits(StockAlert::query()->whereBetween('created_at', [$from, $to])->count()),
+                    'hint' => PersianText::toPersianDigits(StockAlert::query()->whereBetween('notified_at', [$from, $to])->count()).' پیامک «موجود شد» رفت'],
+            ]);
+        }
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->call(fn () => app(Watchers::class)->sweep())->hourly()->name('wishlist:sweep')->withoutOverlapping();

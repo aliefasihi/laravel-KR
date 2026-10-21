@@ -92,7 +92,7 @@ final class Reminders
                     return;
                 }
                 $values = [
-                    route('abandoned.restore', $cart->token),
+                    route('abandoned.restore', ['token' => $cart->token, 'utm_source' => 'sms']),
                     (string) (Settings::get('abandoned.coupon_code') ?: '-'),
                     PersianText::toPersianDigits($cart->count()),
                     $cart->customer->first_name ?: 'مشتری عزیز',

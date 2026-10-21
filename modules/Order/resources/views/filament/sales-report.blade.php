@@ -20,6 +20,8 @@
         ['discounts', 'تخفیف کوپن', true, null],
         ['shipping', 'هزینه‌ی ارسال دریافتی', true, null],
         ['new_customers', 'مشتری تازه', false, null],
+        ['returning', 'سفارش مشتری‌های قدیمی', false, 'سفارش‌هایی که خریدارشان قبل از این بازه هم خرید کرده بود'],
+        ['cancelled', 'لغوشده', false, null],
     ];
 @endphp
 <x-filament-panels::page>
@@ -38,7 +40,7 @@
     <p class="-mt-2 text-sm text-gray-500">{{ $rangeLabel }} · مقایسه با دوره‌ی هم‌اندازه‌ی قبل</p>
 
     {{-- KPIs --}}
-    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
         @foreach ($cards as [$key, $label, $money, $hint])
             @php($d = $delta($key))
             <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
@@ -58,11 +60,28 @@
     {{-- chart --}}
     @livewire(\Modules\Order\Filament\Widgets\SalesChart::class, ['from' => $from, 'to' => $to], key('chart-'.$from.'-'.$to))
 
+    {{-- results of the selling tools (abandoned-cart SMS, wedding lists, gift wrap…) --}}
+    @if ($tools !== [])
+        <x-filament::section heading="نتیجه‌ی ابزارهای فروش در این بازه" compact>
+            <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                @foreach ($tools as $card)
+                    <div class="rounded-lg p-3 ring-1 ring-gray-950/5 dark:ring-white/10">
+                        <p class="text-xs text-gray-500">{{ $card['label'] }}</p>
+                        <p class="mt-1 text-lg font-bold">{{ $card['value'] }}</p>
+                        @if ($card['hint'])<p class="mt-0.5 text-xs text-gray-400">{{ $card['hint'] }}</p>@endif
+                    </div>
+                @endforeach
+            </div>
+        </x-filament::section>
+    @endif
+
     {{-- tables --}}
     <div class="grid gap-6 lg:grid-cols-2">
         @foreach ([
             ['پرفروش‌ترین محصولات', $products, 'name', 'quantity', 'تعداد'],
+            ['کانال‌های فروش', $channels, 'name', 'orders', 'سفارش'],
             ['دسته‌ها', $categories, 'name', 'quantity', 'تعداد'],
+            ['برندها', $brands, 'name', 'quantity', 'تعداد'],
             ['استان‌ها', $provinces, 'name', 'orders', 'سفارش'],
             ['روش‌های پرداخت', $payments, 'name', 'orders', 'سفارش'],
             ['روش‌های ارسال', $shipping, 'name', 'orders', 'سفارش'],

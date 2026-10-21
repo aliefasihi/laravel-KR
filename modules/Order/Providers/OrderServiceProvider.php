@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 use Modules\Coupon\Support\CouponEvaluator;
 use Modules\Integration\Models\OutboxEvent;
+use Modules\Order\Http\Middleware\RememberTrafficSource;
 use Modules\Order\Livewire\Checkout;
 use Modules\Order\Models\Order;
 use Modules\Order\Payments\PaymentMethods;
@@ -26,6 +27,7 @@ use Modules\Order\Support\OrderNotifier;
 use Modules\Order\Support\OrderWorkflow;
 use Modules\Order\Support\PlaceOrder;
 use Modules\Order\Support\Stock;
+use Modules\Order\Support\TrafficSource;
 
 class OrderServiceProvider extends ModuleServiceProvider
 {
@@ -45,6 +47,14 @@ class OrderServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         Livewire::component('order.checkout', Checkout::class);
+
+        // sales channel: where the shopper came from (Torob, Google, an SMS link…) → orders.source
+        $this->app['router']->pushMiddlewareToGroup('web', RememberTrafficSource::class);
+        Event::listen('order.placing', function (Order $order) {
+            if (($order->source ?? 'web') === 'web' && ($source = TrafficSource::current())) {
+                $order->forceFill(['source' => $source])->save();
+            }
+        });
 
         $this->notifications();
         $this->settings();

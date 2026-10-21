@@ -72,6 +72,7 @@ class SalesReportData
             'items' => $items,
             'cancelled' => $this->orders()->whereIn('status', ['cancelled', 'failed'])->count(),
             'awaiting' => $this->orders()->whereIn('status', ['pending', 'on_hold'])->count(),
+            'returning' => $this->returningOrders(),
             'new_customers' => DB::table('customers')->whereBetween('created_at', [$this->from->copy()->utc(), $this->to->copy()->utc()])->count(),
         ];
     }
@@ -140,6 +141,39 @@ class SalesReportData
         return $this->orders()->sales()->groupBy('province')
             ->selectRaw('province as name, count(*) as orders, sum(total - refunded_total) as revenue')
             ->orderByDesc('revenue')->limit($limit)->get();
+    }
+
+    /** Sales channel (orders.source): site (with Torob, Google… when detected), phone, Instagram… */
+    public function byChannel(): Collection
+    {
+        $labels = AdminOrders::channels();
+
+        return $this->orders()->sales()->groupBy('source')
+            ->selectRaw('source, count(*) as orders, sum(total - refunded_total) as revenue')
+            ->orderByDesc('revenue')->get()
+            ->each(fn ($row) => $row->name = $labels[$row->source] ?? $row->source);
+    }
+
+    public function topBrands(int $limit = 8): Collection
+    {
+        return DB::table('order_items')->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereIn('orders.status', Order::SALE_STATUSES)
+            ->whereBetween('orders.created_at', [$this->from->copy()->utc(), $this->to->copy()->utc()])
+            ->whereNotNull('order_items.brand')
+            ->groupBy('order_items.brand')
+            ->selectRaw('order_items.brand as name, sum(order_items.quantity - order_items.refunded_quantity) as quantity, sum(order_items.total) as revenue')
+            ->orderByDesc('revenue')->limit($limit)->get();
+    }
+
+    /** Sale orders in the range from customers who had ordered before it. */
+    public function returningOrders(): int
+    {
+        $start = $this->from->copy()->utc();
+
+        return $this->orders()->sales()->whereNotNull('customer_id')
+            ->whereExists(fn ($q) => $q->from('orders as earlier')->whereColumn('earlier.customer_id', 'orders.customer_id')
+                ->where('earlier.created_at', '<', $start)->whereIn('earlier.status', Order::SALE_STATUSES))
+            ->count();
     }
 
     public function byPayment(): Collection

@@ -31,6 +31,12 @@ class AdminOrders
         'wordpress' => 'سایت قبلی (ووکامرس)',
     ];
 
+    /** every channel an order can have: the ones staff pick + the ones the site detects (TrafficSource) */
+    public static function channels(): array
+    {
+        return self::SOURCES + TrafficSource::CHANNELS;
+    }
+
     public function __construct(private Stock $stock, private OrderWorkflow $workflow) {}
 
     /**

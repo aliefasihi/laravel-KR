@@ -100,7 +100,7 @@ class OrderResource extends Resource
                     ->toman(unit: true)
                     ->description(fn (Order $r) => $r->coupon_code ? 'کد '.$r->coupon_code : null),
                 TextColumn::make('source')->label('کانال')->toggleable(isToggledHiddenByDefault: true)
-                    ->labels(AdminOrders::SOURCES),
+                    ->labels(AdminOrders::channels()),
                 TextColumn::make('tracking_code')->label('رهگیری')->searchable()->toggleable(isToggledHiddenByDefault: true)->copyable(),
             ])
             ->filters([
@@ -119,7 +119,7 @@ class OrderResource extends Resource
                     ->options(fn () => Order::query()->whereNotNull('shipping_method')->distinct()->pluck('shipping_method_title', 'shipping_method')->all()),
                 SelectFilter::make('province')->label('استان')->searchable()
                     ->options(fn () => array_combine(config('modules.customer.provinces'), config('modules.customer.provinces'))),
-                SelectFilter::make('source')->label('کانال فروش')->options(AdminOrders::SOURCES),
+                SelectFilter::make('source')->label('کانال فروش')->options(AdminOrders::channels()),
                 TernaryFilter::make('coupon')->label('با کد تخفیف')
                     ->queries(true: fn ($query) => $query->whereNotNull('coupon_code'), false: fn ($query) => $query->whereNull('coupon_code')),
             ])
