@@ -40,6 +40,7 @@ class ViewOrder extends ViewRecord
                 OrderActions::editAddress()->after(fn () => $this->refreshOrder()),
                 OrderActions::invoice(),
                 OrderActions::packingSlip(),
+                OrderActions::shippingLabel(),
                 OrderActions::refund()->after(fn () => $this->refreshOrder()),
             ])->label('بیشتر')->button()->color('gray'),
         ];

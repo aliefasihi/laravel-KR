@@ -63,6 +63,9 @@ class AdminPanelProvider extends PanelProvider
             ->defaultAvatarProvider(InitialsAvatarProvider::class) // no ui-avatars.com request on every page
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->sidebarCollapsibleOnDesktop()
+            // the bell: low stock and other alerts for the staff (checked every minute)
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('60s')
             // SPA navigation: page changes swap only the content (no full reload of Filament's CSS/JS),
             // and links are prefetched on hover so most clicks open instantly.
             ->spa(hasPrefetching: true)

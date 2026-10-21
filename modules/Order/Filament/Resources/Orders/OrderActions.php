@@ -181,12 +181,22 @@ final class OrderActions
     public static function packingSlip(): Action
     {
         return Action::make('slip')->label('برگه‌ی بسته‌بندی')->icon('heroicon-o-clipboard-document-list')->color('gray')
-            ->url(fn (Order $record) => self::printUrl([$record->id], slip: true), shouldOpenInNewTab: true);
+            ->url(fn (Order $record) => self::printUrl([$record->id], 'slip'), shouldOpenInNewTab: true);
     }
 
-    /** Signed, short-lived link: invoices open in a new tab without the panel, ready to print. */
-    public static function printUrl(array $ids, bool $slip = false): string
+    public static function shippingLabel(): Action
     {
-        return URL::temporarySignedRoute('order.print', now()->addMinutes(30), ['ids' => implode(',', $ids), 'slip' => $slip ? 1 : 0]);
+        return Action::make('label')->label('برچسب پستی')->icon('heroicon-o-tag')->color('gray')
+            ->url(fn (Order $record) => self::printUrl([$record->id], 'label'), shouldOpenInNewTab: true);
+    }
+
+    /**
+     * Signed, short-lived link: invoices open in a new tab without the panel, ready to print.
+     *
+     * @param  'invoice'|'slip'|'label'  $kind
+     */
+    public static function printUrl(array $ids, string $kind = 'invoice'): string
+    {
+        return URL::temporarySignedRoute('order.print', now()->addMinutes(30), ['ids' => implode(',', $ids), 'kind' => $kind]);
     }
 }

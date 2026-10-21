@@ -11,7 +11,10 @@ use App\Core\Modules\Modules;
 use App\Core\Modules\ModuleServiceProvider;
 use App\Core\Settings\Settings;
 use App\Core\Settings\SettingsSection;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Text;
 use Illuminate\Console\Scheduling\Schedule;
@@ -58,6 +61,7 @@ class OrderServiceProvider extends ModuleServiceProvider
 
         $this->notifications();
         $this->settings();
+        $this->printSettings();
         $this->integrations();
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
@@ -103,6 +107,42 @@ class OrderServiceProvider extends ModuleServiceProvider
                     TextInput::make('admin_mobiles')->label('شماره‌ها')->placeholder('09121234567, 09351234567')->extraInputAttributes(['dir' => 'ltr']),
                     TextInput::make('admin_template')->label('الگو')->extraInputAttributes(['dir' => 'ltr']),
                 ])->columns(2),
+            ],
+        ));
+    }
+
+    private function printSettings(): void
+    {
+        Settings::section(new SettingsSection(
+            key: 'print',
+            title: 'فاکتور و برچسب',
+            icon: 'heroicon-o-printer',
+            sort: 37,
+            defaults: [
+                'sender_name' => null, 'sender_phone' => null, 'sender_postal_code' => null, 'sender_address' => null,
+                'label_size' => 'a6', 'show_logo' => true, 'customer_invoice' => true,
+                'national_id' => null, 'economic_code' => null, 'registration_no' => null, 'invoice_note' => null,
+            ],
+            schema: fn () => [
+                Fieldset::make('فرستنده روی برچسب پستی')->columns(2)->schema([
+                    TextInput::make('sender_name')->label('نام فرستنده')->placeholder(config('khaneh.store.name')),
+                    TextInput::make('sender_phone')->label('تلفن فرستنده')->placeholder(config('khaneh.store.mobile'))->extraInputAttributes(['dir' => 'ltr']),
+                    TextInput::make('sender_postal_code')->label('کد پستی فرستنده')->maxLength(10)->extraInputAttributes(['dir' => 'ltr']),
+                    Textarea::make('sender_address')->label('نشانی فرستنده')->placeholder(config('khaneh.store.address'))->rows(2)->columnSpanFull(),
+                    Radio::make('label_size')->label('اندازه‌ی برچسب')->columnSpanFull()->options([
+                        'a6' => 'A6 / ۱۰×۱۵ — هر برچسب یک صفحه (پرینتر حرارتی برچسب)',
+                        'a4' => 'چهار برچسب روی یک A4 (پرینتر معمولی؛ بعد از چاپ برش بزنید)',
+                    ]),
+                ]),
+                Fieldset::make('فاکتور')->columns(3)->schema([
+                    TextInput::make('national_id')->label('شناسه‌ی ملی')->extraInputAttributes(['dir' => 'ltr']),
+                    TextInput::make('economic_code')->label('کد اقتصادی')->extraInputAttributes(['dir' => 'ltr']),
+                    TextInput::make('registration_no')->label('شماره‌ی ثبت')->extraInputAttributes(['dir' => 'ltr']),
+                    Textarea::make('invoice_note')->label('متن پایین فاکتور')->rows(2)->columnSpanFull()
+                        ->placeholder('مثلاً: تا ۷ روز امکان مرجوعی کالای سالم در بسته‌بندی اصلی وجود دارد.'),
+                    Toggle::make('show_logo')->label('لوگو روی فاکتور')->columnSpanFull(),
+                    Toggle::make('customer_invoice')->label('مشتری بتواند فاکتور سفارشش را از حساب کاربری چاپ کند')->columnSpanFull(),
+                ]),
             ],
         ));
     }

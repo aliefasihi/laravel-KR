@@ -19,11 +19,9 @@ use Modules\Integration\Providers\IntegrationServiceProvider;
 use Modules\Inventory\Providers\InventoryServiceProvider;
 use Modules\Loyalty\Providers\LoyaltyServiceProvider;
 use Modules\Media\Providers\MediaServiceProvider;
-use Modules\Occasions\Providers\OccasionsServiceProvider;
 use Modules\Order\Providers\OrderServiceProvider;
 use Modules\Payment\Providers\PaymentServiceProvider;
 use Modules\Placement\Providers\PlacementServiceProvider;
-use Modules\Pwa\Providers\PwaServiceProvider;
 use Modules\RecentlyViewed\Providers\RecentlyViewedServiceProvider;
 use Modules\Registry\Providers\RegistryServiceProvider;
 use Modules\Reviews\Providers\ReviewsServiceProvider;
@@ -71,8 +69,6 @@ return [
         GiftWrapServiceProvider::class,
         RecentlyViewedServiceProvider::class,
         InventoryServiceProvider::class,
-        PwaServiceProvider::class,
-        OccasionsServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,

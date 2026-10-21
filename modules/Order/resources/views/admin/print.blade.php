@@ -1,5 +1,5 @@
-{{-- Printable invoices / packing slips (A4) | نویسنده: علی فصیحی (Ali Fasihi) --}}
-@php use App\Core\Support\{Jalali, Money, PersianText}; $fa = fn ($v) => PersianText::toPersianDigits((string) $v); @endphp
+{{-- Printable invoices / packing slips (A4); also the shopper's own invoice ($customer) | نویسنده: علی فصیحی (Ali Fasihi) --}}
+@php use App\Core\Support\{Jalali, Money, PersianText}; $fa = fn ($v) => PersianText::toPersianDigits((string) $v); $customer ??= false; $logo ??= null; $legal ??= []; $note ??= null; @endphp
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -27,6 +27,10 @@
         .totals td { border: none; padding: 4px 8px; }
         .totals tr.grand td { border-top: 2px solid #23284f; font-weight: 800; font-size: 14px; }
         .check { width: 22px; height: 22px; border: 1.5px solid #23284f; border-radius: 4px; display: inline-block; }
+        .brand { display: flex; gap: 12px; align-items: center; }
+        .brand img { max-height: 54px; max-width: 150px; object-fit: contain; }
+        .legal { color: #66717f; font-size: 11px; margin-top: 2px; }
+        .note { margin-top: 14px; border: 1px dashed #d1d5db; border-radius: 8px; padding: 8px 10px; color: #4b5563; line-height: 1.9; }
         footer { margin-top: 18px; text-align: center; color: #98a2ae; font-size: 10px; }
         .toolbar { text-align: center; margin: 12px; }
         .toolbar button { font: inherit; padding: 8px 22px; border-radius: 999px; border: 0; background: #23284f; color: #fff; cursor: pointer; }
@@ -38,10 +42,16 @@
     @foreach ($orders as $order)
         <section class="sheet">
             <header>
-                <div>
-                    <h1>{{ $store['name'] }}</h1>
-                    <div class="muted">{{ $store['address'] }}</div>
-                    <div class="muted">تلفن: {{ $fa($store['phone']) }}</div>
+                <div class="brand">
+                    @if ($logo && ! $slip)<img src="{{ $logo }}" alt="">@endif
+                    <div>
+                        <h1>{{ $store['name'] }}</h1>
+                        <div class="muted">{{ $store['address'] }}</div>
+                        <div class="muted">تلفن: {{ $fa($store['phone']) }}</div>
+                        @if ($legal && ! $slip)
+                            <div class="legal">@foreach ($legal as $label => $value){{ $label }}: {{ $fa($value) }}@unless ($loop->last) · @endunless @endforeach</div>
+                        @endif
+                    </div>
                 </div>
                 <div style="text-align:left">
                     <h1>{{ $slip ? 'برگه‌ی بسته‌بندی' : 'فاکتور فروش' }}</h1>
@@ -61,7 +71,9 @@
                     @unless ($slip)<b>پرداخت:</b> {{ $order->payment_method_title }} ({{ $order->paymentStatusLabel() }})<br>@endunless
                     @if ($order->tracking_code)<b>کد رهگیری:</b> {{ $order->tracking_code }}<br>@endif
                     @if ($order->customer_note)<b>توضیح:</b> {{ $order->customer_note }}@endif
-                    @storefrontHook('admin.order.print', ['order' => $order, 'slip' => $slip])
+                    @unless ($customer)
+                        @storefrontHook('admin.order.print', ['order' => $order, 'slip' => $slip])
+                    @endunless
                 </div>
             </div>
 
@@ -97,6 +109,7 @@
                     @if ($order->wallet_used ?? 0)<tr><td class="muted">پرداخت از کیف پول</td><td>{{ Money::toman($order->wallet_used) }}−</td></tr>@endif
                     <tr class="grand"><td>{{ ($order->wallet_used ?? 0) ? 'مبلغ پرداختی (تومان)' : 'مبلغ کل (تومان)' }}</td><td>{{ Money::toman($order->total) }}</td></tr>
                 </table>
+                @if ($note)<div class="note">{!! nl2br(e($note)) !!}</div>@endif
             @endunless
             <footer>{{ $store['name'] }} — {{ url('/') }} — از خرید شما سپاسگزاریم</footer>
         </section>

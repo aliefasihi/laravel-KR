@@ -57,6 +57,11 @@
                     <button class="btn-glass">لغو سفارش</button>
                 </form>
             @endif
+            @if (\Modules\Order\Http\Controllers\PrintController::customerCanPrint($order))
+                <a href="{{ route('customer.orders.invoice', $order) }}" target="_blank" rel="noopener" class="btn-glass">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/></svg> فاکتور
+                </a>
+            @endif
         </div>
     </section>
 

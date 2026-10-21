@@ -149,7 +149,9 @@ class OrderResource extends Resource
                     BulkAction::make('print')->label('چاپ فاکتورها')->icon('heroicon-o-printer')
                         ->action(fn (Collection $records, $livewire) => $livewire->js('window.open('.json_encode(OrderActions::printUrl($records->modelKeys())).', "_blank")')),
                     BulkAction::make('slips')->label('چاپ برگه‌های بسته‌بندی')->icon('heroicon-o-clipboard-document-list')
-                        ->action(fn (Collection $records, $livewire) => $livewire->js('window.open('.json_encode(OrderActions::printUrl($records->modelKeys(), slip: true)).', "_blank")')),
+                        ->action(fn (Collection $records, $livewire) => $livewire->js('window.open('.json_encode(OrderActions::printUrl($records->modelKeys(), 'slip')).', "_blank")')),
+                    BulkAction::make('labels')->label('چاپ برچسب‌های پستی')->icon('heroicon-o-tag')
+                        ->action(fn (Collection $records, $livewire) => $livewire->js('window.open('.json_encode(OrderActions::printUrl($records->modelKeys(), 'label')).', "_blank")')),
                     BulkAction::make('export')->label('خروجی CSV')->icon('heroicon-o-arrow-down-tray')
                         ->action(fn (Collection $records) => OrdersCsv::download($records)),
                 ]),
