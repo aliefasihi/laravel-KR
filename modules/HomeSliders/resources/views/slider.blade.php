@@ -9,13 +9,25 @@
 @endphp
 
 @if ($slider->style === 'band')
-    <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-l from-caramel via-[#e89a7f] to-rose p-4 shadow-[0_30px_60px_-30px_rgb(204_51_102/0.6)] sm:p-6"
+    @php
+        $occ = config('khaneh.occasion');   // یلدا، نوروز…: the band takes the occasion's colours, sign and words
+        $amazingTitle = $occ && str_contains($slider->accent.' '.$slider->title, 'شگفت');
+    @endphp
+    <section @class(['relative overflow-hidden rounded-[2rem] bg-gradient-to-l from-caramel via-[#e89a7f] to-rose p-4 shadow-[0_30px_60px_-30px_rgb(204_51_102/0.6)] sm:p-6', 'occ-amazing' => $occ])
              aria-labelledby="{{ $id }}" x-data="{{ $rail }}" aria-roledescription="carousel">
+        @if ($occ)
+            <span class="occ-hero" aria-hidden="true">{!! \Modules\Occasions\Support\Art::svg($occ['hero']) !!}</span>
+        @endif
         <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(40rem_20rem_at_80%_0%,rgb(255_255_255/0.35),transparent)]" aria-hidden="true"></div>
         <div class="relative grid items-center gap-5 lg:grid-cols-[13rem_1fr]">
             <div class="flex flex-col items-start gap-4 text-white lg:items-center lg:text-center">
                 <h2 id="{{ $id }}" class="text-3xl leading-tight font-black drop-shadow-sm">
-                    @if ($slider->accent){{ $slider->accent }}<br class="max-lg:hidden"> @endif{{ $slider->title }}
+                    @if ($occ)<span class="occ-title-emblem" aria-hidden="true">{!! \Modules\Occasions\Support\Art::svg($occ['emblem']) !!}</span> @endif
+                    @if ($amazingTitle)
+                        {{ $occ['amazing_title'] }}
+                    @else
+                        @if ($slider->accent){{ $slider->accent }}<br class="max-lg:hidden"> @endif{{ $slider->title }}
+                    @endif
                 </h2>
                 @if ($dealsEnd)
                     <x-ui.deals-countdown :until="$dealsEnd" />

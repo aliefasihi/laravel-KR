@@ -18,7 +18,12 @@
 
         <div class="absolute inset-x-2 top-2 flex items-start justify-between">
             @if ($variant && $variant->currentPrice() < $variant->price)
-                <span class="badge-off">{{ \App\Core\Support\PersianText::toPersianDigits(\App\Core\Support\Money::discountPercent($variant->price, $variant->currentPrice())) }}٪</span>
+                <span class="flex flex-col items-start gap-1">
+                    <span class="badge-off">{{ \App\Core\Support\PersianText::toPersianDigits(\App\Core\Support\Money::discountPercent($variant->price, $variant->currentPrice())) }}٪</span>
+                    @if ($occ = config('khaneh.occasion'))
+                        <span class="occ-badge">{!! \Modules\Occasions\Support\Art::svg($occ['emblem']) !!}{{ $occ['badge'] }}</span>
+                    @endif
+                </span>
             @else
                 <span></span>
             @endif

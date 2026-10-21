@@ -23,6 +23,7 @@
  */
 @import 'tailwindcss';
 @import './themes.css'; /* the other demos' palettes and fonts (data-theme) */
+@import './occasions.css'; /* Yalda, Nowruz… (html[data-occasion]) */
 
 /* Self-hosted Vazirmatn (variable, OFL) — inlined here so the storefront needs no extra CSS request. */
 @font-face {

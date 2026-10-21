@@ -109,12 +109,20 @@
 
         {{-- ── Amazing offers band ──────────────────────────────────────── --}}
         @if ($amazing?->isNotEmpty())
-            <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-l from-caramel via-[#e89a7f] to-rose p-4 shadow-[0_30px_60px_-30px_rgb(204_51_102/0.6)] sm:p-6"
+            @php($occ = config('khaneh.occasion'))
+            <section @class(['relative overflow-hidden rounded-[2rem] bg-gradient-to-l from-caramel via-[#e89a7f] to-rose p-4 shadow-[0_30px_60px_-30px_rgb(204_51_102/0.6)] sm:p-6', 'occ-amazing' => $occ])
                      aria-labelledby="amazing-title" x-data="rail">
+                @if ($occ)
+                    <span class="occ-hero" aria-hidden="true">{!! \Modules\Occasions\Support\Art::svg($occ['hero']) !!}</span>
+                @endif
                 <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(40rem_20rem_at_80%_0%,rgb(255_255_255/0.35),transparent)]" aria-hidden="true"></div>
                 <div class="relative grid items-center gap-5 lg:grid-cols-[13rem_1fr]">
                     <div class="flex flex-col items-start gap-4 text-white lg:items-center lg:text-center">
-                        <h2 id="amazing-title" class="text-3xl leading-tight font-black drop-shadow-sm">محصولات<br class="max-lg:hidden"> شگفت‌انگیز</h2>
+                        @if ($occ)
+                            <h2 id="amazing-title" class="text-3xl leading-tight font-black drop-shadow-sm"><span class="occ-title-emblem" aria-hidden="true">{!! \Modules\Occasions\Support\Art::svg($occ['emblem']) !!}</span> {{ $occ['amazing_title'] }}</h2>
+                        @else
+                            <h2 id="amazing-title" class="text-3xl leading-tight font-black drop-shadow-sm">محصولات<br class="max-lg:hidden"> شگفت‌انگیز</h2>
+                        @endif
                         <x-ui.deals-countdown :until="$dealsEnd" />
                         <a href="{{ route('catalog.shop', ['sale' => 1, 'sort' => 'discount']) }}" class="btn !bg-surface !px-5 !py-2.5 text-navy hover:!bg-cream">مشاهده همه</a>
                         <div class="hidden gap-2 lg:flex">

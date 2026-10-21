@@ -31,7 +31,7 @@ class HomeController
     {
         // The whole body is rendered once and kept as HTML: a cached home page costs one cache read.
         $sections = StoreCache::remember(
-            'home.sections.'.Designs::signature(),   // one cached copy per design
+            'home.sections.'.Designs::signature().'.'.(config('khaneh.occasion.key') ?? 'none'),   // one cached copy per design (and occasion)
             fn () => view('home.sections', $this->data($listing))->render(),
             fn () => $this->nextSwitch(),
         );

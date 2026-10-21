@@ -22,6 +22,18 @@
          :class="scrolled && '!bg-surface/80 shadow-[0_16px_40px_-20px_rgb(35_40_79/0.35)]'"
          @mouseleave="mega = false">
 
+        {{-- occasion (یلدا، نوروز…): small signs hanging from the bar --}}
+        @if ($occ = config('khaneh.occasion'))
+            @foreach ($occ['header'] as $i => $art)
+                @if ($art === 'web')
+                    <span class="occ-corner" aria-hidden="true">{!! \Modules\Occasions\Support\Art::svg('web') !!}</span>
+                @else
+                    <span @class(['occ-hang transition-opacity duration-300', 'max-sm:hidden' => $i > 0]) :class="scrolled && 'opacity-0'" aria-hidden="true"
+                          style="{{ $i === 0 ? 'inset-inline-start: 22%; --occ-string: 1.4rem; --occ-size: 2.6rem;' : 'inset-inline-end: 16%; --occ-string: .8rem; --occ-size: 2.3rem; animation-delay: -1.4s;' }}">{!! \Modules\Occasions\Support\Art::svg($art) !!}</span>
+                @endif
+            @endforeach
+        @endif
+
         {{-- Row 1 --}}
         <div class="flex items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-5">
             <button type="button" class="btn-icon -ms-1 text-navy lg:hidden" @click="menu = true" aria-label="باز کردن منو">

@@ -1,7 +1,7 @@
 {{-- Khaneh Romantic — storefront layout (RTL, glass) | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @php($store = config('khaneh.store'))
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" data-theme="{{ \App\Core\Support\Designs::current('theme') }}" @if (config('khaneh.font') === 'kalameh') style="--font-brand: 'Kalameh'" @endif>
+<html lang="fa" dir="rtl" data-theme="{{ \App\Core\Support\Designs::current('theme') }}" @if (config('khaneh.occasion')) data-occasion="{{ config('khaneh.occasion.key') }}" @endif @if (config('khaneh.font') === 'kalameh') style="--font-brand: 'Kalameh'" @endif>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

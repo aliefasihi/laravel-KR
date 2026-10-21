@@ -362,6 +362,49 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    // «Install the app» banner (PWA module): from the third page view, not in the installed app,
+    // not again for 30 days after «بعداً». Android/desktop Chrome: the browser's own install dialog
+    // (its event is caught early in the <head>); iPhone Safari: how to add it to the home screen.
+    Alpine.data('pwaInstall', () => ({
+        open: false,
+        ios: false,
+        key: 'kr-pwa',
+        state() {
+            try { return JSON.parse(localStorage.getItem(this.key) || '{}'); } catch { return {}; }
+        },
+        save(state) {
+            try { localStorage.setItem(this.key, JSON.stringify(state)); } catch { /* private mode */ }
+        },
+        init() {
+            if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return;
+            const state = this.state();
+            if (state.until && state.until > Date.now()) return;
+            state.views = (state.views || 0) + 1;
+            this.save(state);
+            if (state.views < 3) return;
+
+            const ua = navigator.userAgent;
+            this.ios = /iphone|ipad|ipod/i.test(ua) && /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
+            const show = () => setTimeout(() => (this.open = true), 3000);
+            if (this.ios) return show();
+            if (window.krInstallPrompt) return show();
+            window.addEventListener('kr-installable', show, { once: true });
+            window.addEventListener('appinstalled', () => this.later(3650));
+        },
+        async install() {
+            const prompt = window.krInstallPrompt;
+            if (!prompt) return this.later();
+            prompt.prompt();
+            const choice = await prompt.userChoice.catch(() => ({}));
+            window.krInstallPrompt = null;
+            this.later(choice.outcome === 'accepted' ? 3650 : 30);
+        },
+        later(days = 30) {
+            this.open = false;
+            this.save({ ...this.state(), until: Date.now() + days * 864e5 });
+        },
+    }));
+
     Alpine.data('share', () => ({
         copied: false,
         async copy(text = null) {   // copy(): this page's address; copy('…'): any text
@@ -375,3 +418,9 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
+
+// Occasions (Yalda, Nowruz…): their effects load only when one is on — a separate small file
+if (document.documentElement.dataset.occasion) {
+    const runOccasion = () => import('./occasion.js').then((m) => m.default());
+    document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', runOccasion) : runOccasion();
+}

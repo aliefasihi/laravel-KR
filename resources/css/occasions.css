@@ -1,0 +1,238 @@
+/*
+ * Khaneh Romantic — Occasion dressing (Yalda, Nowruz, Chaharshanbe-Suri…), active on html[data-occasion].
+ * Colours, backgrounds and cursors of the occasion come inline from the Occasions module (head);
+ * this file only places the pieces. Visitors can switch the moving parts off (html.occ-off).
+ * نویسنده: علی فصیحی (Ali Fasihi)
+ */
+
+@layer components {
+    /* drifting pieces: over the page, under the header and dialogs, never catching clicks */
+    .occ-canvas {
+        position: fixed;
+        inset: 0;
+        z-index: 45;
+        pointer-events: none;
+    }
+
+    .occ-off .occ-canvas {
+        display: none;
+    }
+
+    /* promo bar: the occasion's colours */
+    .occ-promo {
+        background: var(--occ-promo);
+    }
+
+    /* search box: the occasion's sign inside it, a coloured ring */
+    .occ-search input {
+        border-color: color-mix(in oklab, var(--color-rose) 45%, transparent) !important;
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-rose) 12%, transparent), 0 8px 24px -14px var(--color-rose);
+        padding-inline-start: 2.75rem !important;
+    }
+
+    .occ-search-emblem {
+        position: absolute;
+        inset-inline-start: 0.85rem;
+        top: 50%;
+        width: 1.45rem;
+        height: 1.45rem;
+        translate: 0 -50%;
+        pointer-events: none;
+        animation: occ-bob 2.8s ease-in-out infinite;
+    }
+
+    /* decorations hanging from the header bar */
+    .occ-hang {
+        position: absolute;
+        top: 100%;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        pointer-events: none;
+        transform-origin: top center;
+        animation: occ-swing 3.6s ease-in-out infinite alternate;
+    }
+
+    .occ-hang::before {
+        content: '';
+        width: 1.5px;
+        height: var(--occ-string, 1.1rem);
+        background: color-mix(in oklab, var(--color-navy) 35%, transparent);
+    }
+
+    .occ-hang svg {
+        width: var(--occ-size, 2.1rem);
+        height: var(--occ-size, 2.1rem);
+        filter: drop-shadow(0 6px 8px rgb(0 0 0 / 0.18));
+    }
+
+    .occ-corner {
+        position: absolute;
+        inset-inline-end: -2px;
+        top: -2px;
+        width: 4.5rem;
+        height: 4.5rem;
+        pointer-events: none;
+        opacity: 0.8;
+        scale: -1 1;
+    }
+
+    .occ-corner svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* «شگفت‌انگیز» band */
+    .occ-amazing {
+        background: var(--occ-amazing) !important;
+    }
+
+    .occ-hero {
+        position: absolute;
+        inset-inline-start: -2.25rem;
+        top: -2.25rem;
+        width: 9rem;
+        height: 9rem;
+        rotate: 14deg;
+        opacity: 0.32;
+        pointer-events: none;
+        animation: occ-float 6s ease-in-out infinite;
+    }
+
+    .occ-title-emblem {
+        display: inline-block;
+        width: 2.4rem;
+        height: 2.4rem;
+        vertical-align: middle;
+        animation: occ-float 3.2s ease-in-out infinite;
+    }
+
+    /* small sign on discounted product cards */
+    .occ-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        border-radius: 999px;
+        background: color-mix(in oklab, var(--color-rose) 92%, black);
+        padding: 0.2rem 0.55rem 0.2rem 0.35rem;
+        font-size: 10.5px;
+        font-weight: 800;
+        color: #fff;
+        box-shadow: 0 6px 14px -8px var(--color-rose);
+    }
+
+    .occ-badge svg {
+        width: 0.95rem;
+        height: 0.95rem;
+    }
+
+    /* the visitor's on/off button */
+    .occ-toggle {
+        position: fixed;
+        inset-inline-end: 1rem;
+        bottom: 6rem;
+        z-index: 46;
+        display: grid;
+        width: 2.75rem;
+        height: 2.75rem;
+        place-items: center;
+        border-radius: 999px;
+        background: color-mix(in oklab, var(--color-surface) 85%, transparent);
+        border: 1px solid var(--color-glint);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 24px -14px rgb(0 0 0 / 0.5);
+        transition: scale 0.2s, filter 0.2s, opacity 0.2s;
+    }
+
+    .occ-toggle:hover {
+        scale: 1.08;
+    }
+
+    .occ-toggle svg {
+        width: 1.6rem;
+        height: 1.6rem;
+    }
+
+    .occ-off .occ-toggle {
+        filter: grayscale(1);
+        opacity: 0.7;
+    }
+
+    .occ-toggle-x {
+        position: absolute;
+        top: -2px;
+        inset-inline-end: -2px;
+        display: grid;
+        width: 1.05rem;
+        height: 1.05rem;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--color-navy);
+        color: #fff;
+        font-size: 9px;
+        line-height: 1;
+    }
+
+    @media (min-width: 1024px) {
+        .occ-toggle {
+            bottom: 1.5rem;
+        }
+    }
+
+    /* admin preview strip */
+    .occ-preview {
+        position: fixed;
+        inset-inline-start: 50%;
+        bottom: 1rem;
+        z-index: 60;
+        translate: 50% 0;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        border-radius: 999px;
+        background: #111827;
+        color: #fff;
+        padding: 0.5rem 0.6rem 0.5rem 1rem;
+        font-size: 12px;
+        box-shadow: 0 14px 30px -14px rgb(0 0 0 / 0.6);
+    }
+
+    .occ-preview a {
+        border-radius: 999px;
+        background: rgb(255 255 255 / 0.14);
+        padding: 0.25rem 0.75rem;
+        font-weight: 700;
+    }
+
+    .occ-off .occ-hang,
+    .occ-off .occ-search-emblem,
+    .occ-off .occ-hero,
+    .occ-off .occ-title-emblem {
+        animation: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .occ-hang,
+        .occ-search-emblem,
+        .occ-hero,
+        .occ-title-emblem {
+            animation: none;
+        }
+    }
+}
+
+@keyframes occ-swing {
+    from { rotate: -5deg; }
+    to { rotate: 5deg; }
+}
+
+@keyframes occ-bob {
+    0%, 100% { translate: 0 -50%; }
+    50% { translate: 0 calc(-50% - 3px); }
+}
+
+@keyframes occ-float {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -4px; }
+}

@@ -1,19 +1,25 @@
 {{-- Instant product search (Alpine + /search/suggest JSON, no Livewire round-trips) | نویسنده: علی فصیحی (Ali Fasihi) --}}
 {{-- Typo-tolerant suggestions from the search engine: categories, brands and products; ↑ ↓ Enter work. --}}
 @props(['value' => '', 'size' => 'md', 'autofocus' => false])
-@php($id = 'q-'.substr(md5(uniqid('', true)), 0, 6))
+@php
+    $id = 'q-'.substr(md5(uniqid('', true)), 0, 6);
+    $occ = config('khaneh.occasion');   // یلدا، نوروز…: the occasion's sign inside, its words as the hint
+@endphp
 
 <div class="relative w-full {{ $size === 'lg' ? '' : 'max-w-lg' }}"
      x-data="searchBox(@js($value), @js(route('search.suggest')))"
      @click.outside="open = false" @keydown.escape="open = false">
     <form action="{{ route('catalog.search') }}" method="get" role="search" @submit="open = false">
         <label for="{{ $id }}" class="sr-only">جستجوی محصولات</label>
-        <div class="relative">
+        <div @class(['relative', 'occ-search' => $occ])>
+            @if ($occ)
+                <span class="occ-search-emblem" aria-hidden="true">{!! \Modules\Occasions\Support\Art::svg($occ['emblem']) !!}</span>
+            @endif
             <input id="{{ $id }}" name="q" type="search" autocomplete="off" x-model="q" @input="input()" @focus="focus()"
                    @keydown.arrow-down.prevent="move(1)" @keydown.arrow-up.prevent="move(-1)" @keydown.enter="enter($event)"
                    role="combobox" aria-autocomplete="list" aria-controls="{{ $id }}-list" :aria-expanded="open"
                    value="{{ $value }}" @if ($autofocus) autofocus @endif
-                   placeholder="{{ $size === 'lg' ? 'نام محصول، برند یا کد کالا…' : 'جستجو در محصولات '.config('khaneh.store.name').'…' }}"
+                   placeholder="{{ $occ['search'] ?? ($size === 'lg' ? 'نام محصول، برند یا کد کالا…' : 'جستجو در محصولات '.config('khaneh.store.name').'…') }}"
                    @class([
                        'w-full rounded-full border border-glint/80 bg-surface/70 ps-5 pe-12 text-ink [&::-webkit-search-cancel-button]:appearance-none shadow-[inset_0_1px_2px_rgb(35_40_79/0.06)] placeholder:text-subtle transition focus:border-rose/30 focus:bg-surface focus:ring-4 focus:ring-rose/10 focus:outline-none',
                        'py-3 text-sm' => $size !== 'lg',
