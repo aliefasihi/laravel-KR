@@ -33,7 +33,14 @@ class ProductAttributeValues
     public function sync(Product $product, int $attributeId, array $valueIds): void
     {
         $valid = AttributeValue::query()->where('attribute_id', $attributeId)
-            ->whereIn('id', array_map('intval', array_filter((array) $valueIds)))->pluck('id')->all();
+            ->whereIn('id', array_map('intval', array_filter((array) $valueIds)))->pluck('id')->map(fn ($id) => (int) $id)->sort()->values()->all();
+
+        // unchanged → no write, no cache flush, no re-index (a product form saves every attribute)
+        $current = DB::table('product_attribute_values')->where('product_id', $product->id)->where('attribute_id', $attributeId)
+            ->pluck('attribute_value_id')->map(fn ($id) => (int) $id)->sort()->values()->all();
+        if ($current === $valid) {
+            return;
+        }
 
         DB::transaction(function () use ($product, $attributeId, $valid) {
             DB::table('product_attribute_values')->where('product_id', $product->id)->where('attribute_id', $attributeId)->delete();

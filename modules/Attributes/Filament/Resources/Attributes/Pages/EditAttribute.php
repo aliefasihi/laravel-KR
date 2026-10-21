@@ -40,7 +40,7 @@ class EditAttribute extends EditRecord
                     $this->refreshFormData(['values']);
                     Notification::make()->title("{$added} مقدار اضافه شد")->success()->send();
                 }),
-            DeleteAction::make(),
+            AttributeResource::deleteAction(DeleteAction::make()),
         ];
     }
 }

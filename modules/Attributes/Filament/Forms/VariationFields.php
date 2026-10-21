@@ -37,7 +37,8 @@ class VariationFields
             ->options($attribute->values->pluck('value', 'value')->all())
             ->searchable()
             ->native(false)
-            ->required(), self::attributes($product)));
+            ->placeholder('—')
+            ->helperText('برای محصول تک‌مدل لازم نیست؛ مقدارش در «مشخصات فنی» بالای صفحه می‌آید.'), self::attributes($product)));
     }
 
     /** form data → options JSON */
@@ -65,12 +66,19 @@ class VariationFields
         return $data;
     }
 
-    /** Product-level values of variation attributes = values used by its active models. */
+    /**
+     * Product-level values of variation attributes = values used by its active models.
+     * Models without that attribute (a single-model product whose colour was picked in «مشخصات
+     * فنی») leave the product's own values alone — editing the model's stock must not wipe them.
+     */
     public static function syncProduct(Product $product): void
     {
-        $variants = $product->variants()->where('is_active', true)->get();
+        $variants = $product->variants()->get();
         foreach (self::attributes($product) as $id => $attribute) {
-            $labels = $variants->map(fn ($v) => $v->options[$attribute->name] ?? null)->filter()->unique()->all();
+            if (! $variants->contains(fn ($v) => filled(((array) $v->options)[$attribute->name] ?? null))) {
+                continue;
+            }
+            $labels = $variants->where('is_active', true)->map(fn ($v) => ((array) $v->options)[$attribute->name] ?? null)->filter()->unique()->all();
             $ids = $attribute->values->whereIn('value', $labels)->modelKeys();
             app(ProductAttributeValues::class)->sync($product, $id, $ids);
         }

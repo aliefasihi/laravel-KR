@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 use Modules\Attributes\Models\ProductAttribute;
 use Modules\Catalog\Models\Brand;
 use Modules\Catalog\Models\Category;
+use Modules\WordPressImport\Support\AttributeGroupsImport;
+use Modules\WordPressImport\Support\AttributeLabels;
 use Modules\WordPressImport\Support\MediaImporter;
 use Modules\WordPressImport\Support\Report;
 use Modules\WordPressImport\Support\Source;
@@ -32,7 +34,7 @@ class TaxonomiesStep extends Step
 
     public function label(): string
     {
-        return 'برندها، دسته‌ها و ویژگی‌ها';
+        return 'برندها، دسته‌ها، ویژگی‌ها و گروه‌های ویژگی';
     }
 
     public function sourceCount(): int
@@ -53,6 +55,7 @@ class TaxonomiesStep extends Step
         $this->categories($report);
         if (Modules::enabled('Attributes')) {
             $this->attributes($report);
+            app(AttributeGroupsImport::class, ['wp' => $this->wp])->run($report);
         }
         StoreCache::flush();
     }
@@ -157,7 +160,7 @@ class TaxonomiesStep extends Step
 
             $attribute = $found
                 ?? ProductAttribute::create([
-                    'name' => $row->attribute_label,
+                    'name' => AttributeLabels::clean((string) $row->attribute_label),
                     'slug' => $slug ?: $row->attribute_label,
                     'is_filterable' => true,
                     'is_visible' => true,

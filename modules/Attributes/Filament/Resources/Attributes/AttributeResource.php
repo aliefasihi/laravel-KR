@@ -27,6 +27,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
 use Modules\Attributes\Filament\Resources\Attributes\Pages\CreateAttribute;
 use Modules\Attributes\Filament\Resources\Attributes\Pages\EditAttribute;
 use Modules\Attributes\Filament\Resources\Attributes\Pages\ListAttributes;
@@ -70,7 +71,7 @@ class AttributeResource extends Resource
                 ]),
             ]),
             Section::make('مقادیر مجاز')
-                ->description('محصول فقط از همین فهرست مقدار می‌گیرد (متن آزاد ندارد) — همین فیلترها را یکدست نگه می‌دارد. با کشیدن مرتب کنید.')
+                ->description('محصول فقط از همین فهرست مقدار می‌گیرد (متن آزاد ندارد) — همین فیلترها را یکدست نگه می‌دارد. با کشیدن مرتب کنید. تغییر نام یک مقدار در همه‌ی محصولات و مدل‌ها اعمال می‌شود؛ حذفش، آن را از محصولاتی که دارندش هم برمی‌دارد.')
                 ->schema([
                     Repeater::make('values')
                         ->hiddenLabel()
@@ -111,7 +112,20 @@ class AttributeResource extends Resource
             ->filters([
                 TernaryFilter::make('is_filterable')->label('فیلتر'),
             ])
-            ->recordActions([EditAction::make(), DeleteAction::make()]);
+            ->recordActions([EditAction::make(), self::deleteAction(DeleteAction::make())]);
+    }
+
+    /** Deleting an attribute takes its values off every product: say how many before. */
+    public static function deleteAction(DeleteAction $action): DeleteAction
+    {
+        return $action->modalDescription(function (ProductAttribute $record) {
+            $products = DB::table('product_attribute_values')->where('attribute_id', $record->id)->distinct()->count('product_id');
+            $groups = DB::table('attribute_group_items')->where('attribute_id', $record->id)->count();
+
+            return $products || $groups
+                ? 'این ویژگی از '.PersianText::toPersianDigits($groups).' گروه و مقدارهایش از '.PersianText::toPersianDigits($products).' محصول برداشته می‌شود و فیلترش هم از صفحه‌ی دسته‌ها می‌رود. برگشت ندارد.'
+                : 'هیچ محصول و گروهی از این ویژگی استفاده نمی‌کند.';
+        });
     }
 
     public static function getPages(): array

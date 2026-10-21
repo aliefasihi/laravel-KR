@@ -23,6 +23,7 @@ use Modules\Catalog\Models\Brand;
 use Modules\Catalog\Models\Category;
 use Modules\Catalog\Models\Product;
 use Modules\Catalog\Models\ProductVariant;
+use Modules\WordPressImport\Support\AttributeLabels;
 use Modules\WordPressImport\Support\MediaImporter;
 use Modules\WordPressImport\Support\Report;
 use Modules\WordPressImport\Support\Source;
@@ -223,7 +224,7 @@ class ProductsStep extends Step
                     ->where('tt.taxonomy', $name)->where('t.slug', $value)->value('t.name');
                 $options[$label] = html_entity_decode($term ?? rawurldecode((string) $value));
             } else {
-                $label = $defs[$name]['name'] ?? $defs[rawurldecode($name)]['name'] ?? rawurldecode($name);
+                $label = AttributeLabels::clean($defs[$name]['name'] ?? $defs[rawurldecode($name)]['name'] ?? rawurldecode($name));
                 $options[$label] = rawurldecode((string) $value);
             }
         }
@@ -237,9 +238,9 @@ class ProductsStep extends Step
     private function taxonomyLabel(string $taxonomy): string
     {
         if (! isset($this->labels[$taxonomy])) {
-            $this->labels[$taxonomy] = $this->wp->hasTable('woocommerce_attribute_taxonomies')
+            $this->labels[$taxonomy] = AttributeLabels::clean($this->wp->hasTable('woocommerce_attribute_taxonomies')
                 ? ($this->wp->table('woocommerce_attribute_taxonomies')->where('attribute_name', substr($taxonomy, 3))->value('attribute_label') ?? substr($taxonomy, 3))
-                : substr($taxonomy, 3);
+                : substr($taxonomy, 3));
         }
 
         return $this->labels[$taxonomy];
@@ -250,7 +251,7 @@ class ProductsStep extends Step
         $values = app(ProductAttributeValues::class);
         foreach ($definitions as $key => $def) {
             $isTaxonomy = (bool) ($def['is_taxonomy'] ?? false);
-            $label = $isTaxonomy ? $this->taxonomyLabel((string) ($def['name'] ?? $key)) : (string) ($def['name'] ?? $key);
+            $label = $isTaxonomy ? $this->taxonomyLabel((string) ($def['name'] ?? $key)) : AttributeLabels::clean((string) ($def['name'] ?? $key));
             if ($label === '') {
                 continue;
             }
@@ -263,7 +264,8 @@ class ProductsStep extends Step
                 continue;
             }
 
-            $attribute = ProductAttribute::query()->where('name', $label)->first()
+            $attribute = ($isTaxonomy ? ProductAttribute::query()->where('slug', strtolower(rawurldecode(substr((string) ($def['name'] ?? $key), 3))))->first() : null)
+                ?? ProductAttribute::query()->where('name', $label)->first()
                 ?? ProductAttribute::create(['name' => $label, 'slug' => Str::slug($label) ?: null, 'is_filterable' => true, 'is_visible' => (bool) ($def['is_visible'] ?? true)]);
             $ids = array_map(fn ($v) => $attribute->values()->firstOrCreate(['value' => $v])->id, $labels);
             $values->sync($product, $attribute->id, $ids);

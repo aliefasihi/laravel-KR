@@ -11,6 +11,7 @@ use App\Core\Concerns\FlushesStoreCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Modules\Attributes\Support\VariantOptions;
 
 class ProductAttribute extends Model
 {
@@ -29,8 +30,27 @@ class ProductAttribute extends Model
     {
         // URL key: latin, from the slug field or the name (transliterated)
         static::saving(function (ProductAttribute $attribute) {
-            $attribute->slug = Str::slug($attribute->slug ?: $attribute->name) ?: 'attr-'.Str::lower(Str::random(5));
+            $attribute->slug = self::uniqueSlug(Str::slug($attribute->slug ?: $attribute->name) ?: 'attr', $attribute->id);
         });
+
+        // models store their choice by the attribute's name: rename it there too
+        static::updated(function (ProductAttribute $attribute) {
+            if ($attribute->wasChanged('name')) {
+                VariantOptions::renameAttribute((string) $attribute->getOriginal('name'), $attribute->name);
+            }
+        });
+    }
+
+    /** «color», then «color-2»… — two attributes may share a name, never a filter key */
+    private static function uniqueSlug(string $slug, ?int $ignoreId): string
+    {
+        $slug = Str::limit($slug, 56, '');
+        $candidate = $slug;
+        for ($i = 2; static::query()->where('slug', $candidate)->when($ignoreId, fn ($q) => $q->whereKeyNot($ignoreId))->exists(); $i++) {
+            $candidate = $slug.'-'.$i;
+        }
+
+        return $candidate;
     }
 
     public function values(): HasMany

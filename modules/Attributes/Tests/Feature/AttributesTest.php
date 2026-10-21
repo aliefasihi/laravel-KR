@@ -11,10 +11,12 @@ namespace Modules\Attributes\Tests\Feature;
 use App\Core\Support\StoreCache;
 use App\Models\User;
 use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Modules\Attributes\Filament\Forms\VariationFields;
+use Modules\Attributes\Models\ProductAttribute;
 use Modules\Attributes\Support\AttributeTemplate;
 use Modules\Attributes\Support\ProductAttributeValues;
 use Modules\Catalog\Filament\Resources\Products\Pages\EditProduct;
@@ -200,5 +202,47 @@ class AttributesTest extends SearchTestCase
 
         $this->assertSame(['رنگ' => 'طلایی'], $set->variants()->where('sku', 'GK-7710-GLD')->value('options'));
         $this->assertContains($this->valueId($this->color, 'طلایی'), app(ProductAttributeValues::class)->forProduct($set->id)[$this->color->id]);
+    }
+
+    public function test_editing_a_single_model_keeps_the_products_own_colour(): void
+    {
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $set = $this->find('GK-7710');
+        $this->setValues($set, $this->color, ['طلایی', 'مشکی']);   // picked in «مشخصات فنی»; its one model has no colour
+        $variant = $set->variants()->first();
+
+        Livewire::test(VariantsRelationManager::class, ['ownerRecord' => $set, 'pageClass' => EditProduct::class])
+            ->callAction(TestAction::make(EditAction::class)->table($variant), ['stock' => 9])
+            ->assertHasNoFormErrors();   // the model's colour is optional
+
+        $this->assertSame(9, (int) $variant->fresh()->stock);
+        $this->assertCount(2, app(ProductAttributeValues::class)->forProduct($set->id)[$this->color->id]);
+    }
+
+    public function test_renaming_an_attribute_or_a_value_follows_into_the_models(): void
+    {
+        $set = $this->find('GK-7710');
+        $variant = $set->variants()->first();
+        $variant->update(['options' => ['رنگ' => 'طلایی', 'سایز' => '۲۸']]);
+
+        $this->color->values()->where('value', 'طلایی')->first()->update(['value' => 'طلایی براق']);
+        $this->assertSame(['رنگ' => 'طلایی براق', 'سایز' => '۲۸'], $variant->fresh()->options);
+
+        $this->color->update(['name' => 'رنگ بدنه']);
+        $this->assertSame(['رنگ بدنه' => 'طلایی براق', 'سایز' => '۲۸'], $variant->fresh()->options);
+
+        // the form and the filters still find the colour
+        $this->assertSame('طلایی براق', VariationFields::fromOptions(['options' => $variant->fresh()->options], $set)['variation_'.$this->color->id]);
+    }
+
+    public function test_attributes_with_the_same_name_get_their_own_filter_key(): void
+    {
+        $a = ProductAttribute::create(['name' => 'Size']);
+        $b = ProductAttribute::create(['name' => 'Size']);
+        $c = ProductAttribute::create(['name' => 'x', 'slug' => 'COLOR']);   // «color» is taken by the fixture
+
+        $this->assertSame(['size', 'size-2', 'color-2'], [$a->slug, $b->slug, $c->slug]);
+        $a->update(['unit' => 'cm']);
+        $this->assertSame('size', $a->fresh()->slug);   // saving again keeps its own key
     }
 }
