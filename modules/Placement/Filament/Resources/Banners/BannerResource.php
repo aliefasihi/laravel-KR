@@ -21,6 +21,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Media\Models\Media;
 use Modules\Placement\Filament\Resources\Banners\Pages\CreateBanner;
 use Modules\Placement\Filament\Resources\Banners\Pages\EditBanner;
@@ -49,10 +50,13 @@ class BannerResource extends Resource
     {
         $mediaSelect = fn (string $name, string $relation, string $label) => Select::make($name)
             ->label($label)
-            ->relationship($relation, 'path')
+            // newest first (just-uploaded banners on top, not thousands of product photos), search by file name or title
+            ->relationship($relation, 'path', fn (Builder $query) => $query->reorder()->latest('id'))
             ->getOptionLabelFromRecordUsing(fn (Media $record) => ($record->title ?: basename($record->path)).($record->width ? " ({$record->width}×{$record->height})" : ''))
-            ->searchable()
-            ->preload();
+            ->searchable(['path', 'title'])
+            ->optionsLimit(100)
+            ->preload()
+            ->helperText('جدیدترین تصاویر بالای فهرست‌اند؛ برای پیدا کردن، بخشی از نام فایل را بنویسید (مثل cookware). تصویر باید از «فایل منیجر» پنل آپلود شده باشد.');
 
         return $schema->components([
             Group::make([
