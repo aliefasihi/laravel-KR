@@ -27,6 +27,7 @@ final class TrafficSource
         'whatsapp_link' => 'واتس‌اپ (لینک)',
         'sms' => 'پیامک‌های فروشگاه',
         'pwa' => 'اپلیکیشن نصب‌شده (PWA)',
+        'push' => 'نوتیفیکیشن',
         'other' => 'سایت‌های دیگر',
     ];
 

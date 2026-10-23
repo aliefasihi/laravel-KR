@@ -72,4 +72,8 @@ self.addEventListener('fetch', (event) => {
         }));
     }
 });
+@if (class_exists(\Modules\Push\Support\Push::class) && \App\Core\Modules\Modules::enabled('Push') && \Modules\Push\Support\Push::enabled())
+
+@include('push::sw')
+@endif
 @endif

@@ -26,6 +26,7 @@ use Modules\Occasions\Providers\OccasionsServiceProvider;
 use Modules\Order\Providers\OrderServiceProvider;
 use Modules\Payment\Providers\PaymentServiceProvider;
 use Modules\Placement\Providers\PlacementServiceProvider;
+use Modules\Push\Providers\PushServiceProvider;
 use Modules\Pwa\Providers\PwaServiceProvider;
 use Modules\Questions\Providers\QuestionsServiceProvider;
 use Modules\RecentlyViewed\Providers\RecentlyViewedServiceProvider;
@@ -87,6 +88,7 @@ return [
         ReturnsServiceProvider::class,
         WholesaleServiceProvider::class,
         ExitPopupServiceProvider::class,
+        PushServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,

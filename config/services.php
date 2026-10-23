@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    // Web push (Push module): VAPID keys — `php artisan push:keys`. Empty = made once and kept in storage/app/private/webpush.json
+    'webpush' => [
+        'public_key' => env('WEBPUSH_PUBLIC_KEY'),
+        'private_key' => env('WEBPUSH_PRIVATE_KEY'),
+    ],
 ];

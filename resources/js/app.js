@@ -451,6 +451,11 @@ if (document.documentElement.dataset.occasion) {
     document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', runOccasion) : runOccasion();
 }
 
+// Web push (notifications): only when the Push module is on, a separate small file
+if (document.getElementById('push-config') && 'serviceWorker' in navigator) {
+    import('./push.js').then((m) => m.default()).catch(() => {});
+}
+
 // Exit popup: only on pages that carry it (the ExitPopup module decides), a separate small file
 if (document.getElementById('exit-popup-config')) {
     import('./exit-popup.js').then((m) => m.default());
