@@ -11,6 +11,7 @@ use App\Core\Modules\ModuleServiceProvider;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Modules\Catalog\Events\CategoryUrlChanged;
 use Modules\Catalog\Events\ProductUrlChanged;
 use Modules\Seo\Http\Middleware\LegacyQueryStringRedirect;
@@ -49,5 +50,12 @@ class SeoServiceProvider extends ModuleServiceProvider
                     ?? rescue(fn () => $this->app->make(LegacyProductMatcher::class)->respond($request), report: true);
             }
         );
+    }
+
+    protected function registerRoutes(): void
+    {
+        parent::registerRoutes();
+
+        Route::group([], $this->modulePath('routes/sitemap.php'));   // sitemaps + robots.txt, no session
     }
 }

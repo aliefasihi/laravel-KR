@@ -19,6 +19,7 @@ use Modules\Integration\Providers\IntegrationServiceProvider;
 use Modules\Inventory\Providers\InventoryServiceProvider;
 use Modules\Loyalty\Providers\LoyaltyServiceProvider;
 use Modules\Media\Providers\MediaServiceProvider;
+use Modules\Occasions\Providers\OccasionsServiceProvider;
 use Modules\Order\Providers\OrderServiceProvider;
 use Modules\Payment\Providers\PaymentServiceProvider;
 use Modules\Placement\Providers\PlacementServiceProvider;
@@ -30,6 +31,7 @@ use Modules\Search\Providers\SearchServiceProvider;
 use Modules\Seo\Providers\SeoServiceProvider;
 use Modules\Shipping\Providers\ShippingServiceProvider;
 use Modules\Sms\Providers\SmsServiceProvider;
+use Modules\Tracking\Providers\TrackingServiceProvider;
 use Modules\Wishlist\Providers\WishlistServiceProvider;
 use Modules\WordPressImport\Providers\WordPressImportServiceProvider;
 
@@ -71,6 +73,8 @@ return [
         RecentlyViewedServiceProvider::class,
         InventoryServiceProvider::class,
         PwaServiceProvider::class,
+        OccasionsServiceProvider::class,
+        TrackingServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,
