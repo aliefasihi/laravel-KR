@@ -116,7 +116,7 @@ export default async function push() {
 
     setTimeout(() => {
         const tpl = document.getElementById('push-prompt-tpl');
-        if (!tpl || document.querySelector('.exit-popup')) return;
+        if (!tpl || document.querySelector('.exit-popup, .chat-panel:not([hidden])')) return;
         const card = tpl.content.firstElementChild.cloneNode(true);
         card.style.opacity = '0';
         card.style.transform = 'translateY(16px)';

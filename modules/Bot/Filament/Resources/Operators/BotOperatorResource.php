@@ -120,7 +120,7 @@ class BotOperatorResource extends Resource
 
         return new HtmlString('<div class="max-h-[60vh] space-y-2 overflow-y-auto text-sm">'.$rows->map(fn (BotMessage $m) => '<div class="rounded-lg p-2 '
             .($m->direction === 'in' ? 'bg-gray-100 dark:bg-white/5' : 'ms-8 bg-primary-50 dark:bg-primary-500/10').'">'
-            .'<div class="text-[11px] text-gray-500">'.e(Channel::NAMES[$m->channel] ?? $m->channel).' · '.e(PersianText::toPersianDigits($m->created_at?->format('H:i') ?? '')).'</div>'
+            .'<div class="text-[11px] text-gray-500">'.e(Channel::NAMES[$m->channel] ?? $m->channel).' · '.e(PersianText::toPersianDigits($m->created_at?->copy()->setTimezone(config('khaneh.display_timezone', 'Asia/Tehran'))->format('H:i') ?? '')).'</div>'
             .'<div class="whitespace-pre-line">'.e((string) $m->text).'</div></div>')->implode('').'</div>');
     }
 

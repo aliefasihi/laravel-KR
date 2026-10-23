@@ -23,6 +23,7 @@ export default function exitPopup() {
     let shown = false;
     const ready = () => !shown && Date.now() - started >= config.delay * 1000
         && ![...document.querySelectorAll('[role="dialog"][aria-modal="true"]')].some((el) => el.checkVisibility?.() ?? el.offsetParent !== null)
+        && !document.querySelector('.chat-panel:not([hidden])')
         && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
 
     const post = (url, data = {}) => fetch(url, {

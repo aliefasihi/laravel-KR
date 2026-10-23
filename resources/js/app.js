@@ -456,6 +456,12 @@ if (document.getElementById('push-config') && 'serviceWorker' in navigator) {
     import('./push.js').then((m) => m.default()).catch(() => {});
 }
 
+// Site chat: the panel's code loads on the first click of the chat button
+document.getElementById('chat-launcher')?.addEventListener('click', (e) => {
+    const launcher = e.currentTarget;
+    import('./chat.js').then((m) => m.open(launcher));
+});
+
 // Exit popup: only on pages that carry it (the ExitPopup module decides), a separate small file
 if (document.getElementById('exit-popup-config')) {
     import('./exit-popup.js').then((m) => m.default());

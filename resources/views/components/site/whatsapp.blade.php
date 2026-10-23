@@ -1,7 +1,8 @@
 {{-- Floating WhatsApp support button | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @props(['raised' => false])
 @php($wa = config('khaneh.store.whatsapp'))
-@if ($wa)
+{{-- with the site chat on, its button takes this place (WhatsApp is inside the chat) --}}
+@if ($wa && ! (class_exists(\Modules\Chat\Support\Chat::class) && \Modules\Chat\Support\Chat::onPage(request()->route()?->getName())))
     <a href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener"
        @class([
            'fixed start-4 z-40 grid size-13 place-items-center rounded-full bg-[#25d366] text-white shadow-[0_12px_28px_-10px_rgb(37_211_102/0.9)] transition hover:scale-105 lg:bottom-6 lg:start-6',
