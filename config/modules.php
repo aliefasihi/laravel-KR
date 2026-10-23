@@ -1,8 +1,10 @@
 <?php
 
 use Modules\AbandonedCart\Providers\AbandonedCartServiceProvider;
+use Modules\Ai\Providers\AiServiceProvider;
 use Modules\Appearance\Providers\AppearanceServiceProvider;
 use Modules\Attributes\Providers\AttributesServiceProvider;
+use Modules\Bot\Providers\BotServiceProvider;
 use Modules\BulkEdit\Providers\BulkEditServiceProvider;
 use Modules\Bundles\Providers\BundlesServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
@@ -89,6 +91,8 @@ return [
         WholesaleServiceProvider::class,
         ExitPopupServiceProvider::class,
         PushServiceProvider::class,
+        AiServiceProvider::class,
+        BotServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,
