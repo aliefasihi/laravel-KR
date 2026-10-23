@@ -405,6 +405,32 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    // Compare (Compare module): up to 4 products, kept in this browser (localStorage «kr-compare»)
+    Alpine.store('compare', {
+        key: 'kr-compare',
+        max: 4,
+        items: [],
+        init() {
+            try { this.items = JSON.parse(localStorage.getItem(this.key) || '[]').filter((i) => i && Number.isInteger(i.id)).slice(0, this.max); } catch { this.items = []; }
+            window.addEventListener('storage', (e) => e.key === this.key && this.init());
+        },
+        save() {
+            try { localStorage.setItem(this.key, JSON.stringify(this.items)); } catch { /* private mode */ }
+        },
+        has(id) { return this.items.some((i) => i.id === id); },
+        toggle(item) {
+            if (this.has(item.id)) return this.remove(item.id);
+            if (this.items.length >= this.max) this.items.shift();
+            this.items.push(item);
+            this.save();
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: this.items.length > 1 ? 'به مقایسه اضافه شد؛ دکمه‌ی «مقایسه» پایین صفحه' : 'به مقایسه اضافه شد؛ یک محصول دیگر هم انتخاب کنید' } }));
+        },
+        remove(id) { this.items = this.items.filter((i) => i.id !== id); this.save(); },
+        replace(items) { this.items = items.slice(0, this.max); this.save(); },
+        clear() { this.items = []; this.save(); },
+        link() { return '/compare?ids=' + this.items.map((i) => i.id).join(','); },
+    });
+
     Alpine.data('share', () => ({
         copied: false,
         async copy(text = null) {   // copy(): this page's address; copy('…'): any text
@@ -418,3 +444,9 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
+
+// Occasions (Yalda, Nowruz…): their effects load only when one is on — a separate small file
+if (document.documentElement.dataset.occasion) {
+    const runOccasion = () => import('./occasion.js').then((m) => m.default());
+    document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', runOccasion) : runOccasion();
+}

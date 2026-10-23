@@ -8,6 +8,7 @@ use Modules\Bundles\Providers\BundlesServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
 use Modules\Checkout\Providers\CheckoutServiceProvider;
 use Modules\Comments\Providers\CommentsServiceProvider;
+use Modules\Compare\Providers\CompareServiceProvider;
 use Modules\Content\Providers\ContentServiceProvider;
 use Modules\Coupon\Providers\CouponServiceProvider;
 use Modules\Crm\Providers\CrmServiceProvider;
@@ -77,6 +78,7 @@ return [
         OccasionsServiceProvider::class,
         TrackingServiceProvider::class,
         BulkEditServiceProvider::class,
+        CompareServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,
