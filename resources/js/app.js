@@ -450,3 +450,8 @@ if (document.documentElement.dataset.occasion) {
     const runOccasion = () => import('./occasion.js').then((m) => m.default());
     document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', runOccasion) : runOccasion();
 }
+
+// Exit popup: only on pages that carry it (the ExitPopup module decides), a separate small file
+if (document.getElementById('exit-popup-config')) {
+    import('./exit-popup.js').then((m) => m.default());
+}

@@ -14,7 +14,7 @@ class NewsletterSubscriber extends Model
 {
     public const CHANNELS = ['sms' => 'پیامک', 'email' => 'ایمیل'];
 
-    public const SOURCES = ['footer' => 'فوتر سایت', 'profile' => 'حساب کاربری', 'checkout' => 'تسویه حساب', 'admin' => 'پنل', 'import' => 'درون‌ریزی'];
+    public const SOURCES = ['footer' => 'فوتر سایت', 'profile' => 'حساب کاربری', 'checkout' => 'تسویه حساب', 'admin' => 'پنل', 'import' => 'درون‌ریزی', 'exit-popup' => 'پاپ‌آپ خروج'];
 
     protected $guarded = ['id'];
 

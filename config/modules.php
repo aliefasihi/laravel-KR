@@ -13,6 +13,7 @@ use Modules\Content\Providers\ContentServiceProvider;
 use Modules\Coupon\Providers\CouponServiceProvider;
 use Modules\Crm\Providers\CrmServiceProvider;
 use Modules\Customer\Providers\CustomerServiceProvider;
+use Modules\ExitPopup\Providers\ExitPopupServiceProvider;
 use Modules\Feeds\Providers\FeedsServiceProvider;
 use Modules\FileManager\Providers\FileManagerServiceProvider;
 use Modules\GiftWrap\Providers\GiftWrapServiceProvider;
@@ -85,6 +86,7 @@ return [
         QuestionsServiceProvider::class,
         ReturnsServiceProvider::class,
         WholesaleServiceProvider::class,
+        ExitPopupServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,
