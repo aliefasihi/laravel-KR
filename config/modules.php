@@ -29,6 +29,7 @@ use Modules\Pwa\Providers\PwaServiceProvider;
 use Modules\Questions\Providers\QuestionsServiceProvider;
 use Modules\RecentlyViewed\Providers\RecentlyViewedServiceProvider;
 use Modules\Registry\Providers\RegistryServiceProvider;
+use Modules\Returns\Providers\ReturnsServiceProvider;
 use Modules\Reviews\Providers\ReviewsServiceProvider;
 use Modules\Search\Providers\SearchServiceProvider;
 use Modules\Seo\Providers\SeoServiceProvider;
@@ -81,6 +82,7 @@ return [
         BulkEditServiceProvider::class,
         CompareServiceProvider::class,
         QuestionsServiceProvider::class,
+        ReturnsServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,

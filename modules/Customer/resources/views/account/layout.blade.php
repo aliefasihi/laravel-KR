@@ -9,6 +9,7 @@
         ['label' => 'پیشخوان', 'route' => 'customer.account', 'icon' => 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1v-9.5Z'],
         Route::has('customer.orders') ? ['label' => 'سفارش‌ها', 'route' => 'customer.orders', 'icon' => 'M5 8h14l-1.2 10.2A2 2 0 0 1 15.8 20H8.2a2 2 0 0 1-2-1.8L5 8Zm4 2V6a3 3 0 0 1 6 0v4'] : null,
         Route::has('customer.club') && \App\Core\Modules\Modules::enabled('Loyalty') ? ['label' => 'باشگاه مشتریان', 'route' => 'customer.club', 'icon' => 'M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3.5Z'] : null,
+        Route::has('customer.returns') ? ['label' => 'مرجوعی‌ها', 'route' => 'customer.returns', 'icon' => 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11'] : null,
         Route::has('customer.wishlist') ? ['label' => 'علاقه‌مندی‌ها', 'route' => 'customer.wishlist', 'icon' => 'M12 20s-7.5-4.6-9.3-9.6C1.5 7 3.8 4 7 4c2 0 3.5 1.1 5 3 1.5-1.9 3-3 5-3 3.2 0 5.5 3 4.3 6.4C19.5 15.4 12 20 12 20Z'] : null,
         Route::has('customer.registry') ? ['label' => 'لیست جهیزیه', 'route' => 'customer.registry', 'icon' => 'M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8M3 8h18v4H3zM12 21V8M12 8S10.5 3 8 4s0 4 4 4ZM12 8s1.5-5 4-4 0 4-4 4Z'] : null,
         ['label' => 'نشانی‌ها', 'route' => 'customer.addresses', 'icon' => 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Zm0-9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z'],
