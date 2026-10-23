@@ -15,6 +15,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Modules\Catalog\Models\Product;
 use Modules\Catalog\Models\ProductVariant;
+use Modules\Checkout\Support\Pricing\LinePrices;
 use Modules\Checkout\Support\Pricing\Quote;
 use Modules\Checkout\Support\Pricing\QuoteContext;
 use Modules\Checkout\Support\Pricing\Quoter;
@@ -123,6 +124,7 @@ class Cart
         if ($clean !== $items) {
             $this->session->put(self::KEY, $clean);
         }
+        $lines = LinePrices::apply($lines);   // special prices for this shopper (e.g. wholesale)
         $this->memo[$request] = ['items' => $clean, 'lines' => $lines];
 
         return $lines;

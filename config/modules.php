@@ -36,6 +36,7 @@ use Modules\Seo\Providers\SeoServiceProvider;
 use Modules\Shipping\Providers\ShippingServiceProvider;
 use Modules\Sms\Providers\SmsServiceProvider;
 use Modules\Tracking\Providers\TrackingServiceProvider;
+use Modules\Wholesale\Providers\WholesaleServiceProvider;
 use Modules\Wishlist\Providers\WishlistServiceProvider;
 use Modules\WordPressImport\Providers\WordPressImportServiceProvider;
 
@@ -83,6 +84,7 @@ return [
         CompareServiceProvider::class,
         QuestionsServiceProvider::class,
         ReturnsServiceProvider::class,
+        WholesaleServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,

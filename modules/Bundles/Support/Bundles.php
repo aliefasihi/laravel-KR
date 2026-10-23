@@ -59,6 +59,9 @@ final class Bundles
     /** Pricing step. */
     public function apply(QuoteContext $context, Quote $quote): void
     {
+        if (! empty($quote->meta['no_discounts'])) {   // e.g. wholesale prices don't stack with set discounts
+            return;
+        }
         $units = $cheapest = [];
         /** @var CartLine $line */
         foreach ($context->lines as $line) {

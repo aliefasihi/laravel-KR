@@ -44,6 +44,11 @@ class CouponServiceProvider extends ModuleServiceProvider
             if (! $context->couponCode) {
                 return;
             }
+            if ($blocked = $quote->meta['no_discounts'] ?? null) {   // e.g. wholesale prices don't stack with coupons
+                $quote->messages['coupon'] = $blocked;
+
+                return;
+            }
             $coupon = Coupon::findByCode($context->couponCode);
             $result = app(CouponEvaluator::class)->evaluate($coupon, $context);
             if (! $result['ok']) {

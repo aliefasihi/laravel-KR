@@ -12,6 +12,7 @@
         Route::has('customer.returns') ? ['label' => 'مرجوعی‌ها', 'route' => 'customer.returns', 'icon' => 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11'] : null,
         Route::has('customer.wishlist') ? ['label' => 'علاقه‌مندی‌ها', 'route' => 'customer.wishlist', 'icon' => 'M12 20s-7.5-4.6-9.3-9.6C1.5 7 3.8 4 7 4c2 0 3.5 1.1 5 3 1.5-1.9 3-3 5-3 3.2 0 5.5 3 4.3 6.4C19.5 15.4 12 20 12 20Z'] : null,
         Route::has('customer.registry') ? ['label' => 'لیست جهیزیه', 'route' => 'customer.registry', 'icon' => 'M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8M3 8h18v4H3zM12 21V8M12 8S10.5 3 8 4s0 4 4 4ZM12 8s1.5-5 4-4 0 4-4 4Z'] : null,
+        Route::has('wholesale') ? ['label' => 'همکاری (خرید عمده)', 'route' => 'wholesale', 'icon' => 'M3 9.5 4.5 4h15L21 9.5M3 9.5h18M3 9.5a2.5 2.5 0 0 0 4.5 1.5 2.5 2.5 0 0 0 4.5 0 2.5 2.5 0 0 0 4.5 0A2.5 2.5 0 0 0 21 9.5M5 12v8h14v-8M10 20v-5h4v5'] : null,
         ['label' => 'نشانی‌ها', 'route' => 'customer.addresses', 'icon' => 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Zm0-9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z'],
     ]);
 @endphp

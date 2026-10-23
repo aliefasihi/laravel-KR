@@ -29,7 +29,11 @@
                             @if ($line->variant->options)
                                 <p class="text-xs text-muted">{{ implode(' · ', $line->variant->options) }}</p>
                             @endif
-                            <p class="mt-1 text-xs text-muted">قیمت واحد: {{ Money::toman($line->unitPrice()) }} تومان</p>
+                            <p class="mt-1 text-xs text-muted">قیمت واحد: {{ Money::toman($line->unitPrice()) }} تومان
+                                @if ($line->priceLabel)
+                                    <span class="ms-1 rounded-full bg-ok/10 px-2 py-0.5 text-[11px] font-bold text-ok">{{ $line->priceLabel }}</span>
+                                @endif
+                            </p>
                         </div>
                         <div class="flex w-full items-center justify-between gap-4 sm:w-auto">
                             <div class="flex items-center rounded-full border border-glint/80 bg-surface/80 p-1">
