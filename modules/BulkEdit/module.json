@@ -1,0 +1,9 @@
+{
+    "title": "ویرایش گروهی",
+    "description": "افزایش یا کاهش قیمت گروهی محصولات با فیلتر دسته، برند و موجودی؛ با پیش‌نمایش قبل از اعمال و امکان برگرداندن.",
+    "version": "1.0.0",
+    "core": false,
+    "requires": ["Catalog"],
+    "default": true,
+    "icon": "pencil-square"
+}

@@ -3,6 +3,7 @@
 use Modules\AbandonedCart\Providers\AbandonedCartServiceProvider;
 use Modules\Appearance\Providers\AppearanceServiceProvider;
 use Modules\Attributes\Providers\AttributesServiceProvider;
+use Modules\BulkEdit\Providers\BulkEditServiceProvider;
 use Modules\Bundles\Providers\BundlesServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
 use Modules\Checkout\Providers\CheckoutServiceProvider;
@@ -75,6 +76,7 @@ return [
         PwaServiceProvider::class,
         OccasionsServiceProvider::class,
         TrackingServiceProvider::class,
+        BulkEditServiceProvider::class,
         IntegrationServiceProvider::class,
         FeedsServiceProvider::class,
         WordPressImportServiceProvider::class,
