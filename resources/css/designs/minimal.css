@@ -1,0 +1,10 @@
+/*
+ * Khaneh Romantic — the whole storefront stylesheet for «دمو ۲ — مینیمال»: loaded INSTEAD of app.css when
+ * this demo is live (App\Core\Support\Designs::stylesheet()), so other demos never add a byte.
+ * نویسنده: علی فصیحی (Ali Fasihi)
+ */
+@import 'tailwindcss' source(none);
+@import '../sources.css';
+@import '../site.css';
+
+@source '../../views/designs/*/minimal/**/*.blade.php';

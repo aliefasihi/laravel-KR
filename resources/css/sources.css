@@ -1,0 +1,15 @@
+/*
+ * Khaneh Romantic — where the storefront's classes are (everything except the other demos' views).
+ * Imported by app.css and the demo stylesheets; a new folder under resources/views needs a line here.
+ * نویسنده: علی فصیحی (Ali Fasihi)
+ */
+@source '../views/*.blade.php';
+@source '../views/components/*.blade.php';
+@source '../views/components/{media,post,product,site,ui}/**/*.blade.php';
+@source '../views/{errors,home,layouts,listing,vendor}/**/*.blade.php';
+@source '../js/**/*.js';
+@source '../../modules/*/resources/views/**/*.blade.php';
+@source not '../../modules/*/resources/views/filament';
+@source '../../app/**/*.php';
+@source not '../../app/Filament';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';

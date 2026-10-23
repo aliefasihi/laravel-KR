@@ -21,6 +21,7 @@ use App\Core\Settings\Settings;
 use App\Core\Settings\SettingsSection;
 use App\Core\Support\Designs;
 use App\Core\Support\StorefrontHooks;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -60,14 +61,14 @@ class AppearanceServiceProvider extends ModuleServiceProvider
             title: 'طرح‌های سایت',
             icon: 'heroicon-o-swatch',
             sort: 11,
-            defaults: ['demo' => 'demo1'] + array_fill_keys(array_keys(Designs::SLOTS), 'classic'),
+            defaults: ['demo' => 'demo1', 'disabled' => []] + array_fill_keys(array_keys(Designs::SLOTS), 'classic'),
             schema: fn () => [
                 Radio::make('demo')->label('دمو')
-                    ->options(array_map(fn (array $demo) => $demo['label'], Designs::DEMOS) + ['custom' => 'ترکیبی (هر بخش جدا)'])
-                    ->descriptions(array_map(fn (array $demo) => $demo['description'], Designs::DEMOS) + ['custom' => 'برای هر بخش طرح دلخواه را پایین انتخاب کنید.'])
+                    ->options(array_map(fn (array $demo) => $demo['label'], Designs::enabledDemos()) + ['custom' => 'ترکیبی (هر بخش جدا)'])
+                    ->descriptions(array_map(fn (array $demo) => $demo['description'], Designs::enabledDemos()) + ['custom' => 'برای هر بخش طرح دلخواه را پایین انتخاب کنید.'])
                     ->helperText(new HtmlString('پیش‌نمایش قبل از ذخیره (فقط برای شما نمایش داده می‌شود): '.implode(' · ', array_map(
                         fn (string $key, array $demo) => '<a href="'.e(url('/').'?design='.$key).'" target="_blank" class="font-bold text-primary-600 underline">'.e($demo['label']).'</a>',
-                        array_keys(Designs::DEMOS), Designs::DEMOS,
+                        array_keys(Designs::enabledDemos()), Designs::enabledDemos(),
                     ))))
                     ->live()
                     ->afterStateUpdated(function (?string $state, Set $set) {
@@ -76,12 +77,16 @@ class AppearanceServiceProvider extends ModuleServiceProvider
                         }
                     }),
                 Fieldset::make('طرح هر بخش')->columns(2)->schema(array_values(array_map(
-                    fn (string $slot, array $meta) => Select::make($slot)->label($meta['label'])->options($meta['variants'])->required()->native(false)->live()
+                    fn (string $slot, array $meta) => Select::make($slot)->label($meta['label'])->options(Designs::enabledVariants($slot))->required()->native(false)->live()
                         ->afterStateUpdated(fn (Get $get, Set $set) => $set('demo', Designs::demoFor(
                             collect(array_keys(Designs::SLOTS))->mapWithKeys(fn (string $s) => [$s => $get($s)])->all(),
                         ) ?? 'custom')),
                     array_keys(Designs::SLOTS), Designs::SLOTS,
                 ))),
+                CheckboxList::make('disabled')->label('دموهای خاموش')
+                    ->options(array_map(fn (array $demo) => $demo['label'], array_diff_key(Designs::DEMOS, ['demo1' => true])))
+                    ->columns(3)
+                    ->helperText('دموی خاموش از فهرست و پیش‌نمایش بالا حذف می‌شود. سرعت سایت به این بستگی ندارد: فقط استایل دمویی که روی سایت است لود می‌شود و فایل‌های بقیه‌ی دموها هیچ‌وقت به بازدیدکننده نمی‌رسد. دموی ۱ و دمویی که الان روی سایت است خاموش نمی‌شوند.'),
             ],
         ));
     }

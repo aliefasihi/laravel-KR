@@ -1,0 +1,126 @@
+/*
+ * Khaneh Romantic — design tokens and custom utilities, shared by every stylesheet:
+ * app.css (core + demo 1) and resources/css/designs/*.css (one per other demo, loaded only when used).
+ * نویسنده: علی فصیحی (Ali Fasihi)
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: var(--font-brand, 'Vazirmatn'), 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+    --font-latin: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+    --font-display: var(--font-heading, var(--font-sans)); /* headings: a palette may set --font-heading */
+
+    --color-navy: #23284f;
+    --color-navy-700: #2e3466;
+    --color-navy-500: #4a5190;
+    --color-deep: #23284f;
+    --color-deep-700: #2e3466;
+    --color-surface: #ffffff;
+    --color-glint: #ffffff;
+    --color-page: #fbf7f5;
+    --color-ok: #1a9e4a;
+    --color-rose: #cc3366;
+    --color-rose-600: #b32656;
+    --color-rose-100: #fbe3ec;
+    --color-caramel: #e4a96c;
+    --color-caramel-600: #cf8d4c;
+    --color-caramel-100: #fbeedf;
+    --color-cream: #fff5ed;
+    --color-ink: #1c252e;
+    --color-muted: #66717f;
+    --color-subtle: #98a2ae;
+    --color-line: rgb(35 40 79 / 0.09);
+    /* extra accents used by some demos (themes.css) */
+    --color-pop-teal: #13a89e;
+    --color-pop-lilac: #b9a6ff;
+    --color-pop-pink: #ff8fb8;
+    --color-sage: #8a9a72;
+
+    --radius-glass: 1.5rem;
+    --radius-card: 1.25rem;
+
+    --shadow-glass: 0 10px 40px -18px rgb(35 40 79 / 0.28), inset 0 1px 0 rgb(255 255 255 / 0.85);
+    --shadow-glass-dark: 0 12px 40px -18px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.05);
+    --shadow-float: 0 18px 50px -20px rgb(35 40 79 / 0.45);
+
+    --animate-marquee: marquee 38s linear infinite;
+    --animate-float: float 7s ease-in-out infinite;
+}
+
+@keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(50%); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* ── Glass surfaces & buttons (utilities so they compose with @apply and variants) ── */
+@utility glass {
+    background: color-mix(in oklab, var(--color-surface) 66%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-glint) 80%, transparent);
+    box-shadow: var(--shadow-glass);
+}
+@utility glass-strong {
+    background: color-mix(in oklab, var(--color-surface) 86%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-glint) 92%, transparent);
+    box-shadow: var(--shadow-glass);
+}
+@utility glass-navy {
+    background: linear-gradient(150deg, rgb(46 52 102 / 0.95), rgb(35 40 79 / 0.98));
+    border: 1px solid rgb(255 255 255 / 0.14);
+    box-shadow: var(--shadow-float), inset 0 1px 0 rgb(255 255 255 / 0.12);
+    color: #fff;
+}
+/* Real frosted glass — only for surfaces that float over changing content. */
+@utility frost {
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    backdrop-filter: blur(18px) saturate(170%);
+}
+/* Soft colour blobs (cheap radial gradients; colour from text-*: `blob text-rose/30`). */
+@utility blob {
+    pointer-events: none;
+    position: absolute;
+    border-radius: 9999px;
+    background: radial-gradient(closest-side, currentColor, transparent);
+    scale: 1.4; /* matches the halo the old blur(64px) blobs had */
+}
+@utility blob-duo {
+    pointer-events: none;
+    position: absolute;
+    border-radius: 9999px;
+    background:
+        radial-gradient(closest-side at 40% 40%, rgb(204 51 102 / 0.26), transparent),
+        radial-gradient(closest-side at 60% 60%, rgb(228 169 108 / 0.32), transparent);
+    scale: 1.4;
+}
+@utility btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    white-space: nowrap;
+    user-select: none;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+    &:active { transform: scale(0.98); }
+    &:disabled { cursor: not-allowed; opacity: 0.5; }
+}
+@utility btn-navy {
+    @apply btn bg-deep text-white shadow-[0_10px_24px_-12px_rgb(35_40_79/0.8)] hover:bg-deep-700;
+}
+@utility btn-rose {
+    @apply btn bg-rose text-white shadow-[0_10px_24px_-12px_rgb(204_51_102/0.8)] hover:bg-rose-600;
+}
+@utility btn-glass {
+    @apply btn glass text-navy hover:bg-surface/90;
+}
+@utility btn-icon {
+    @apply inline-flex size-11 items-center justify-center rounded-full transition hover:bg-surface/70;
+}

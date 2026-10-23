@@ -1,0 +1,117 @@
+/* «دمو ۵ — طاق» palette, fonts and surfaces (html[data-theme='arch']) | نویسنده: علی فصیحی (Ali Fasihi) */
+
+/* fonts (self-hosted, OFL) — downloaded only when this palette uses them */
+@font-face {
+    font-family: 'Estedad';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('/fonts/estedad/estedad-arabic-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFC;
+}
+@font-face {
+    font-family: 'Estedad';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('/fonts/estedad/estedad-latin-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* palette (<html data-theme="arch">) */
+/* ═══ arch — «طاق»: linen, olive and terracotta, soft and calm ══════════════════════════════ */
+/* light palette in a layer, so the site-wide night palette (:root.dark in app.css) still wins in dark mode,
+   exactly as when this file was part of app.css; the palette's own .dark block below wins over both */
+@layer palette {
+    :root[data-theme='arch'] {
+        --font-brand: 'Estedad';
+        --font-heading: 'Estedad', 'Vazirmatn', sans-serif;
+        --color-navy: #2c3026;
+        --color-navy-700: #3c4134;
+        --color-navy-500: #5f6553;
+        --color-deep: #3f4a32;
+        --color-deep-700: #4e5b3e;
+        --color-surface: #fbf8f2;
+        --color-glint: #e3d9c6;
+        --color-page: #f3eee4;
+        --color-ok: #4f7a3a;
+        --color-rose: #b0532d;
+        --color-rose-600: #964424;
+        --color-rose-100: #f2dccf;
+        --color-caramel: #c9a66b;
+        --color-caramel-600: #8a6629;
+        --color-caramel-100: #eee1c8;
+        --color-cream: #ebe3d3;
+        --color-ink: #2c3026;
+        --color-muted: #66685a;
+        --color-subtle: #98978a;
+        --color-line: rgb(44 48 38 / 0.13);
+        --color-sage: #8a9a72;
+        --radius-glass: 1.75rem;
+        --radius-card: 1.5rem;
+        --shadow-glass: 0 1px 0 rgb(44 48 38 / 0.04);
+        --shadow-float: 0 24px 50px -28px rgb(63 74 50 / 0.45);
+    }
+}
+:root.dark[data-theme='arch'] {
+    --color-navy: #efe9dc;
+    --color-navy-700: #e0d8c6;
+    --color-navy-500: #bdb5a2;
+    --color-deep: #5d6d48;
+    --color-deep-700: #6c7e54;
+    --color-surface: #23261e;
+    --color-glint: rgb(239 233 220 / 0.12);
+    --color-page: #1c1e18;
+    --color-cream: #2b2e25;
+    --color-ink: #efe9dc;
+    --color-muted: #b5b09f;
+    --color-subtle: #868272;
+    --color-line: rgb(239 233 220 / 0.11);
+    --color-rose: #d0714a;
+    --color-rose-100: #3b261c;
+    --color-caramel-600: #d8b878;
+    --color-caramel-100: #34301f;
+    --shadow-float: 0 24px 50px -28px rgb(0 0 0 / 0.8);
+}
+
+/* page background */
+:root[data-theme='arch'] body::before,
+:root.dark[data-theme='arch'] body::before {
+    background-image: none;
+}
+
+/* shared surfaces (glass, buttons, fields…) in this palette's style */
+@layer utilities {
+    /* arch: soft paper panels */
+    :root[data-theme='arch'] :is(.glass, .glass-strong) {
+        background: var(--color-surface);
+        border: 1px solid var(--color-line);
+        box-shadow: none;
+    }
+    :root[data-theme='arch'] .glass-navy {
+        background: var(--color-deep);
+        border: 0;
+        box-shadow: none;
+    }
+    :root[data-theme='arch'] :is(.btn-navy, .btn-rose) { box-shadow: none; }
+    :root[data-theme='arch'] .field { box-shadow: none; background: var(--color-surface); }
+    :root[data-theme='arch'] .section-title .ghost { display: none; }
+}
+
+/* helpers this demo's views use */
+@layer components {
+    /* arch-shaped frame (round top) */
+    .arch-frame {
+        border-radius: 999px 999px var(--radius-2xl) var(--radius-2xl);
+        overflow: hidden;
+    }
+}
+
+/* the decorative two-colour blob in this palette's accents */
+@layer utilities {
+    :root[data-theme='arch'] .blob-duo {
+        background:
+            radial-gradient(closest-side at 40% 40%, color-mix(in oklab, var(--color-rose) 22%, transparent), transparent),
+            radial-gradient(closest-side at 60% 60%, color-mix(in oklab, var(--color-caramel) 28%, transparent), transparent);
+    }
+}

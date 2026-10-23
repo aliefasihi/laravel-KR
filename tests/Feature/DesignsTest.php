@@ -109,4 +109,42 @@ class DesignsTest extends SearchTestCase
         $this->get('/blog')->assertSee('>Journal<', false);              // the preview follows the admin around
         $this->get('/?design=off')->assertSee('هر روز، یک تجربه‌ی')->assertDontSee('فقط شما می‌بینید');
     }
+
+    public function test_each_demo_loads_only_its_own_stylesheet(): void
+    {
+        $this->withVite();
+        $use = function (string $demo) {
+            $slots = Designs::DEMOS[$demo]['slots'];
+            Settings::set(array_combine(array_map(fn ($s) => 'design.'.$s, array_keys($slots)), $slots));
+
+            return $this->get('/')->assertOk()->getContent();
+        };
+
+        $this->assertSame('resources/css/app.css', Designs::stylesheet());
+        $this->assertMatchesRegularExpression('#assets/app-[\w-]+\.css#', $use('demo1'));
+
+        $html = $use('demo3');
+        $this->assertStringContainsString('build/assets/noir-', $html);
+        $this->assertDoesNotMatchRegularExpression('#assets/app-[\w-]+\.css#', $html);   // instead of app.css, not on top of it
+        $this->assertDoesNotMatchRegularExpression('#assets/(pop|arch|bazaar|minimal|all)-#', $html);
+
+        $this->assertStringContainsString('build/assets/minimal-', $use('demo2'));
+
+        // a hand-made mix of two demos: the combined stylesheet
+        Settings::set(['design.card' => 'pop']);
+        $this->assertStringContainsString('build/assets/all-', $this->get('/')->assertOk()->getContent());
+    }
+
+    public function test_switched_off_demos_leave_the_picker_and_the_preview(): void
+    {
+        Settings::set(['design.disabled' => ['demo4', 'demo5']]);
+        $this->assertArrayNotHasKey('demo4', Designs::enabledDemos());
+        $this->assertArrayHasKey('demo1', Designs::enabledDemos());
+        $this->assertArrayNotHasKey('pop', Designs::enabledVariants('card'));
+        $this->assertArrayHasKey('noir', Designs::enabledVariants('card'));
+
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $this->get('/?design=demo4')->assertDontSee('فقط شما می‌بینید');
+        $this->get('/?design=demo3')->assertSee('فقط شما می‌بینید');
+    }
 }

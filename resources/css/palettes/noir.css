@@ -1,0 +1,122 @@
+/* «دمو ۳ — شب طلایی» palette, fonts and surfaces (html[data-theme='noir']) | نویسنده: علی فصیحی (Ali Fasihi) */
+
+/* fonts (self-hosted, OFL) — downloaded only when this palette uses them */
+@font-face {
+    font-family: 'Markazi Text';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400 700;
+    src: url('/fonts/markazi/markazi-text-arabic-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFC;
+}
+@font-face {
+    font-family: 'Markazi Text';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400 700;
+    src: url('/fonts/markazi/markazi-text-latin-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* palette (<html data-theme="noir">) */
+/* ═══ noir — «شب طلایی»: always dark, gold accents, sharp corners ═══════════════════════════ */
+:root[data-theme='noir'],
+:root.dark[data-theme='noir'] {
+    color-scheme: dark;
+    --font-heading: 'Markazi Text', 'Vazirmatn', serif;
+    --color-navy: #f3efe6;
+    --color-navy-700: #e4ddcd;
+    --color-navy-500: #bdb5a5;
+    --color-deep: #2b2a28;
+    --color-deep-700: #3a3936;
+    --color-surface: #18181a;
+    --color-glint: rgb(243 239 230 / 0.1);
+    --color-page: #0e0e0f;
+    --color-ok: #7fd6a0;
+    --color-rose: #a67c35;
+    --color-rose-600: #8c6829;
+    --color-rose-100: #2a2218;
+    --color-caramel: #d6b46e;
+    --color-caramel-600: #d0aa5f;
+    --color-caramel-100: #2a241a;
+    --color-cream: #1e1e20;
+    --color-ink: #f3efe6;
+    --color-muted: #aaa397;
+    --color-subtle: #7a756c;
+    --color-line: rgb(243 239 230 / 0.11);
+    --radius-lg: 2px;
+    --radius-xl: 2px;
+    --radius-2xl: 3px;
+    --radius-3xl: 4px;
+    --radius-4xl: 4px;
+    --radius-glass: 4px;
+    --radius-card: 2px;
+    --shadow-glass: 0 0 0 1px rgb(243 239 230 / 0.06);
+    --shadow-float: 0 24px 60px -24px rgb(0 0 0 / 0.9);
+}
+
+/* page background */
+:root[data-theme='noir'] body::before {
+    background-image: radial-gradient(60rem 30rem at 50% -10%, rgb(214 180 110 / 0.08), transparent 70%);
+}
+
+/* shared surfaces (glass, buttons, fields…) in this palette's style */
+@layer utilities {
+    /* noir: flat panels with hairlines, square buttons */
+    :root[data-theme='noir'] :is(.glass, .glass-strong) {
+        background: var(--color-surface);
+        border: 1px solid var(--color-line);
+        box-shadow: none;
+    }
+    :root[data-theme='noir'] .glass-navy {
+        background: #0a0a0b;
+        border: 1px solid var(--color-line);
+        box-shadow: none;
+    }
+    :root[data-theme='noir'] :is(.btn, .btn-navy, .btn-rose, .btn-glass, .chip, .badge-off) {
+        border-radius: 2px;
+        box-shadow: none;
+    }
+    :root[data-theme='noir'] :is(.btn-navy, .btn-rose) {
+        background: var(--color-caramel);
+        color: #111;
+    }
+    :root[data-theme='noir'] :is(.btn-navy, .btn-rose):hover { background: #e3c482; }
+    :root[data-theme='noir'] .btn-glass {
+        background: transparent;
+        color: var(--color-caramel);
+        border: 1px solid rgb(214 180 110 / 0.5);
+    }
+    :root[data-theme='noir'] .btn-glass:hover { border-color: var(--color-caramel); }
+    :root[data-theme='noir'] .field { box-shadow: none; }
+    :root[data-theme='noir'] .section-title { font-family: var(--font-heading); font-weight: 700; }
+    :root[data-theme='noir'] .section-title .ghost { color: rgb(243 239 230 / 0.04); }
+}
+
+/* helpers this demo's views use */
+@layer components {
+    /* thin gold rule with a diamond in the middle (noir headings) */
+    .noir-rule {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--color-caramel);
+    }
+    .noir-rule::before,
+    .noir-rule::after {
+        content: '';
+        height: 1px;
+        flex: 1;
+        background: linear-gradient(to var(--rule-dir, left), transparent, currentColor);
+    }
+    .noir-rule::after { --rule-dir: right; }
+}
+
+/* the decorative two-colour blob in this palette's accents */
+@layer utilities {
+    :root[data-theme='noir'] .blob-duo {
+        background:
+            radial-gradient(closest-side at 40% 40%, color-mix(in oklab, var(--color-rose) 22%, transparent), transparent),
+            radial-gradient(closest-side at 60% 60%, color-mix(in oklab, var(--color-caramel) 28%, transparent), transparent);
+    }
+}

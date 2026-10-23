@@ -1,0 +1,214 @@
+/*
+ * Khaneh Romantic — the storefront's own CSS (fonts, night palette, base, components, occasions),
+ * shared by app.css (demo 1) and every demo stylesheet (resources/css/designs/*.css).
+ * نویسنده: علی فصیحی (Ali Fasihi)
+ */
+@import './tokens.css'; /* colours, fonts, radii + glass/btn utilities (shared with the demo stylesheets) */
+@import './occasions.css'; /* Yalda, Nowruz… (html[data-occasion]) */
+
+/* Self-hosted Vazirmatn (variable, OFL) — inlined here so the storefront needs no extra CSS request. */
+@font-face {
+    font-family: 'Vazirmatn';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('/fonts/vazirmatn/vazirmatn-arabic-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFC;
+}
+@font-face {
+    font-family: 'Vazirmatn';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('/fonts/vazirmatn/vazirmatn-latin-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+
+
+/* ── Dark mode: same classes, night palette ─────────────────────────────── */
+:root.dark {
+    color-scheme: dark;
+    --color-navy: #e7e9fb;
+    --color-navy-700: #d3d6f3;
+    --color-navy-500: #aab0e2;
+    --color-deep: #343c86;
+    --color-deep-700: #414a9e;
+    --color-surface: #1b1f3c;
+    --color-glint: rgb(170 178 240 / 0.16);
+    --color-page: #101226;
+    --color-ok: #4cd081;
+    --color-rose: #e2547f;
+    --color-rose-600: #cc3366;
+    --color-rose-100: #3d1d34;
+    --color-caramel-600: #e8b47e;
+    --color-caramel-100: #392b26;
+    --color-cream: #221f38;
+    --color-ink: #eef0f8;
+    --color-muted: #a6aec6;
+    --color-subtle: #7b84a0;
+    --color-line: rgb(231 233 251 / 0.1);
+    --shadow-glass: var(--shadow-glass-dark);
+    --shadow-float: 0 18px 50px -20px rgb(0 0 0 / 0.8);
+}
+
+@layer base {
+    html,
+    body {
+        overflow-x: clip;
+    }
+
+    html {
+        -webkit-tap-highlight-color: transparent;
+        scroll-behavior: smooth;
+        scroll-padding-top: 8rem;
+    }
+
+    body {
+        @apply text-ink font-sans antialiased;
+        background-color: var(--color-page);
+    }
+
+    /* The mesh: a fixed layer the compositor just keeps in place while scrolling (no repaints). */
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background-image:
+            radial-gradient(42rem 32rem at 100% -6%, rgb(204 51 102 / 0.16), transparent 62%),
+            radial-gradient(38rem 30rem at -8% 22%, rgb(228 169 108 / 0.22), transparent 60%),
+            radial-gradient(46rem 36rem at 60% 108%, rgb(110 118 214 / 0.14), transparent 62%),
+            radial-gradient(30rem 24rem at 40% 48%, rgb(255 245 237 / 0.9), transparent 70%);
+        transform: translateZ(0);
+    }
+    .dark body::before {
+        background-image:
+            radial-gradient(42rem 32rem at 100% -6%, rgb(204 51 102 / 0.18), transparent 62%),
+            radial-gradient(38rem 30rem at -8% 22%, rgb(228 169 108 / 0.1), transparent 60%),
+            radial-gradient(46rem 36rem at 60% 108%, rgb(90 100 214 / 0.2), transparent 62%);
+    }
+    /* photos are shot on white: soften them a touch at night */
+    .dark img:not([data-keep-bright]) {
+        filter: brightness(0.94);
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-rose);
+        outline-offset: 2px;
+        border-radius: 0.5rem;
+    }
+
+    ::selection {
+        background: var(--color-rose-100);
+        color: var(--color-navy);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}
+
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .frost { background-color: color-mix(in oklab, var(--color-surface) 94%, transparent); }
+}
+
+@layer components {
+    /* ── Inputs ────────────────────────────────────────────────── */
+    .field {
+        @apply w-full rounded-2xl border border-glint/80 bg-surface/70 px-4 py-3 text-sm text-ink shadow-[inset_0_1px_2px_rgb(35_40_79/0.06)] placeholder:text-subtle focus:border-rose/40 focus:bg-surface focus:ring-4 focus:ring-rose/10 focus:outline-none;
+    }
+
+    /* ── Section title: two-tone + ghost Latin word (from the current brand) ── */
+    .section-title {
+        @apply relative isolate text-2xl font-black text-navy sm:text-3xl;
+    }
+    .section-title .accent {
+        @apply text-caramel-600;
+    }
+    .section-title .ghost {
+        @apply pointer-events-none absolute -top-5 right-0 -z-10 font-latin text-4xl font-black tracking-widest whitespace-nowrap text-navy/[0.05] uppercase select-none sm:-top-7 sm:text-6xl;
+        direction: ltr;
+    }
+
+    /* ── Chips & badges ────────────────────────────────────────── */
+    .chip {
+        @apply inline-flex items-center gap-1.5 rounded-full border border-glint/80 bg-surface/70 px-4 py-2 text-sm text-navy transition hover:border-rose/30 hover:bg-surface hover:text-rose;
+    }
+    .badge-off {
+        @apply inline-flex items-center rounded-full bg-rose px-2.5 py-1 text-[11px] leading-none font-black text-white shadow-[0_6px_14px_-6px_rgb(204_51_102/0.9)];
+    }
+
+    /* ── Long-form content (WordPress / ai-platform) ───────────── */
+    .prose-fa {
+        @apply text-[15px] leading-8 text-muted;
+    }
+    .prose-fa h2 {
+        @apply mt-10 mb-3 text-xl font-black text-navy;
+    }
+    .prose-fa h3 {
+        @apply mt-8 mb-2 text-lg font-bold text-navy;
+    }
+    .prose-fa p,
+    .prose-fa ul,
+    .prose-fa ol {
+        @apply mb-4;
+    }
+    .prose-fa ul {
+        @apply list-disc ps-6 marker:text-rose;
+    }
+    .prose-fa ol {
+        @apply list-decimal ps-6 marker:text-rose;
+    }
+    .prose-fa strong {
+        @apply text-ink;
+    }
+    .prose-fa a {
+        @apply text-rose underline decoration-rose/30 underline-offset-4 hover:decoration-rose;
+    }
+    .prose-fa img {
+        @apply my-6 h-auto max-w-full rounded-2xl;
+    }
+    .prose-fa table {
+        @apply my-6 w-full overflow-hidden rounded-2xl text-sm;
+    }
+    .prose-fa th,
+    .prose-fa td {
+        @apply border-b border-line p-3 text-start;
+    }
+    .prose-fa th {
+        @apply bg-surface/60 font-bold text-navy;
+    }
+
+    /* ── Horizontal rails (carousels without JS) ───────────────── */
+    .rail {
+        @apply -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pb-4;
+        scrollbar-width: none;
+    }
+    .rail::-webkit-scrollbar {
+        display: none;
+    }
+    .rail > * {
+        @apply snap-start;
+    }
+
+    /* ── Logo marquee ──────────────────────────────────────────── */
+    .marquee-mask {
+        mask-image: linear-gradient(to left, transparent, #000 10%, #000 90%, transparent);
+    }
+}

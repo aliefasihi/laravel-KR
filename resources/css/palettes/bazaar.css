@@ -1,0 +1,95 @@
+/* «دمو ۶ — بازار» palette, fonts and surfaces (html[data-theme='bazaar']) | نویسنده: علی فصیحی (Ali Fasihi) */
+
+/* palette (<html data-theme="bazaar">) */
+/* ═══ bazaar — «بازار»: white & cobalt, compact, many products at a glance ═══════════════ */
+/* light palette in a layer, so the site-wide night palette (:root.dark in app.css) still wins in dark mode,
+   exactly as when this file was part of app.css; the palette's own .dark block below wins over both */
+@layer palette {
+    :root[data-theme='bazaar'] {
+        --color-navy: #1b1d21;
+        --color-navy-700: #2d3036;
+        --color-navy-500: #5a5f69;
+        --color-deep: #2350e6;
+        --color-deep-700: #1a40c4;
+        --color-surface: #ffffff;
+        --color-glint: #e4e7ec;
+        --color-page: #f3f4f6;
+        --color-ok: #0e8a55;
+        --color-rose: #d93a0a;
+        --color-rose-600: #b83008;
+        --color-rose-100: #ffe6dc;
+        --color-caramel: #ffb020;
+        --color-caramel-600: #a86400;
+        --color-caramel-100: #fff1d6;
+        --color-cream: #f0f2f5;
+        --color-ink: #1b1d21;
+        --color-muted: #5d6470;
+        --color-subtle: #8b929c;
+        --color-line: #e4e7ec;
+        --radius-lg: 0.5rem;
+        --radius-xl: 0.5rem;
+        --radius-2xl: 0.75rem;
+        --radius-3xl: 0.875rem;
+        --radius-glass: 0.875rem;
+        --radius-card: 0.625rem;
+        --shadow-glass: 0 1px 2px rgb(16 24 40 / 0.06);
+        --shadow-float: 0 12px 32px -12px rgb(16 24 40 / 0.25);
+    }
+}
+:root.dark[data-theme='bazaar'] {
+    --color-navy: #eef0f4;
+    --color-navy-700: #dde1e8;
+    --color-navy-500: #a9afba;
+    --color-deep: #3d6bff;
+    --color-deep-700: #5580ff;
+    --color-surface: #1b1e23;
+    --color-glint: #2b2f36;
+    --color-page: #121418;
+    --color-cream: #22262c;
+    --color-ink: #eef0f4;
+    --color-muted: #a4abb6;
+    --color-subtle: #78808c;
+    --color-line: #2b2f36;
+    --color-rose: #ff6a3d;
+    --color-rose-100: #3a2119;
+    --color-caramel-600: #ffbf47;
+    --color-caramel-100: #392c14;
+    --shadow-glass: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+/* page background */
+:root[data-theme='bazaar'] body::before,
+:root.dark[data-theme='bazaar'] body::before {
+    background-image: none;
+}
+
+/* shared surfaces (glass, buttons, fields…) in this palette's style */
+@layer utilities {
+    /* bazaar: white cards with a hairline, compact controls */
+    :root[data-theme='bazaar'] :is(.glass, .glass-strong) {
+        background: var(--color-surface);
+        border: 1px solid var(--color-line);
+        box-shadow: var(--shadow-glass);
+    }
+    :root[data-theme='bazaar'] .glass-navy {
+        background: #15171b;
+        border: 0;
+        box-shadow: none;
+    }
+    :root[data-theme='bazaar'] :is(.btn, .btn-navy, .btn-rose, .btn-glass) {
+        border-radius: 0.625rem;
+        box-shadow: none;
+    }
+    :root[data-theme='bazaar'] .field { box-shadow: none; border-color: var(--color-line); background: var(--color-surface); }
+    :root[data-theme='bazaar'] .section-title { font-size: 1.375rem; }
+    :root[data-theme='bazaar'] .section-title .ghost { display: none; }
+}
+
+/* the decorative two-colour blob in this palette's accents */
+@layer utilities {
+    :root[data-theme='bazaar'] .blob-duo {
+        background:
+            radial-gradient(closest-side at 40% 40%, color-mix(in oklab, var(--color-rose) 22%, transparent), transparent),
+            radial-gradient(closest-side at 60% 60%, color-mix(in oklab, var(--color-caramel) 28%, transparent), transparent);
+    }
+}

@@ -31,7 +31,8 @@
     @if (config('khaneh.font') === 'kalameh')
         <link rel="stylesheet" href="/fonts/kalameh/kalameh.css">
     @endif
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- one stylesheet: demo 1's, or the live demo's own (Designs::stylesheet) — other demos add nothing --}}
+    @vite([\App\Core\Support\Designs::stylesheet(), 'resources/js/app.js'])
 
     {{-- Instant navigation: Chromium browsers prerender a page as soon as the visitor shows intent
          (hover on desktop, touch start on mobile). Cart/admin/new-tab links are left alone. --}}

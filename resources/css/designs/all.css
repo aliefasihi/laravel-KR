@@ -1,0 +1,22 @@
+/*
+ * Khaneh Romantic — every demo at once: only for a hand-made mix of parts from different demos
+ * (تنظیمات ← طرح‌های سایت ← ترکیبی). Ready-made demos load their own, smaller stylesheet.
+ * نویسنده: علی فصیحی (Ali Fasihi)
+ */
+@import 'tailwindcss' source(none);
+@import '../sources.css';
+@import '../site.css';
+@import '../palettes/noir.css';
+@import '../palettes/pop.css';
+@import '../palettes/arch.css';
+@import '../palettes/bazaar.css';
+
+@source '../../views/designs/*/minimal/**/*.blade.php';
+@source '../../views/designs/*/noir/**/*.blade.php';
+@source '../../views/designs/*/pop/**/*.blade.php';
+@source '../../views/designs/*/arch/**/*.blade.php';
+@source '../../views/designs/*/bazaar/**/*.blade.php';
+@source '../../views/components/noir/*.blade.php';
+@source '../../views/components/pop/*.blade.php';
+@source '../../views/components/arch/*.blade.php';
+@source '../../views/components/bazaar/*.blade.php';

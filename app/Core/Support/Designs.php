@@ -14,7 +14,7 @@
  *
  * The chosen variants' folders are put in front of the normal view paths for the request
  * (ApplyDesign middleware); anything a variant doesn't override falls back to the classic view.
- * The "theme" slot is the palette, fonts and surface style (html[data-theme] + resources/css/themes.css),
+ * The "theme" slot is the palette, fonts and surface style (html[data-theme] + resources/css/designs/{variant}.css),
  * so shared pages (cart, checkout, account…) follow the chosen demo too.
  * A demo is a preset of variants for every slot, applied with one click in
  * تنظیمات فروشگاه ← طرح‌های سایت. Admins can preview a demo first: /?design=demo2 (/?design=off).
@@ -32,7 +32,7 @@ final class Designs
     public const SESSION_KEY = 'design.preview';
 
     /** page part => [label, variants] — "classic" is the original design and always exists.
-     *  "theme" has no views: it is the palette, fonts and surfaces (html[data-theme], resources/css/themes.css). */
+     *  "theme" has no views: it is the palette, fonts and surfaces (html[data-theme], resources/css/designs/{variant}.css). */
     public const SLOTS = [
         'theme' => ['label' => 'رنگ‌ها و فونت', 'variants' => ['classic' => 'صورتی و سرمه‌ای، شیشه‌ای', 'noir' => 'مشکی و طلایی', 'pop' => 'رنگی و پرانرژی', 'arch' => 'کرم و زیتونی', 'bazaar' => 'سفید و آبی، فروشگاهی']],
         'chrome' => ['label' => 'هدر و فوتر', 'variants' => ['classic' => 'هدر شیشه‌ای شناور', 'noir' => 'لوگو وسط، مشکی', 'pop' => 'قاب‌دار و رنگی', 'arch' => 'لوگو وسط، خطی و آرام', 'bazaar' => 'جستجوی بزرگ، منوی فروشگاهی']],
@@ -105,6 +105,42 @@ final class Designs
         }
     }
 
+    /**
+     * The one storefront stylesheet for this request: app.css for demo 1; a ready-made demo's own
+     * resources/css/designs/{variant}.css (the whole site in that demo's style, nothing of the others);
+     * designs/all.css only for a hand-made mix of parts from several demos.
+     */
+    public static function stylesheet(): string
+    {
+        $variants = array_values(array_unique(array_diff(self::$active ?? self::saved(), ['classic'])));
+
+        return match (count($variants)) {
+            0 => 'resources/css/app.css',
+            1 => is_file(resource_path("css/designs/{$variants[0]}.css")) ? "resources/css/designs/{$variants[0]}.css" : 'resources/css/designs/all.css',
+            default => 'resources/css/designs/all.css',
+        };
+    }
+
+    /** Demos switched on in تنظیمات ← طرح‌های سایت (demo 1 always; the live one always). @return array<string, array> */
+    public static function enabledDemos(): array
+    {
+        $off = (array) Settings::get('design.disabled', []);
+
+        return array_filter(self::DEMOS, fn (array $demo, string $key) => $key === 'demo1' || ! in_array($key, $off, true)
+            || self::demoFor(self::saved()) === $key, ARRAY_FILTER_USE_BOTH);
+    }
+
+    /** Variants that some switched-on demo uses (classic always) — the only ones offered per slot. */
+    public static function enabledVariants(string $slot): array
+    {
+        $used = ['classic'];
+        foreach (self::enabledDemos() as $demo) {
+            $used[] = $demo['slots'][$slot] ?? 'classic';
+        }
+
+        return array_intersect_key(self::SLOTS[$slot]['variants'], array_flip($used));
+    }
+
     /** @return array<string, string> slot => variant saved in the settings */
     public static function saved(): array
     {
@@ -159,7 +195,7 @@ final class Designs
         }
         $asked = $request->query('design');
         if (is_string($asked)) {
-            array_key_exists($asked, self::DEMOS)
+            array_key_exists($asked, self::enabledDemos())
                 ? $request->session()->put(self::SESSION_KEY, $asked)
                 : $request->session()->forget(self::SESSION_KEY);
         }
