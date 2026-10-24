@@ -1,38 +1,71 @@
-*.log
-.DS_Store
-.env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
+# ── Laravel / tooling ───────────────────────────────────────────────
+/vendor
 /node_modules
 /public/build
+/public/hot
+/public/storage
 /public/vendor
 /public/js/filament
 /public/css/filament
 /public/fonts/filament
-/public/hot
-/public/storage
 /storage/*.key
 /storage/pail
-/vendor
+/storage/debugbar
+/auth.json
+.phpactor.json
+.phpunit.result.cache
+/.phpunit.cache
+/.php-cs-fixer.cache
+/coverage
 Homestead.json
 Homestead.yaml
-Thumbs.db
 
-# Khaneh Romantic — never commit data dumps or import working files
+# ── Secrets: every .env except the committed example ────────────────
+.env
+.env.*
+!.env.example
+
+# ── Editors and OS junk ─────────────────────────────────────────────
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+/.claude/settings.local.json
+.DS_Store
+._*
+__MACOSX/
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+*.bak
+*.orig
+
+# ── Logs, archives and local databases ──────────────────────────────
+*.log
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tgz
+*.sqlite
+*.sqlite-journal
+
+# ── Khaneh Romantic: never commit data dumps or import working files ─
 *.sql
 *.sql.gz
 /storage/import
 /data
 
-# Licensed fonts are installed per server, never committed
+# ── Licensed fonts are installed per server, never committed ────────
 /public/fonts/kalameh/*.woff2
 /public/fonts/kalameh/*.woff
+/public/fonts/kalameh/*.ttf
+/public/fonts/kalameh/*.otf
+
+# ── Local helpers and generated analysis ────────────────────────────
+/restore-missing.sh
+/graphify-out
