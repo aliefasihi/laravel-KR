@@ -12,6 +12,8 @@ use App\Core\Support\StorefrontHooks;
 use App\Filament\Pages\SettingsPage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -49,6 +51,27 @@ class SettingsTest extends TestCase
         $this->assertSame('light', Settings::get('appearance.default'));
         $this->assertSame('smsir', Settings::get('sms.driver'));
         $this->assertSame('123456', (string) Settings::get('sms.smsir_otp_template'));
+    }
+
+    public function test_secrets_are_encrypted_at_rest(): void
+    {
+        Settings::set(['sms.kavenegar_key' => 'live-api-key', 'sms.kavenegar_otp_template' => 'login']);
+
+        $stored = json_decode(DB::table('settings')->where('key', 'sms.kavenegar_key')->value('value'), true);
+        $this->assertStringStartsWith(Settings::ENCRYPTED, $stored);
+        $this->assertStringNotContainsString('live-api-key', $stored);
+        $this->assertDatabaseHas('settings', ['key' => 'sms.kavenegar_otp_template', 'value' => '"login"']); // not a secret
+
+        Cache::flush();
+        app()->forgetInstance(Settings::class);
+        $this->assertSame('live-api-key', Settings::get('sms.kavenegar_key'));
+        $this->assertStringNotContainsString('live-api-key', json_encode(Cache::get(Settings::CACHE_KEY)));
+
+        // saved with another APP_KEY: reads as empty instead of breaking the site
+        DB::table('settings')->where('key', 'sms.kavenegar_key')->update(['value' => json_encode(Settings::ENCRYPTED.'garbage')]);
+        Cache::flush();
+        app()->forgetInstance(Settings::class);
+        $this->assertNull(Settings::get('sms.kavenegar_key'));
     }
 
     public function test_storefront_hooks_render_in_order(): void

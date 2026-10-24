@@ -16,7 +16,9 @@ cd /srv/sites/khanehromantic
 git clone <repo> .
 cp .env.example .env            # و مقدارها را پر کن (بخش ۳)
 composer install --no-dev --optimize-autoloader
-php artisan key:generate
+php artisan key:generate        # ✱ کلید تازه‌ی همین سرور؛ هرگز APP_KEY لوکال را کپی نکن
+php artisan push:keys           # ✱ کلیدهای نوتیفیکیشن همین سرور (خروجی را در .env بگذار)
+chmod 600 .env
 php artisan storage:link
 npm ci && npm run build
 php artisan migrate --force
@@ -78,8 +80,16 @@ QUEUE_CONNECTION=redis
 SEARCH_DRIVER=meilisearch
 MEILISEARCH_HOST=http://127.0.0.1:7700
 MEILISEARCH_KEY=…
+SESSION_SECURE_COOKIE=true
+ZARINPAL_SANDBOX=false
 ```
 کلیدهای پیامک (`SMS_*`) و زرین‌پال (`ZARINPAL_*`) را می‌شود این‌جا یا در **پنل ← تنظیمات فروشگاه** گذاشت؛ مقدار پنل بر `.env` مقدم است.
+
+### ✱ امنیت
+- **`APP_KEY` را بعد از راه‌اندازی عوض نکن.** کلیدها و توکن‌های پنل (پیامک، ربات، هوش مصنوعی، اسنپ‌پی) با همین کلید رمز شده‌اند. اگر عوض شود، این فیلدها خالی می‌شوند و باید دوباره در پنل وارد شوند. یک نسخه از `.env` را جای امن (نه در گیت) نگه دار.
+- `.env`، بکاپ‌های دیتابیس و فایل‌های `.sql` هرگز وارد گیت نمی‌شوند (`.gitignore`).
+- رمز ادمین حداقل ۱۲ کاراکتر؛ برای هر نفر حساب جدا با `php artisan khaneh:admin`.
+- بعد از هر `composer update`: `composer audit` باید «No security vulnerability advisories» بدهد.
 
 ## ۴. بعد از دیپلوی — آزمون دودی (۲ دقیقه)
 - [ ] صفحه‌ی اصلی، یک دسته، یک محصول و جستجو باز می‌شوند.
