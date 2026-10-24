@@ -3,6 +3,7 @@
 @php use App\Core\Support\PersianText; @endphp
 
 @section('title', $q !== '' ? 'جستجوی «'.$q.'»' : 'جستجو')
+@section('meta_description', 'جستجو در محصولات '.config('khaneh.store.name').($q !== '' ? ' برای «'.$q.'»' : '').' — لوازم آشپزخانه، سرو و پذیرایی و دکوراتیو.')
 @section('robots', 'noindex, follow')
 
 @section('content')

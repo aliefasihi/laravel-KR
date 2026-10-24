@@ -19,7 +19,7 @@
              {{ $attributes }}>
     </picture>
 @else
-    <div {{ $attributes->class(['flex items-center justify-center bg-gradient-to-br from-cream via-surface to-rose-100 text-caramel/60']) }} role="img" aria-label="{{ $alt ?? 'بدون تصویر' }}">
+    <div {{ $attributes->class(['flex items-center justify-center bg-gradient-to-br from-cream via-surface to-rose-100 text-caramel/60']) }} @if ($alt === '') aria-hidden="true" @else role="img" aria-label="{{ $alt ?? 'بدون تصویر' }}" @endif>
         <x-site.lotus class="size-1/4 max-w-16" stroke="1.2" />
     </div>
 @endif

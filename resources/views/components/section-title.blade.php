@@ -4,7 +4,8 @@
 <div {{ $attributes->class(['flex items-end justify-between gap-4']) }}>
     <h2 @if ($id) id="{{ $id }}" @endif @class(['section-title', '!text-white' => $light])>
         @if ($ghost)
-            <span @class(['ghost', '!text-white/10' => $light]) aria-hidden="true">{{ $ghost }}</span>
+            {{-- drawn by CSS (::before) so the faint word is decoration, not text that must pass contrast checks --}}
+            <span @class(['ghost', '!text-white/10' => $light]) aria-hidden="true" data-ghost="{{ $ghost }}"></span>
         @endif
         <span @class(['accent', '!text-cream' => $light])>{{ $accent }}</span> {{ $title }}
     </h2>

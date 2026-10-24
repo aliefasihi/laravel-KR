@@ -5,6 +5,7 @@
  * نویسنده: علی فصیحی (Ali Fasihi)
  *
  * GET /search/suggest?q=قابل → products (engine, typo-tolerant), matching categories and brands.
+ * GET /search/recent?ids=… → recently viewed products, for the empty search box.
  * Runs without session/cookies, so it is as light as a request to Laravel can be.
  */
 
@@ -31,20 +32,7 @@ class SuggestController
             return response()->json(['products' => [], 'categories' => [], 'brands' => []]);
         }
 
-        $products = $finder->suggest($q, 6)->map(function (Product $product) {
-            $variant = $product->variants->where('is_active', true)->sortBy(fn ($v) => $v->currentPrice())->first();
-            $media = $product->media->first();
-
-            return [
-                'name' => $product->name,
-                'brand' => $product->brand?->name_fa,
-                'url' => $product->url(),
-                'image' => $media?->urlFor(160),
-                'price' => $variant ? Money::toman($variant->currentPrice()) : null,
-                'old_price' => $variant && $variant->currentPrice() < $variant->price ? Money::toman($variant->price) : null,
-                'in_stock' => (bool) $product->variants->first(fn ($v) => $v->is_active && $v->stock > 0),
-            ];
-        })->values();
+        $products = $finder->suggest($q, 6)->map(fn (Product $product) => self::card($product))->values();
 
         $matches = fn (string $normalized) => collect($tokens)->every(fn ($t) => str_contains($normalized, $t));
 
@@ -59,6 +47,42 @@ class SuggestController
         return response()
             ->json(compact('products', 'categories', 'brands'), options: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
             ->header('Cache-Control', 'private, max-age=60');
+    }
+
+    /**
+     * GET /search/recent?ids=12,7,3 → the visitor's recently viewed products (ids from their browser,
+     * newest first), in the same shape as the suggestions: shown when the search box is focused while empty.
+     */
+    public function recent(Request $request): JsonResponse
+    {
+        $ids = array_slice(array_values(array_unique(array_filter(array_map('intval', explode(',', (string) $request->query('ids')))))), 0, 6);
+
+        $products = $ids === [] ? collect() : Product::query()->active()->whereKey($ids)->with(['brand', 'variants', 'media'])->get()
+            ->sortBy(fn (Product $p) => array_search($p->id, $ids, true))
+            ->map(fn (Product $product) => self::card($product))->values();
+
+        return response()
+            ->json(['products' => $products], options: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+            ->header('Cache-Control', 'private, max-age=300')
+            ->header('X-Robots-Tag', 'noindex');
+    }
+
+    /** @return array<string, mixed> one product row of the search box */
+    private static function card(Product $product): array
+    {
+        $variant = $product->variants->where('is_active', true)->sortBy(fn ($v) => $v->currentPrice())->first();
+        $media = $product->media->first();
+
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'brand' => $product->brand?->name_fa,
+            'url' => $product->url(),
+            'image' => $media?->urlFor(160),
+            'price' => $variant ? Money::toman($variant->currentPrice()) : null,
+            'old_price' => $variant && $variant->currentPrice() < $variant->price ? Money::toman($variant->price) : null,
+            'in_stock' => (bool) $product->variants->first(fn ($v) => $v->is_active && $v->stock > 0),
+        ];
     }
 
     /** Active categories and brands with their normalized names (cached until the catalog changes). */

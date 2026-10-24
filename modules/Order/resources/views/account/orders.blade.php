@@ -10,13 +10,18 @@
         <h1 class="mb-5 text-xl font-black text-navy">سفارش‌های من</h1>
         <div class="space-y-3">
             @forelse ($orders as $order)
-                <a href="{{ route('customer.orders.show', $order) }}" class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-[var(--radius-card)] bg-surface/60 p-4 ring-1 ring-line transition hover:ring-rose/40">
-                    <span class="font-black text-navy">سفارش {{ $order->displayNumber() }}</span>
+                {{-- the whole row opens the order; buttons from other modules (e.g. «درخواست مرجوعی») sit above the link --}}
+                @php $rowActions = trim((string) \App\Core\Support\StorefrontHooks::render('account.orders.row', ['order' => $order])); @endphp
+                <div class="relative flex flex-wrap items-center gap-x-6 gap-y-2 rounded-[var(--radius-card)] bg-surface/60 p-4 ring-1 ring-line transition hover:ring-rose/40">
+                    <a href="{{ route('customer.orders.show', $order) }}" class="font-black text-navy after:absolute after:inset-0 after:rounded-[var(--radius-card)]">سفارش {{ $order->displayNumber() }}</a>
                     @include('order::partials.status-badge')
                     <span class="text-sm text-muted">{{ Jalali::format($order->created_at) }}</span>
                     <span class="text-sm text-muted">{{ PersianText::toPersianDigits($order->items_count) }} کالا</span>
                     <span class="ms-auto font-black text-navy">{{ Money::toman($order->total) }} <span class="text-xs font-medium text-muted">تومان</span></span>
-                </a>
+                    @if ($rowActions !== '')
+                        <div class="relative z-10 flex w-full flex-wrap gap-2">{!! $rowActions !!}</div>
+                    @endif
+                </div>
             @empty
                 <div class="py-10 text-center">
                     <p class="font-bold text-navy">هنوز سفارشی ثبت نکرده‌اید.</p>

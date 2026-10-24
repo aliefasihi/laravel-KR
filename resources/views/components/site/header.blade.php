@@ -124,7 +124,7 @@
                                 </div>
                             </div>
                             <a href="{{ $category->url() }}" class="group relative hidden overflow-hidden rounded-2xl bg-gradient-to-br from-cream to-rose-100 xl:block">
-                                <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="208px" class="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                                <x-media.picture :media="$category->media->first()" alt="" sizes="208px" class="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                                 <span class="absolute inset-x-3 bottom-3 rounded-xl bg-surface/80 px-3 py-2 text-center text-sm font-bold text-navy backdrop-blur">{{ $category->name }}</span>
                             </a>
                         </div>

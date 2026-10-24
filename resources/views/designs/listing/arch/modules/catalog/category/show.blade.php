@@ -22,7 +22,7 @@
         <header class="text-center">
             @if ($image = $category->media->first())
                 <span class="arch-frame mx-auto block h-36 w-28 bg-cream sm:h-44 sm:w-36">
-                    <x-media.picture :media="$image" :alt="$category->name" sizes="144px" class="size-full object-cover" />
+                    <x-media.picture :media="$image" alt="" sizes="144px" class="size-full object-cover" />
                 </span>
             @endif
             <h1 class="mt-6 text-4xl font-extralight text-navy sm:text-6xl">{{ $category->name }}</h1>

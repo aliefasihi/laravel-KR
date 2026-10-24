@@ -25,6 +25,7 @@
         @if ($posts->isEmpty())
             <p class="py-16 text-center text-muted">هنوز مطلبی منتشر نشده است.</p>
         @else
+            <h2 class="sr-only">مطالب</h2>
             <ol class="divide-y divide-line border-y border-line">
                 @foreach ($posts as $post)
                     <li>

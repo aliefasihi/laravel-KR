@@ -18,6 +18,7 @@
         @if ($posts->isEmpty())
             <p class="py-16 text-center text-muted">هنوز مطلبی منتشر نشده است.</p>
         @else
+            <h2 class="sr-only">مطالب</h2>
             <div class="space-y-20">
                 @foreach ($posts as $post)
                     <a href="{{ $post->url() }}" class="group grid items-center gap-8 md:grid-cols-2 md:gap-16">

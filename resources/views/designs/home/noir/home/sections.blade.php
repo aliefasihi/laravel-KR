@@ -85,7 +85,7 @@
                 <div class="relative aspect-[5/6] overflow-hidden bg-cream">
                     @foreach ($categories as $category)
                         <div x-show="on === {{ $loop->index }}" @if (! $loop->first) x-cloak @endif x-transition.opacity.duration.500ms class="absolute inset-0">
-                            <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="640px" class="size-full object-cover" />
+                            <x-media.picture :media="$category->media->first()" alt="" sizes="640px" class="size-full object-cover" />
                         </div>
                     @endforeach
                     <div class="pointer-events-none absolute inset-4 border border-caramel/30" aria-hidden="true"></div>
@@ -96,7 +96,7 @@
                 @foreach ($categories as $category)
                     <li class="w-[62%] shrink-0">
                         <a href="{{ $category->url() }}" class="relative block aspect-[3/4] overflow-hidden bg-cream">
-                            <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="62vw" class="size-full object-cover" />
+                            <x-media.picture :media="$category->media->first()" alt="" sizes="62vw" class="size-full object-cover" />
                             <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent p-4 pt-16">
                                 <span class="block font-display text-sm text-caramel">{{ $num($loop->iteration) }}</span>
                                 <span class="block font-display text-2xl font-semibold text-white">{{ $category->name }}</span>
@@ -215,12 +215,15 @@
                 @endforeach
             </div>
             @foreach ($showcase as $item)
-                <div x-show="tab === {{ $loop->index }}" @if (! $loop->first) x-cloak @endif role="tabpanel" class="grid grid-cols-2 gap-x-5 gap-y-12 lg:grid-cols-4">
+                {{-- other brands' products join the page only when their tab is opened (lighter first load) --}}
+                @if (! $loop->first)<template x-if="tab === {{ $loop->index }}">@endif
+                <div @if ($loop->first) x-show="tab === 0" @endif role="tabpanel" class="grid grid-cols-2 gap-x-5 gap-y-12 lg:grid-cols-4">
                     @foreach ($item['products'] as $product)
                         <x-product.card :product="$product" />
                     @endforeach
                     <a href="{{ $item['brand']->url() }}" class="col-span-full mx-auto border border-caramel/50 px-8 py-3 text-sm text-caramel transition hover:bg-caramel hover:text-black">همه‌ی محصولات {{ $item['brand']->name_fa }}</a>
                 </div>
+                @if (! $loop->first)</template>@endif
             @endforeach
         </section>
     @endif

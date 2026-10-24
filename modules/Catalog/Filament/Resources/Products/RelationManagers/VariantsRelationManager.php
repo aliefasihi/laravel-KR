@@ -72,7 +72,7 @@ class VariantsRelationManager extends RelationManager
                 TextColumn::make('stock')->label('موجودی')->color(fn ($state) => $state < 1 ? 'danger' : null),
                 IconColumn::make('is_active')->label('فعال')->boolean(),
             ])
-            ->headerActions([
+            ->pushHeaderActions([
                 CreateAction::make()
                     ->mutateDataUsing(fn (array $data) => $this->variationModule() ? VariationFields::toOptions($data, $this->getOwnerRecord()) : $data)
                     ->after(fn () => $this->variationModule() && VariationFields::syncProduct($this->getOwnerRecord())),

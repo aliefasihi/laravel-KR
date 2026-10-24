@@ -2,6 +2,7 @@
  * Khaneh Romantic — The site chat panel. Loaded on the first click of the chat button (a separate small
  * file), keeps the conversation in this browser (token) across pages, renders the assistant's answers:
  * text, product cards, links and quick replies. Everything is put in with textContent (no HTML from the server).
+ * «منو» in the header (and a chip under answers that have no choices of their own) goes back to the bot's menu.
  * نویسنده: علی فصیحی (Ali Fasihi)
  */
 
@@ -45,6 +46,7 @@ export function open(launcher) {
 
     const close = () => { panel.hidden = true; launcher.setAttribute('aria-expanded', 'false'); launcher.focus(); };
     panel.querySelector('[data-chat-close]').addEventListener('click', close);
+    panel.querySelector('[data-chat-menu]')?.addEventListener('click', () => send(config.menu));
     panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 
     const scroll = () => requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; });
@@ -87,7 +89,9 @@ export function open(launcher) {
         log.appendChild(row);
 
         quick.replaceChildren();
-        for (const label of m.quick || []) {
+        // an answer without its own choices still offers the way back to the menu
+        const choices = m.quick?.length ? m.quick : (mine || !config.menu ? [] : [config.menu]);
+        for (const label of choices) {
             const chip = el('button', 'shrink-0 rounded-full border border-rose/30 bg-surface px-3 py-1.5 text-xs font-bold text-rose hover:bg-rose hover:text-white', label);
             chip.type = 'button';
             chip.addEventListener('click', () => send(label));

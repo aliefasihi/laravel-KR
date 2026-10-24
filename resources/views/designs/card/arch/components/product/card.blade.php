@@ -14,9 +14,9 @@
     <div class="relative">
         <div class="arch-frame relative aspect-[3/4] bg-cream">
             <x-media.picture :media="$images->first()" :alt="$product->name" :eager="$eager" :sizes="$sizes"
-                             :class="\Illuminate\Support\Arr::toCssClasses(['absolute inset-0 size-full object-cover transition duration-700', 'group-hover:opacity-0' => $images->count() > 1, 'group-hover:scale-105' => $images->count() < 2])" />
+                             :class="\Illuminate\Support\Arr::toCssClasses(['absolute inset-0 size-full object-cover transition duration-700', 'group-hover:scale-105' => true])" />
             @if ($images->count() > 1)
-                <x-media.picture :media="$images->last()" alt="" :sizes="$sizes" class="absolute inset-0 size-full object-cover opacity-0 transition duration-700 group-hover:opacity-100" />
+                <template data-card-hover><x-media.picture :media="$images->last()" alt="" :sizes="$sizes" class="absolute inset-0 size-full object-cover opacity-0 transition duration-700 group-hover:opacity-100" /></template>
             @endif
             @unless ($variant)
                 <span class="absolute inset-x-0 bottom-0 bg-surface/85 py-2 text-xs text-muted">ناموجود</span>

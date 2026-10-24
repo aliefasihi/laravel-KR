@@ -33,6 +33,9 @@ final class Assistant
 {
     public const QUICK = ['📦 پیگیری سفارش', '🔎 پیدا کردن محصول', '🚚 ارسال و هزینه', '↩️ مرجوعی', '💳 روش‌های پرداخت', '🙋 صحبت با پشتیبان'];
 
+    /** «back to the menu»: the panel's menu button and the chip under answers send this; it also leaves any step half-way (order tracking…) */
+    public const MENU = '🏠 منوی اصلی';
+
     /** @var list<array> replies of this turn */
     private array $replies = [];
 
@@ -65,6 +68,14 @@ final class Assistant
     private function think(string $text): void
     {
         $state = $this->conversation->state;
+
+        // back to the menu, from anywhere (also cancels a half-done order lookup)
+        if ($text === self::MENU || in_array(Knowledge::norm($text), ['منو', 'منوی اصلی', 'بازگشت', 'برگشت به منو', 'شروع دوباره', 'انصراف', 'لغو'], true)) {
+            $this->state(null);
+            $this->say('چه کمکی از دستم برمی‌آید؟ یکی را انتخاب کنید یا سؤال‌تان را بنویسید.', quick: self::QUICK, intent: 'menu');
+
+            return;
+        }
 
         // in the middle of something
         if ($state === 'order_number') {

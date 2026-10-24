@@ -32,7 +32,7 @@
         <link rel="stylesheet" href="/fonts/kalameh/kalameh.css">
     @endif
     {{-- one stylesheet: demo 1's, or the live demo's own (Designs::stylesheet) — other demos add nothing --}}
-    @vite([\App\Core\Support\Designs::stylesheet(), 'resources/js/app.js'])
+    @vite(\App\Core\Support\Designs::stylesheet())
 
     {{-- Instant navigation: Chromium browsers prerender a page as soon as the visitor shows intent
          (hover on desktop, touch start on mobile). Cart/admin/new-tab links are left alone. --}}
@@ -50,6 +50,7 @@
 <body @class(['flex min-h-dvh flex-col lg:pb-0', 'pb-24' => ! $bare && ! View::hasSection('buy_bar'), 'pb-44' => ! $bare && View::hasSection('buy_bar')])>
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-[60] focus:rounded-full focus:bg-surface focus:px-5 focus:py-2.5 focus:shadow-lg">پرش به محتوا</a>
 
+    <x-site.icons />
     @storefrontHook('body.start')
     @unless ($bare)
         <x-site.promo />
@@ -69,5 +70,9 @@
 
     @storefrontHook('body.end')
     @stack('scripts')
+    {{-- scripts last: requested after the page's own images and fonts, never in the way of the first paint;
+         Livewire's own script (added after this) is deferred too — it runs after app.js, as before --}}
+    @vite('resources/js/app.js')
+    @php(\Livewire\Livewire::useScriptTagAttributes(['defer' => true]))
 </body>
 </html>

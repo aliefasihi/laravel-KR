@@ -56,7 +56,8 @@
         </form>
     </div>
 
-    <section aria-label="محصولات" class="space-y-10">
+    <section aria-labelledby="listing-products" class="space-y-10">
+        <h2 id="listing-products" class="sr-only">محصولات</h2>
         @if ($products->isEmpty())
             <div class="pop-frame flex flex-col items-center gap-4 rounded-2xl bg-pop-lilac px-6 py-16 text-center text-[#141414]">
                 <p class="font-display text-3xl">اوه! چیزی پیدا نشد</p>

@@ -7,15 +7,15 @@
 @endphp
 
 <div class="relative w-full {{ $size === 'lg' ? '' : 'max-w-lg' }}"
-     x-data="searchBox(@js($value), @js(route('search.suggest')))"
+     x-data="searchBox(@js($value), @js(route('search.suggest')), @js(route('search.recent')))"
      @click.outside="open = false" @keydown.escape="open = false">
-    <form action="{{ route('catalog.search') }}" method="get" role="search" @submit="open = false">
+    <form action="{{ route('catalog.search') }}" method="get" role="search" @submit="submit()">
         <label for="{{ $id }}" class="sr-only">جستجوی محصولات</label>
         <div @class(['relative', 'occ-search' => $occ])>
             @if ($occ)
                 <span class="occ-search-emblem" aria-hidden="true">{!! \Modules\Occasions\Support\Art::svg($occ['emblem']) !!}</span>
             @endif
-            <input id="{{ $id }}" name="q" type="search" autocomplete="off" x-model="q" @input="input()" @focus="focus()"
+            <input id="{{ $id }}" name="q" type="search" autocomplete="off" x-model="q" @input="input()" @focus="focus()" @click="open || focus()"
                    @keydown.arrow-down.prevent="move(1)" @keydown.arrow-up.prevent="move(-1)" @keydown.enter="enter($event)"
                    role="combobox" aria-autocomplete="list" aria-controls="{{ $id }}-list" :aria-expanded="open"
                    value="{{ $value }}" @if ($autofocus) autofocus @endif
@@ -34,46 +34,99 @@
 
     <div x-show="open" x-cloak x-transition.opacity.duration.150ms id="{{ $id }}-list" role="listbox"
          class="glass-strong frost absolute inset-x-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-3xl p-2 text-start">
-        <template x-if="data.categories.length || data.brands.length">
-            <div class="flex flex-wrap gap-1.5 px-2 pt-1 pb-2">
-                <template x-for="(c, i) in data.categories" :key="'c' + i">
-                    <a :href="c.url" data-suggest-link class="chip !py-1.5 text-xs" :class="active === i && '!bg-deep !text-white'">
-                        <svg class="size-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
-                        <span x-text="c.name"></span><span x-show="c.parent" class="text-subtle" x-text="'در ' + c.parent"></span>
-                    </a>
+        {{-- focused while empty: what this visitor searched and viewed before (kept only in their browser) --}}
+        <template x-if="mode === 'recent'">
+            <div>
+                <template x-if="recent.searches.length">
+                    <div class="px-2 pt-1 pb-2">
+                        <div class="mb-2 flex items-center justify-between text-xs">
+                            <span class="font-bold text-muted">جستجوهای اخیر</span>
+                            <button type="button" @click="forget()" class="text-subtle hover:text-rose">پاک کردن</button>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <template x-for="(term, i) in recent.searches" :key="'s' + term">
+                                <span class="chip !gap-1 !py-1 !ps-3 !pe-1 text-xs" :class="active === i && '!bg-deep !text-white'">
+                                    <a :href="'{{ route('catalog.search') }}?q=' + encodeURIComponent(term)" data-suggest-link @click="remember(term)" class="inline-flex items-center gap-1.5">
+                                        <svg class="size-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="8.5"/></svg>
+                                        <span x-text="term"></span>
+                                    </a>
+                                    <button type="button" @click.stop="forget(term)" class="grid size-5 place-items-center rounded-full opacity-50 hover:bg-navy/10 hover:opacity-100" :aria-label="'حذف «' + term + '»'">
+                                        <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                                    </button>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
                 </template>
-                <template x-for="(b, i) in data.brands" :key="'b' + i">
-                    <a :href="b.url" data-suggest-link class="chip !py-1.5 text-xs font-bold" :class="active === data.categories.length + i && '!bg-deep !text-white'">
-                        <span>برند</span><span x-text="b.name"></span>
-                    </a>
+                <template x-if="recent.products.length">
+                    <div>
+                        <p class="px-2 pt-2 pb-1 text-xs font-bold text-muted">بازدیدهای اخیر شما</p>
+                        <template x-for="(p, i) in recent.products" :key="'r' + p.id">
+                            <a :href="p.url" data-suggest-link role="option" class="flex items-center gap-3 rounded-2xl p-2 transition hover:bg-cream"
+                               :class="active === recent.searches.length + i && 'bg-cream'">
+                                <span class="size-12 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-cream to-rose-100">
+                                    <template x-if="p.image"><img :src="p.image" alt="" class="size-full object-cover" loading="lazy" decoding="async"></template>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-sm font-bold text-navy" x-text="p.name"></span>
+                                    <span class="text-xs text-caramel-600" x-text="p.brand"></span>
+                                    <span x-show="!p.in_stock" class="ms-1 text-[11px] text-subtle">· ناموجود</span>
+                                </span>
+                                <span class="shrink-0 text-end" x-show="p.price">
+                                    <span x-show="p.old_price" class="block text-[11px] text-subtle line-through" x-text="p.old_price"></span>
+                                    <span class="text-xs font-black text-navy"><span x-text="p.price"></span> <span class="font-normal text-muted">تومان</span></span>
+                                </span>
+                            </a>
+                        </template>
+                    </div>
                 </template>
             </div>
         </template>
 
-        <template x-for="(p, i) in data.products" :key="'p' + i">
-            <a :href="p.url" data-suggest-link role="option" class="flex items-center gap-3 rounded-2xl p-2 transition hover:bg-cream"
-               :class="active === data.categories.length + data.brands.length + i && 'bg-cream'">
-                <span class="size-12 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-cream to-rose-100">
-                    <template x-if="p.image"><img :src="p.image" alt="" class="size-full object-cover" loading="lazy" decoding="async"></template>
-                </span>
-                <span class="min-w-0 flex-1">
-                    <span class="block truncate text-sm font-bold text-navy" x-text="p.name"></span>
-                    <span class="text-xs text-caramel-600" x-text="p.brand"></span>
-                    <span x-show="!p.in_stock" class="ms-1 text-[11px] text-subtle">· ناموجود</span>
-                </span>
-                <span class="shrink-0 text-end" x-show="p.price">
-                    <span x-show="p.old_price" class="block text-[11px] text-subtle line-through" x-text="p.old_price"></span>
-                    <span class="text-xs font-black text-navy"><span x-text="p.price"></span> <span class="font-normal text-muted">تومان</span></span>
-                </span>
-            </a>
-        </template>
+        <template x-if="mode === 'results'">
+            <div @click="$event.target.closest('a') && remember(q)">
+            <template x-if="data.categories.length || data.brands.length">
+                <div class="flex flex-wrap gap-1.5 px-2 pt-1 pb-2">
+                    <template x-for="(c, i) in data.categories" :key="'c' + i">
+                        <a :href="c.url" data-suggest-link class="chip !py-1.5 text-xs" :class="active === i && '!bg-deep !text-white'">
+                            <svg class="size-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+                            <span x-text="c.name"></span><span x-show="c.parent" class="text-subtle" x-text="'در ' + c.parent"></span>
+                        </a>
+                    </template>
+                    <template x-for="(b, i) in data.brands" :key="'b' + i">
+                        <a :href="b.url" data-suggest-link class="chip !py-1.5 text-xs font-bold" :class="active === data.categories.length + i && '!bg-deep !text-white'">
+                            <span>برند</span><span x-text="b.name"></span>
+                        </a>
+                    </template>
+                </div>
+            </template>
 
-        <p x-show="!data.products.length && !data.categories.length && !data.brands.length" class="px-4 py-5 text-center text-sm text-muted">
-            چیزی با «<span x-text="q"></span>» پیدا نشد.
-        </p>
-        <a :href="'{{ route('catalog.search') }}?q=' + encodeURIComponent(q.trim())"
-           class="mt-1 block rounded-2xl bg-navy/5 px-4 py-2.5 text-center text-sm font-bold text-navy hover:bg-deep hover:text-white">
-            همه‌ی نتایج «<span x-text="q.trim()"></span>»
-        </a>
+            <template x-for="(p, i) in data.products" :key="'p' + i">
+                <a :href="p.url" data-suggest-link role="option" class="flex items-center gap-3 rounded-2xl p-2 transition hover:bg-cream"
+                   :class="active === data.categories.length + data.brands.length + i && 'bg-cream'">
+                    <span class="size-12 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-cream to-rose-100">
+                        <template x-if="p.image"><img :src="p.image" alt="" class="size-full object-cover" loading="lazy" decoding="async"></template>
+                    </span>
+                    <span class="min-w-0 flex-1">
+                        <span class="block truncate text-sm font-bold text-navy" x-text="p.name"></span>
+                        <span class="text-xs text-caramel-600" x-text="p.brand"></span>
+                        <span x-show="!p.in_stock" class="ms-1 text-[11px] text-subtle">· ناموجود</span>
+                    </span>
+                    <span class="shrink-0 text-end" x-show="p.price">
+                        <span x-show="p.old_price" class="block text-[11px] text-subtle line-through" x-text="p.old_price"></span>
+                        <span class="text-xs font-black text-navy"><span x-text="p.price"></span> <span class="font-normal text-muted">تومان</span></span>
+                    </span>
+                </a>
+            </template>
+
+            <p x-show="!data.products.length && !data.categories.length && !data.brands.length" class="px-4 py-5 text-center text-sm text-muted">
+                چیزی با «<span x-text="q"></span>» پیدا نشد.
+            </p>
+            <a :href="'{{ route('catalog.search') }}?q=' + encodeURIComponent(q.trim())"
+               class="mt-1 block rounded-2xl bg-navy/5 px-4 py-2.5 text-center text-sm font-bold text-navy hover:bg-deep hover:text-white">
+                همه‌ی نتایج «<span x-text="q.trim()"></span>»
+            </a>
+            </div>
+        </template>
     </div>
 </div>

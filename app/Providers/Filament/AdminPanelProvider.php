@@ -14,6 +14,8 @@ use App\Core\Modules\ModuleRegistry;
 use App\Core\Settings\SiteSettings;
 use App\Filament\Auth\Login;
 use App\Filament\AvatarProviders\InitialsAvatarProvider;
+use App\Filament\Pages\SettingsPage;
+use App\Filament\Support\AdminSearch;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -23,6 +25,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -66,9 +69,18 @@ class AdminPanelProvider extends PanelProvider
             // the bell: low stock and other alerts for the staff (checked every minute)
             ->databaseNotifications()
             ->databaseNotificationsPolling('60s')
-            // SPA navigation: page changes swap only the content (no full reload of Filament's CSS/JS),
-            // and links are prefetched on hover so most clicks open instantly.
-            ->spa(hasPrefetching: true)
+            // SPA navigation: page changes swap only the content (no full reload of Filament's CSS/JS).
+            // On the live server links are also prefetched on hover so most clicks open instantly; not
+            // on a local dev server (php artisan serve has few workers: every hover would queue a
+            // whole page and make the real clicks wait).
+            ->spa(hasPrefetching: app()->isProduction())
+            // one search box for menu pages, every settings field and records (Ctrl/⌘ + K)
+            ->globalSearch(AdminSearch::class)
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->globalSearchFieldKeyBindingSuffix()
+            ->globalSearchDebounce('250ms')
+            // a settings result opens its tab and scrolls to the field (?tab=…&field=…)
+            ->renderHook(PanelsRenderHook::PAGE_END, fn () => view('filament.settings-jump'), scopes: SettingsPage::class)
             ->navigationGroups([
                 'فروش',
                 'ارتباط با مشتری',

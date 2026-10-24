@@ -15,7 +15,7 @@
             <div class="flex items-center gap-4">
                 <span class="text-5xl font-black text-navy">{{ PersianText::toPersianDigits(number_format($avg, 1)) }}</span>
                 <div>
-                    <div class="flex" aria-label="امتیاز {{ $avg }} از ۵">{!! $stars($avg, 'size-5') !!}</div>
+                    <div class="flex" role="img" aria-label="امتیاز {{ $avg }} از ۵">{!! $stars($avg, 'size-5') !!}</div>
                     <p class="mt-1 text-xs text-muted">از {{ PersianText::toPersianDigits($count) }} نظر</p>
                 </div>
             </div>

@@ -17,7 +17,7 @@
     @forelse ($reviews as $review)
         <article wire:key="rv-{{ $review->id }}" class="border-b border-line py-5 first:pt-0 last:border-0">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span class="flex" aria-label="امتیاز {{ $review->rating }} از ۵">{!! $stars($review->rating) !!}</span>
+                <span class="flex" role="img" aria-label="امتیاز {{ $review->rating }} از ۵">{!! $stars($review->rating) !!}</span>
                 @if ($review->title)<span class="font-bold text-navy">{{ $review->title }}</span>@endif
             </div>
             <p class="mt-2 text-sm leading-7 whitespace-pre-line text-muted">{{ $review->body }}</p>

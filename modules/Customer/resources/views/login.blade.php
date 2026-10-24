@@ -2,6 +2,7 @@
 @extends('layouts.app')
 
 @section('title', 'ورود یا ثبت‌نام')
+@section('meta_description', 'ورود یا ثبت‌نام در '.config('khaneh.store.name').' با شماره موبایل و کد تأیید پیامکی.')
 @section('robots', 'noindex, follow')
 @section('bare', '1')
 

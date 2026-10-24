@@ -28,7 +28,7 @@
                     <h1 class="mt-4 font-display text-5xl leading-tight sm:text-6xl">{{ $category->name }}</h1>
                 </div>
                 @if ($image = $category->media->first())
-                    <x-media.picture :media="$image" :alt="$category->name" sizes="144px" class="size-28 rotate-6 rounded-full border-2 border-[#141414] object-cover shadow-[4px_4px_0_#141414] sm:size-36" />
+                    <x-media.picture :media="$image" alt="" sizes="144px" class="size-28 rotate-6 rounded-full border-2 border-[#141414] object-cover shadow-[4px_4px_0_#141414] sm:size-36" />
                 @endif
             </div>
             @if ($category->children->isNotEmpty())

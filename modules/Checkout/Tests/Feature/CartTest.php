@@ -70,8 +70,8 @@ class CartTest extends TestCase
     {
         $html = $this->get('/')->assertOk()->getContent();
 
-        // header mini-cart (+ search box) only — cards use plain Alpine buttons
+        // header mini-cart (+ search box) only — cards use plain buttons run by one handler in app.js
         $this->assertLessThanOrEqual(3, substr_count($html, 'wire:snapshot'));
-        $this->assertStringContainsString("cart-add', { variantId: {$this->variant->id} }", $html);
+        $this->assertStringContainsString('data-quick-add="'.$this->variant->id.'"', $html);
     }
 }

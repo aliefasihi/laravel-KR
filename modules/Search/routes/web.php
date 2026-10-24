@@ -20,3 +20,8 @@ Route::get('search/suggest', SuggestController::class)
     ->withoutMiddleware([StartSession::class, ShareErrorsFromSession::class, VerifyCsrfToken::class, EncryptCookies::class, AddQueuedCookiesToResponse::class])
     ->middleware('throttle:120,1')
     ->name('search.suggest');
+
+Route::get('search/recent', [SuggestController::class, 'recent'])
+    ->withoutMiddleware([StartSession::class, ShareErrorsFromSession::class, VerifyCsrfToken::class, EncryptCookies::class, AddQueuedCookiesToResponse::class])
+    ->middleware('throttle:60,1')
+    ->name('search.recent');

@@ -55,7 +55,7 @@
                     <li>
                         <a href="{{ $category->url() }}" class="group block text-center">
                             <span class="arch-frame block aspect-[3/4] bg-cream">
-                                <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="160px" class="size-full object-cover transition duration-700 group-hover:scale-105" />
+                                <x-media.picture :media="$category->media->first()" alt="" sizes="160px" class="size-full object-cover transition duration-700 group-hover:scale-105" />
                             </span>
                             <span class="mt-3 block text-sm font-medium text-navy group-hover:text-rose">{{ $category->name }}</span>
                         </a>
@@ -92,7 +92,7 @@
                         <li class="w-24 shrink-0">
                             <a href="{{ $category->url() }}" class="block text-center">
                                 <span class="arch-frame block aspect-[3/4] bg-cream">
-                                    <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="96px" class="size-full object-cover" />
+                                    <x-media.picture :media="$category->media->first()" alt="" sizes="96px" class="size-full object-cover" />
                                 </span>
                                 <span class="mt-2 line-clamp-2 block text-xs font-medium text-navy">{{ $category->name }}</span>
                             </a>

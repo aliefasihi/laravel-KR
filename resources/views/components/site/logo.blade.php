@@ -12,7 +12,8 @@
     $img = 'h-11 w-auto max-w-[11rem] object-contain sm:h-12';
 @endphp
 
-<a href="{{ route('home') }}" {{ $attributes->class(['flex shrink-0 items-center gap-2.5']) }} aria-label="{{ $store['name'] }} — صفحه اصلی">
+<a href="{{ route('home') }}" {{ $attributes->class(['flex shrink-0 items-center gap-2.5']) }}>
+    {{-- no aria-label: the accessible name must contain the visible wordmark (PageSpeed «label-content-name-mismatch») --}}
     @if ($light && ($logoLight || $logo))
         <img src="{{ $logoLight ?? $logo }}" alt="{{ $store['name'] }}" class="{{ $img }}" width="160" height="48">
     @elseif ($logo)
@@ -26,7 +27,8 @@
         </span>
         <span class="leading-tight">
             <span @class(['block text-lg font-black', 'text-navy' => ! $light, 'text-white' => $light])>{{ $store['name'] }}</span>
-            <span @class(['block font-latin text-[10px] tracking-[0.18em] uppercase', 'text-caramel-600' => ! $light, 'text-caramel' => $light]) dir="ltr">{{ $store['name_en'] }}</span>
+            <span @class(['block font-latin text-[10px] tracking-[0.18em] uppercase', 'text-caramel-600' => ! $light, 'text-caramel' => $light]) dir="ltr" aria-hidden="true">{{ $store['name_en'] }}</span>
         </span>
     @endif
+    <span class="sr-only"> — صفحه اصلی</span>
 </a>

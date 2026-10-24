@@ -7,6 +7,7 @@
 
 namespace Modules\Search\Tests\Feature;
 
+use Modules\Catalog\Models\Product;
 use Modules\Search\Models\SearchTerm;
 
 class SearchPagesTest extends SearchTestCase
@@ -34,6 +35,23 @@ class SearchPagesTest extends SearchTestCase
 
         $this->assertSame('ریتون', $this->getJson('/search/suggest?q=riton')->json('brands.0.name'));
         $this->assertSame([], $this->getJson('/search/suggest?q=a')->json('products'));
+    }
+
+    public function test_recently_viewed_for_the_empty_search_box(): void
+    {
+        $ids = Product::query()->orderBy('id')->pluck('id')->take(2)->all();
+        $draft = Product::query()->whereKey($ids[1])->first();
+        $draft->update(['status' => Product::STATUS_DRAFT]);
+
+        $json = $this->getJson('/search/recent?ids='.$ids[1].','.$ids[0].',abc')->assertOk()
+            ->assertCookieMissing(config('session.cookie'))->json('products');
+        $this->assertCount(1, $json);                         // the draft is never shown
+        $this->assertSame($ids[0], $json[0]['id']);
+        $this->assertArrayHasKey('price', $json[0]);
+        $this->assertSame([], $this->getJson('/search/recent')->json('products'));
+
+        // the box knows where to fetch them, on every page that has it
+        $this->get('/')->assertOk()->assertSee('search\\/recent', false);
     }
 
     public function test_suggestions_do_not_start_a_session(): void

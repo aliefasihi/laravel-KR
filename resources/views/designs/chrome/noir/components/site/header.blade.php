@@ -86,7 +86,7 @@
             <div>
                 @foreach ($navCategories as $category)
                     <a href="{{ $category->url() }}" x-show="active === {{ $category->id }}" @if (! $loop->first) x-cloak @endif class="group relative block aspect-[4/5] overflow-hidden bg-cream">
-                        <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="320px" class="size-full object-cover opacity-80 transition duration-700 group-hover:scale-105 group-hover:opacity-100" />
+                        <x-media.picture :media="$category->media->first()" alt="" sizes="320px" class="size-full object-cover opacity-80 transition duration-700 group-hover:scale-105 group-hover:opacity-100" />
                         <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-5 pt-16 text-sm text-white">
                             <span class="block text-[11px] tracking-[0.25em] text-caramel">مجموعه</span>
                             <span class="mt-1 block font-display text-2xl font-semibold">{{ $category->name }}</span>

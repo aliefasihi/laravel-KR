@@ -46,7 +46,7 @@
     --color-cream: #221f38;
     --color-ink: #eef0f8;
     --color-muted: #a6aec6;
-    --color-subtle: #7b84a0;
+    --color-subtle: #8e96ae;
     --color-line: rgb(231 233 251 / 0.1);
     --shadow-glass: var(--shadow-glass-dark);
     --shadow-float: 0 18px 50px -20px rgb(0 0 0 / 0.8);
@@ -144,6 +144,9 @@
     .section-title .ghost {
         @apply pointer-events-none absolute -top-5 right-0 -z-10 font-latin text-4xl font-black tracking-widest whitespace-nowrap text-navy/[0.05] uppercase select-none sm:-top-7 sm:text-6xl;
         direction: ltr;
+    }
+    .section-title .ghost::before {
+        content: attr(data-ghost);
     }
 
     /* ── Chips & badges ────────────────────────────────────────── */

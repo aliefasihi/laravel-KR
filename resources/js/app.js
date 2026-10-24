@@ -3,7 +3,12 @@
  * نویسنده: علی فصیحی (Ali Fasihi)
  *
  * Alpine ships with Livewire; small UI behaviours are registered here.
+ *
+ * Livewire (with Alpine) is bundled into this file instead of the separate script Livewire would
+ * add at the end of <body>: this file is a deferred module, so nothing blocks the first paint
+ * (the layout prints the settings with @livewireScriptConfig). Filament's admin pages keep their own.
  */
+
 
 const toFa = (value) => String(value).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 window.toFa = toFa; // usable in Alpine expressions: x-text="toFa(count)"
@@ -123,6 +128,18 @@ document.addEventListener('alpine:init', () => {
         count: 0,
         sign: 1,
         init() {
+            // the copies (3× the cards) are only made once the rail comes near the screen:
+            // rails further down the page cost nothing while it loads
+            const track = this.$refs.track;
+            if (!('IntersectionObserver' in window)) return this.setup();
+            const near = new IntersectionObserver(([entry]) => {
+                if (!entry.isIntersecting) return;
+                near.disconnect();
+                this.setup();
+            }, { rootMargin: '300px 0px' });
+            near.observe(track);
+        },
+        setup() {
             const track = this.$refs.track;
             const items = [...track.children];
             // everything already fits on screen: a plain row, nothing to loop
@@ -264,27 +281,40 @@ document.addEventListener('alpine:init', () => {
     }));
 
     // Instant search: debounced fetch of /search/suggest, cached per term, keyboard navigation.
-    Alpine.data('searchBox', (initial = '', endpoint = '/search/suggest') => ({
+    // Focused while empty: «جستجوهای اخیر» (kept in this browser, «kr-searches») and «بازدیدهای اخیر»
+    // (ids saved by the RecentlyViewed module in «kr-recent», cards from /search/recent).
+    Alpine.data('searchBox', (initial = '', endpoint = '/search/suggest', recentEndpoint = '/search/recent') => ({
         q: initial,
         open: false,
+        mode: 'results', // 'results' | 'recent'
         loading: false,
         active: -1,
         data: { products: [], categories: [], brands: [] },
+        recent: { searches: [], products: [] },
+        recentLoaded: '',
         cache: new Map(),
         timer: null,
         controller: null,
+        init() {
+            // the results page (?q=…) counts as a search too
+            if (initial.trim().length >= 2) this.remember(initial);
+            // autofocused box (empty search page): it got focus before Alpine was ready
+            this.$nextTick(() => document.activeElement?.matches?.('input[name=q]') && this.$root.contains(document.activeElement) && this.focus());
+        },
         input() {
             clearTimeout(this.timer);
             const term = this.q.trim();
             if (term.length < 2) {
-                this.open = false;
-                return;
+                return term.length ? (this.open = false) : this.showRecent();
             }
             this.timer = setTimeout(() => this.fetch(term), 160);
         },
         focus() {
-            if (this.q.trim().length >= 2) {
-                this.cache.has(this.q.trim()) ? (this.open = true) : this.input();
+            const term = this.q.trim();
+            if (term.length >= 2) {
+                this.cache.has(term) ? this.show(term, this.cache.get(term)) : this.input();
+            } else {
+                this.showRecent();
             }
         },
         async fetch(term) {
@@ -312,8 +342,45 @@ document.addEventListener('alpine:init', () => {
         show(term, data) {
             if (term !== this.q.trim()) return; // a newer keystroke won
             this.data = data;
+            this.mode = 'results';
             this.active = -1;
             this.open = true;
+        },
+        read(key) {
+            try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; }
+        },
+        async showRecent() {
+            this.recent.searches = this.read('kr-searches').filter((t) => typeof t === 'string').slice(0, 6);
+            const ids = this.read('kr-recent').filter(Number.isInteger).slice(0, 6).join(',');
+            if (ids && ids !== this.recentLoaded) {
+                try {
+                    const response = await fetch(`${recentEndpoint}?ids=${ids}`, { headers: { Accept: 'application/json' } });
+                    if (response.ok) this.recent.products = (await response.json()).products ?? [];
+                    this.recentLoaded = ids;
+                } catch { /* offline: searches only */ }
+            } else if (!ids) {
+                this.recent.products = [];
+            }
+            if (this.q.trim().length >= 2) return; // the visitor started typing meanwhile
+            this.mode = 'recent';
+            this.active = -1;
+            this.open = this.recent.searches.length > 0 || this.recent.products.length > 0;
+        },
+        remember(term) {
+            term = term.trim().replace(/\s+/g, ' ').slice(0, 60);
+            if (term.length < 2) return;
+            const list = [term, ...this.read('kr-searches').filter((t) => typeof t === 'string' && t !== term)].slice(0, 8);
+            try { localStorage.setItem('kr-searches', JSON.stringify(list)); } catch { /* private mode */ }
+        },
+        forget(term = null) {
+            const list = term === null ? [] : this.read('kr-searches').filter((t) => t !== term);
+            try { localStorage.setItem('kr-searches', JSON.stringify(list)); } catch { /* private mode */ }
+            this.recent.searches = list.slice(0, 6);
+            this.open = this.recent.searches.length > 0 || this.recent.products.length > 0;
+        },
+        submit() {
+            this.remember(this.q);
+            this.open = false;
         },
         links() {
             return [...this.$root.querySelectorAll('[data-suggest-link]')];
@@ -445,15 +512,59 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
+// Product cards, one handler for the whole page (no Alpine component per card):
+//  - «افزودن به سبد»: [data-quick-add=variantId] → the header mini-cart (Livewire) adds it and answers
+//    with a «cart-added» event; the button shows a spinner, then a tick.
+//  - the second photo for mouse hover sits in a <template data-card-hover> until the first hover.
+const setIcon = (button, icon) => {
+    const use = button.querySelector('use');
+    use?.setAttribute('href', `#i-${icon}`);
+    use?.parentElement.classList.toggle('animate-spin', icon === 'spin');
+};
+document.addEventListener('click', (e) => {
+    const button = e.target.closest('[data-quick-add]');
+    if (!button || button.disabled) return;
+    button.disabled = true;
+    setIcon(button, 'spin');
+    window.Livewire?.dispatch('cart-add', { variantId: Number(button.dataset.quickAdd) });
+});
+window.addEventListener('cart-added', (e) => {
+    document.querySelectorAll(`[data-quick-add="${e.detail.variantId}"]`).forEach((button) => {
+        button.disabled = false;
+        setIcon(button, e.detail.added ? 'check' : 'cart');
+    });
+});
+document.addEventListener('pointerover', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const tpl = e.target.closest?.('.group')?.querySelector('template[data-card-hover]');
+    tpl?.replaceWith(tpl.content.cloneNode(true));
+}, { passive: true });
+
+// Extras that are not needed for the first paint wait until the page is up: the first touch,
+// scroll, key or mouse move — or a few idle seconds after load. The page becomes usable sooner
+// (PageSpeed: less main-thread work while it loads) and visitors don't notice the difference.
+const afterLoad = (run, wait = 3500) => {
+    let done = false;
+    const events = ['pointerdown', 'touchstart', 'scroll', 'keydown', 'mousemove'];
+    const go = () => {
+        if (done) return;
+        done = true;
+        events.forEach((e) => removeEventListener(e, go, true));
+        run();
+    };
+    events.forEach((e) => addEventListener(e, go, { capture: true, passive: true, once: true }));
+    const idle = () => setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(go, { timeout: 2000 }) : go()), wait);
+    document.readyState === 'complete' ? idle() : addEventListener('load', idle, { once: true });
+};
+
 // Occasions (Yalda, Nowruz…): their effects load only when one is on — a separate small file
 if (document.documentElement.dataset.occasion) {
-    const runOccasion = () => import('./occasion.js').then((m) => m.default());
-    document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', runOccasion) : runOccasion();
+    afterLoad(() => import('./occasion.js').then((m) => m.default()));
 }
 
 // Web push (notifications): only when the Push module is on, a separate small file
 if (document.getElementById('push-config') && 'serviceWorker' in navigator) {
-    import('./push.js').then((m) => m.default()).catch(() => {});
+    afterLoad(() => import('./push.js').then((m) => m.default()).catch(() => {}), 1500);
 }
 
 // Site chat: the panel's code loads on the first click of the chat button
@@ -464,5 +575,6 @@ document.getElementById('chat-launcher')?.addEventListener('click', (e) => {
 
 // Exit popup: only on pages that carry it (the ExitPopup module decides), a separate small file
 if (document.getElementById('exit-popup-config')) {
-    import('./exit-popup.js').then((m) => m.default());
+    afterLoad(() => import('./exit-popup.js').then((m) => m.default()), 1500);
 }
+

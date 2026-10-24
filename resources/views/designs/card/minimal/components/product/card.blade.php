@@ -11,9 +11,9 @@
 <article {{ $attributes->class(['group relative flex flex-col']) }}>
     <div class="relative aspect-[4/5] overflow-hidden rounded-2xl bg-cream/70">
         <x-media.picture :media="$images->first()" :alt="$product->name" :eager="$eager" :sizes="$sizes"
-                         :class="\Illuminate\Support\Arr::toCssClasses(['absolute inset-0 size-full object-cover transition duration-700', 'group-hover:opacity-0' => $images->count() > 1, 'group-hover:scale-[1.03]' => $images->count() < 2])" />
+                         :class="\Illuminate\Support\Arr::toCssClasses(['absolute inset-0 size-full object-cover transition duration-700', 'group-hover:scale-[1.03]' => true])" />
         @if ($images->count() > 1)
-            <x-media.picture :media="$images->last()" alt="" :sizes="$sizes" class="absolute inset-0 size-full object-cover opacity-0 transition duration-700 group-hover:opacity-100" />
+            <template data-card-hover><x-media.picture :media="$images->last()" alt="" :sizes="$sizes" class="absolute inset-0 size-full object-cover opacity-0 transition duration-700 group-hover:opacity-100" /></template>
         @endif
 
         @if ($variant && $variant->currentPrice() < $variant->price)

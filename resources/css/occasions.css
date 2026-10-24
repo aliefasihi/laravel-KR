@@ -122,9 +122,12 @@
         box-shadow: 0 6px 14px -8px var(--color-rose);
     }
 
-    .occ-badge svg {
+    /* the emblem comes from --occ-emblem (set once in the head), not an <svg> in every card */
+    .occ-badge::before {
+        content: '';
         width: 0.95rem;
         height: 0.95rem;
+        background: var(--occ-emblem) center / contain no-repeat;
     }
 
     /* the visitor's on/off button */

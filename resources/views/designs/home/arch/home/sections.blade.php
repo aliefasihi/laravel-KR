@@ -68,7 +68,7 @@
                     <li class="w-32 shrink-0 lg:w-auto">
                         <a href="{{ $category->url() }}" class="group block text-center">
                             <span class="arch-frame block aspect-[3/4] bg-cream ring-1 ring-line ring-offset-4 ring-offset-page transition group-hover:ring-rose/40">
-                                <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="160px" class="size-full object-cover transition duration-700 group-hover:scale-105" />
+                                <x-media.picture :media="$category->media->first()" alt="" sizes="160px" class="size-full object-cover transition duration-700 group-hover:scale-105" />
                             </span>
                             <span class="mt-4 block text-sm font-medium text-navy transition group-hover:text-rose">{{ $category->name }}</span>
                         </a>
@@ -179,11 +179,14 @@
                 @endforeach
             </div>
             @foreach ($showcase as $item)
-                <div x-show="tab === {{ $loop->index }}" @if (! $loop->first) x-cloak @endif role="tabpanel" class="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4">
+                {{-- other brands' products join the page only when their tab is opened (lighter first load) --}}
+                @if (! $loop->first)<template x-if="tab === {{ $loop->index }}">@endif
+                <div @if ($loop->first) x-show="tab === 0" @endif role="tabpanel" class="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4">
                     @foreach ($item['products'] as $product)
                         <x-product.card :product="$product" />
                     @endforeach
                 </div>
+                @if (! $loop->first)</template>@endif
             @endforeach
         </section>
     @endif

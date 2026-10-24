@@ -19,6 +19,7 @@ use Livewire\Livewire;
 use Modules\Chat\Filament\Resources\Conversations\Pages\ViewChatConversation;
 use Modules\Chat\Models\ChatConversation;
 use Modules\Chat\Models\ChatFaq;
+use Modules\Chat\Support\Assistant;
 use Modules\Crm\Models\FormSubmission;
 use Modules\Order\Livewire\Checkout;
 use Modules\Order\Models\Order;
@@ -78,6 +79,18 @@ class ChatTest extends ShopTestCase
         $replies = $this->say('سفارشم کجاست؟');
         $this->assertStringContainsString('سفارش '.$order->displayNumber(), $this->text($replies));
         $this->assertSame('جزئیات سفارش', $replies[0]['links'][0]['label']);
+    }
+
+    public function test_back_to_the_menu_from_anywhere(): void
+    {
+        $this->get('/')->assertSee('data-chat-menu', false);
+
+        $this->say('📦 پیگیری سفارش');                                 // now waiting for an order number…
+        $replies = $this->say(Assistant::MENU);                          // …«منو» leaves that step
+        $this->assertSame(Assistant::QUICK, $replies[0]['quick']);
+        $this->assertNull(ChatConversation::query()->sole()->state);
+
+        $this->assertSame(Assistant::QUICK, $this->say('بازگشت')[0]['quick']);   // typed, too
     }
 
     public function test_facts_ready_answers_products_and_unanswered(): void

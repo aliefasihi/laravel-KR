@@ -27,6 +27,7 @@
         @if ($posts->isEmpty())
             <p class="py-16 text-center font-bold text-muted">هنوز مطلبی منتشر نشده است.</p>
         @else
+            <h2 class="sr-only">مطالب</h2>
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ($posts as $post)
                     <x-post.card :post="$post" :class="$tiles[$loop->index % count($tiles)].' '.$tilts[$loop->index % count($tilts)]" />

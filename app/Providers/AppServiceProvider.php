@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Core\Settings\SiteSettings;
 use App\Filament\Support\Formats;
+use App\Filament\Support\TableExport;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
 
         // ->jalali(), ->faDigits(), ->toman(), ->labels() on admin table columns and infolist entries
         Formats::register();
+
+        // «خروجی» (Excel / CSV) on every admin list and relation manager
+        TableExport::register();
 
         // «تنظیمات عمومی» (name, logo, contact…) over config('khaneh.store')
         SiteSettings::register();

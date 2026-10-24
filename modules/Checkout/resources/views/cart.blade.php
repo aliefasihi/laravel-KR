@@ -2,6 +2,7 @@
 @extends('layouts.app')
 
 @section('title', 'سبد خرید')
+@section('meta_description', 'سبد خرید شما در '.config('khaneh.store.name').' — بررسی محصولات، کد تخفیف و ادامه‌ی خرید.')
 @section('robots', 'noindex, follow')
 
 @section('content')

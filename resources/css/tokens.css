@@ -19,17 +19,17 @@
     --color-surface: #ffffff;
     --color-glint: #ffffff;
     --color-page: #fbf7f5;
-    --color-ok: #1a9e4a;
+    --color-ok: #147939; /* ≥4.5:1 for small text (PageSpeed / WCAG AA) */
     --color-rose: #cc3366;
     --color-rose-600: #b32656;
     --color-rose-100: #fbe3ec;
     --color-caramel: #e4a96c;
-    --color-caramel-600: #cf8d4c;
+    --color-caramel-600: #955e28; /* text-safe bronze (AA on cream and white) */
     --color-caramel-100: #fbeedf;
     --color-cream: #fff5ed;
     --color-ink: #1c252e;
-    --color-muted: #66717f;
-    --color-subtle: #98a2ae;
+    --color-muted: #57616e;
+    --color-subtle: #646f7d; /* lightest grey that still passes AA on the page and glass */
     --color-line: rgb(35 40 79 / 0.09);
     /* extra accents used by some demos (themes.css) */
     --color-pop-teal: #13a89e;

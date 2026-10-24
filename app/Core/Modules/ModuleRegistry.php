@@ -172,10 +172,17 @@ class ModuleRegistry
     /** Cached routes/config/Filament components would still describe the old set of modules. */
     private function clearCaches(): void
     {
+        // an optimized site (php artisan optimize) is optimized again right away with the new set of modules
+        $wasOptimized = app()->configurationIsCached() || app()->routesAreCached();
+
         foreach (['route:clear', 'config:clear', 'view:clear'] as $command) {
             rescue(fn () => Artisan::call($command), report: false);
         }
         rescue(fn () => Artisan::call('filament:optimize-clear'), report: false);
+
+        if ($wasOptimized) {
+            rescue(fn () => Artisan::call('optimize'), report: false);
+        }
     }
 
     public static function file(): string

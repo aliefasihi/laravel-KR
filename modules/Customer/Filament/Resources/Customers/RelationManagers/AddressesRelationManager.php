@@ -53,7 +53,7 @@ class AddressesRelationManager extends RelationManager
                 TextColumn::make('recipient_name')->label('گیرنده'),
                 IconColumn::make('is_default')->label('پیش‌فرض')->boolean(),
             ])
-            ->headerActions([CreateAction::make()])
+            ->pushHeaderActions([CreateAction::make()])
             ->recordActions([EditAction::make(), DeleteAction::make()]);
     }
 }

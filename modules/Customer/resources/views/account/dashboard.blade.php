@@ -28,7 +28,7 @@
             <p class="text-sm leading-7 text-muted">{{ $address->line() }}</p>
             <p class="mt-1 text-xs text-subtle">گیرنده: {{ $address->recipient_name }} — <span dir="ltr">{{ \App\Core\Support\PersianText::toPersianDigits($address->recipient_mobile) }}</span></p>
         @else
-            <p class="text-sm text-muted">هنوز نشانی ثبت نکرده‌اید. <a href="{{ route('customer.addresses') }}" class="font-bold text-rose hover:underline">افزودن نشانی</a></p>
+            <p class="text-sm text-muted">هنوز نشانی ثبت نکرده‌اید. <a href="{{ route('customer.addresses') }}" class="font-bold text-rose underline underline-offset-4">افزودن نشانی</a></p>
         @endif
     </section>
 @endsection

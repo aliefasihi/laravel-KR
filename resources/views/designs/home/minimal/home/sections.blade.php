@@ -57,7 +57,7 @@
                 @foreach ($categories as $category)
                     <li>
                         <a href="{{ $category->url() }}" class="group relative block aspect-[4/5] overflow-hidden rounded-2xl bg-cream">
-                            <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="(min-width: 640px) 25vw, 50vw" class="size-full object-cover transition duration-700 group-hover:scale-105" />
+                            <x-media.picture :media="$category->media->first()" alt="" sizes="(min-width: 640px) 25vw, 50vw" class="size-full object-cover transition duration-700 group-hover:scale-105" />
                             <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-deep/70 to-transparent px-4 pt-12 pb-4 text-base font-black text-white">{{ $category->name }}</span>
                         </a>
                     </li>
@@ -186,12 +186,15 @@
                 </div>
             </div>
             @foreach ($showcase as $item)
-                <div x-show="tab === {{ $loop->index }}" @if (! $loop->first) x-cloak @endif role="tabpanel" class="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4">
+                {{-- other brands' products join the page only when their tab is opened (lighter first load) --}}
+                @if (! $loop->first)<template x-if="tab === {{ $loop->index }}">@endif
+                <div @if ($loop->first) x-show="tab === 0" @endif role="tabpanel" class="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4">
                     @foreach ($item['products'] as $product)
                         <x-product.card :product="$product" />
                     @endforeach
                     <a href="{{ $item['brand']->url() }}" class="col-span-full mx-auto rounded-full border border-navy px-6 py-2.5 text-sm font-bold text-navy transition hover:bg-navy hover:text-white">همه‌ی محصولات {{ $item['brand']->name_fa }}</a>
                 </div>
+                @if (! $loop->first)</template>@endif
             @endforeach
         </section>
     @endif

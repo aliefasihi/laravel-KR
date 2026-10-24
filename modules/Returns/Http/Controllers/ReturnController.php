@@ -18,9 +18,14 @@ class ReturnController
 {
     public function index()
     {
+        $customerId = Auth::guard('customer')->id();
+
         return view('returns::account.index', [
-            'requests' => ReturnRequest::query()->where('customer_id', Auth::guard('customer')->id())
+            'requests' => ReturnRequest::query()->where('customer_id', $customerId)
                 ->with(['order', 'items.orderItem'])->latest('id')->get(),
+            // orders that can be returned right now, so the customer doesn't have to hunt for them
+            'eligible' => Order::query()->where('customer_id', $customerId)->whereIn('status', ['shipped', 'completed'])
+                ->latest('id')->limit(30)->get()->filter(Returns::inWindow(...))->values(),
         ]);
     }
 

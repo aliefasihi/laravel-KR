@@ -10,7 +10,8 @@
 
 <div class="grid gap-10 lg:grid-cols-[16rem_1fr] [&>*]:min-w-0" x-data="{ sheet: false }" @keydown.escape.window="sheet = false">
     {{-- Filters --}}
-    <aside :class="sheet ? 'max-lg:fixed max-lg:inset-0 max-lg:z-[60] max-lg:flex max-lg:items-end' : 'max-lg:hidden'">
+    {{-- hidden on phones from the first paint (not only once Alpine runs): no layout shift --}}
+    <aside class="max-lg:hidden" :class="sheet ? 'max-lg:fixed max-lg:inset-0 max-lg:z-[60] max-lg:flex! max-lg:items-end' : ''">
         <div class="absolute inset-0 bg-navy/30 lg:hidden" @click="sheet = false" aria-hidden="true"></div>
         <form method="get" action="{{ $action }}" x-data="autoSubmit" @change="if (window.innerWidth >= 1024) submit()"
               class="relative max-h-[85vh] w-full space-y-7 overflow-y-auto rounded-t-[2.5rem] bg-cream p-6 lg:sticky lg:top-28 lg:max-h-none lg:rounded-[2rem]">
@@ -18,7 +19,8 @@
         </form>
     </aside>
 
-    <section aria-label="محصولات" class="space-y-10">
+    <section aria-labelledby="listing-products" class="space-y-10">
+        <h2 id="listing-products" class="sr-only">محصولات</h2>
         <div class="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-line pb-4 text-sm">
             <button type="button" @click="sheet = true" class="inline-flex items-center gap-2 rounded-full bg-deep px-4 py-2 text-white lg:hidden">
                 فیلترها

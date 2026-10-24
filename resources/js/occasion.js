@@ -1,7 +1,8 @@
 /**
  * Khaneh Romantic — Occasion effects: pieces drifting in from the sides of the page
  * (pomegranate seeds for Yalda, blossoms for Nowruz, sparks for Chaharshanbe-Suri, bats…).
- * Loaded only when an occasion is on (html[data-occasion]); a separate chunk, ~3 KB.
+ * Loaded only when an occasion is on (html[data-occasion]), after the page is up (first touch or a few
+ * idle seconds — see afterLoad in app.js); a separate chunk, ~3 KB.
  * Nothing moves for visitors who asked their device for less motion, while the tab is hidden,
  * or after they press the small «خاموش کردن افکت» button (remembered per occasion).
  * نویسنده: علی فصیحی (Ali Fasihi)
@@ -92,9 +93,17 @@ function start(config) {
     for (let i = 0; i < burst; i++) setTimeout(spawn, i * 90);
     let timer = setInterval(() => { if (!document.hidden) spawn(); }, every);
 
-    let frame = 0, running = true;
-    const tick = () => {
+    let frame = 0, running = true, last = 0, drawn = true;
+    const tick = (now) => {
         if (!running) return;
+        frame = requestAnimationFrame(tick);
+        if (mobile && now - last < 32) return;     // ~30fps on phones: drifting pieces look the same, half the work
+        last = now;
+        if (!pieces.length) {                       // nothing on screen: clear once, then idle until the next spawn
+            if (drawn) { ctx.clearRect(0, 0, width, height); drawn = false; }
+            return;
+        }
+        drawn = true;
         ctx.clearRect(0, 0, width, height);
         for (let i = pieces.length - 1; i >= 0; i--) {
             const p = pieces[i];
@@ -126,7 +135,6 @@ function start(config) {
             }
             ctx.restore();
         }
-        frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
 

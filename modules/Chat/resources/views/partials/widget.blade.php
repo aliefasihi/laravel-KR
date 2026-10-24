@@ -7,6 +7,7 @@
         'send' => route('chat.send', absolute: false),
         'token' => csrf_token(),
         'whatsapp' => \Modules\Chat\Support\Knowledge::whatsapp(),
+        'menu' => \Modules\Chat\Support\Assistant::MENU,
     ];
 @endphp
 <script type="application/json" id="chat-config">@json($config)</script>
@@ -35,6 +36,11 @@
                     <svg class="size-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
                 </a>
             @endif
+            {{-- back to the bot's menu from anywhere in the conversation --}}
+            <button type="button" class="inline-flex h-9 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-navy hover:bg-navy/5" data-chat-menu aria-label="بازگشت به منوی گفتگو">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+                منو
+            </button>
             <button type="button" class="grid size-9 place-items-center rounded-full text-muted hover:bg-navy/5" data-chat-close aria-label="بستن گفتگو">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
             </button>

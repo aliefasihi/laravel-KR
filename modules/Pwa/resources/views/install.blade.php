@@ -4,7 +4,7 @@
          class="glass !bg-surface/95 fixed inset-x-3 bottom-40 z-50 rounded-[var(--radius-glass)] p-4 shadow-2xl lg:inset-x-auto lg:bottom-6 lg:end-6 lg:w-96"
          style="margin-bottom: env(safe-area-inset-bottom)" role="dialog" aria-labelledby="pwa-title">
         <div class="flex items-start gap-3">
-            <img src="{{ \Modules\Pwa\Support\AppIcons::urls()['192'] }}" alt="" class="size-12 shrink-0 rounded-2xl shadow" width="48" height="48">
+            <img src="{{ \Modules\Pwa\Support\AppIcons::urls()['192'] }}" alt="" class="size-12 shrink-0 rounded-2xl shadow" width="48" height="48" loading="lazy" decoding="async">
             <div class="min-w-0 flex-1">
                 <p id="pwa-title" class="font-black text-navy">اپلیکیشن {{ \Modules\Pwa\Http\Controllers\PwaController::name() }}</p>
                 <p class="mt-1 text-sm leading-7 text-muted" x-show="! ios">نصب روی گوشی، بدون نوار مرورگر و با یک لمس از صفحه‌ی اصلی؛ بدون دانلود از استور.</p>

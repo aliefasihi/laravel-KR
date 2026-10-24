@@ -14,11 +14,14 @@
 
 @if ($faqs->isNotEmpty())
     @push('head')
-        <script type="application/ld+json">{!! json_encode([
+        @php
+            $faqSchema = [
             '@context' => 'https://schema.org',
             '@type' => 'FAQPage',
             'mainEntity' => $faqs->map(fn ($i) => ['@type' => 'Question', 'name' => $i['question'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $i['answer'] ?? '']])->values()->all(),
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+            ];
+        @endphp
+        <script type="application/ld+json">{!! json_encode($faqSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
     @endpush
 @endif
 

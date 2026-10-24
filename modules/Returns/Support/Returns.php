@@ -11,7 +11,8 @@
  *   the quantities back in stock and, for «کیف پول», the Loyalty module credits the wallet
  * The customer gets an SMS at each step (templates in تنظیمات ← مرجوعی; values RETURN, ORDER, AMOUNT, NOTE).
  * Returns are possible for shipped/completed orders within the window (7 days by default) after
- * delivery; a line can't be in two open requests, nor returned beyond what was bought.
+ * delivery; a line can't be in two open requests, nor returned beyond what was bought. The customer
+ * sees the button on the order page and in «سفارش‌های من», and the reason when it isn't available yet.
  */
 
 namespace Modules\Returns\Support;
@@ -40,12 +41,47 @@ final class Returns
         return max(1, (int) Settings::get('returns.window_days', 7));
     }
 
-    /** The day returns close for this order (from delivery, or shipping if never marked delivered). */
+    /**
+     * The day returns close for this order: from delivery, or shipping if never marked delivered; an
+     * order that is shipped/completed but carries neither date (imported, or the status was set by hand)
+     * counts from the day it was placed.
+     */
     public static function deadline(Order $order): ?Carbon
     {
-        $from = $order->completed_at ?? $order->shipped_at;
+        $from = $order->completed_at ?? $order->shipped_at
+            ?? (in_array($order->status, ['shipped', 'completed'], true) ? $order->created_at : null);
 
         return $from?->copy()->addDays(self::windowDays())->endOfDay();
+    }
+
+    /** Cheap check for lists (no queries): the order is in the return window. The request page checks the items. */
+    public static function inWindow(Order $order): bool
+    {
+        return in_array($order->status, ['shipped', 'completed'], true) && ($deadline = self::deadline($order)) && $deadline->isFuture();
+    }
+
+    /**
+     * Where this order stands for a return, for the customer's order page:
+     *   open — can ask now (until «deadline»); not_yet — not shipped yet; expired — the window has passed;
+     *   done — every item is already returned or in an open request; closed — cancelled/refunded/failed.
+     *
+     * @return array{state: string, deadline: ?Carbon, left: array<int, int>}
+     */
+    public function status(Order $order): array
+    {
+        $deadline = self::deadline($order);
+
+        if (! in_array($order->status, ['shipped', 'completed'], true)) {
+            $state = in_array($order->status, ['cancelled', 'refunded', 'failed'], true) ? 'closed' : 'not_yet';
+
+            return ['state' => $state, 'deadline' => null, 'left' => []];
+        }
+        if (! $deadline || $deadline->isPast()) {
+            return ['state' => 'expired', 'deadline' => $deadline, 'left' => []];
+        }
+        $left = $this->returnable($order);
+
+        return ['state' => $left ? 'open' : 'done', 'deadline' => $deadline, 'left' => $left];
     }
 
     /** @return array<int, int> order item id => quantity that can still be returned */

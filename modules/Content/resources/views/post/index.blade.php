@@ -19,6 +19,7 @@
         @if ($posts->isEmpty())
             <p class="glass rounded-[var(--radius-glass)] p-10 text-center text-muted">هنوز مطلبی منتشر نشده است.</p>
         @else
+            <h2 class="sr-only">مطالب</h2>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ($posts as $post)
                     <x-post.card :post="$post" />

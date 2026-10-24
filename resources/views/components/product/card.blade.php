@@ -3,8 +3,7 @@
 @php
     ['variant' => $variant, 'single' => $single] = $product->cardSummary();
     $images = $product->media->take(2);
-    $mainClass = 'absolute inset-0 size-full object-cover transition duration-700 '
-        .($images->count() > 1 ? 'group-hover:opacity-0' : 'group-hover:scale-[1.04]');
+    $mainClass = 'absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-[1.04]';
 @endphp
 
 <article {{ $attributes->class(['group glass relative flex flex-col rounded-[var(--radius-card)] p-2.5 transition duration-300 hover:-translate-y-1 hover:bg-surface/80 hover:shadow-[0_22px_44px_-24px_rgb(35_40_79/0.5)]']) }}>
@@ -13,7 +12,8 @@
                          sizes="(min-width: 1280px) 20vw, (min-width: 768px) 30vw, 50vw"
                          class="{{ $mainClass }}" />
         @if ($images->count() > 1)
-            <x-media.picture :media="$images->last()" alt="" sizes="(min-width: 1280px) 20vw, (min-width: 768px) 30vw, 50vw" class="absolute inset-0 size-full scale-[1.04] object-cover opacity-0 transition duration-700 group-hover:scale-100 group-hover:opacity-100" />
+            {{-- second photo for mouse hover: kept in a <template> (not downloaded, not in the DOM) until the first hover --}}
+            <template data-card-hover><x-media.picture :media="$images->last()" alt="" sizes="(min-width: 1280px) 20vw, (min-width: 768px) 30vw, 50vw" class="absolute inset-0 size-full scale-[1.04] object-cover opacity-0 transition duration-700 group-hover:scale-100 group-hover:opacity-100" /></template>
         @endif
 
         <div class="absolute inset-x-2 top-2 flex items-start justify-between">
@@ -21,7 +21,7 @@
                 <span class="flex flex-col items-start gap-1">
                     <span class="badge-off">{{ \App\Core\Support\PersianText::toPersianDigits(\App\Core\Support\Money::discountPercent($variant->price, $variant->currentPrice())) }}٪</span>
                     @if ($occ = config('khaneh.occasion'))
-                        <span class="occ-badge">{!! \Modules\Occasions\Support\Art::svg($occ['emblem']) !!}{{ $occ['badge'] }}</span>
+                        <span class="occ-badge">{{ $occ['badge'] }}</span>
                     @endif
                 </span>
             @else
@@ -38,7 +38,7 @@
             <span class="text-caramel-600">{{ $product->brand->name_fa }}</span>
             @if (($product->rating_count ?? 0) > 0 && \App\Core\Modules\Modules::enabled('Reviews'))
                 <span class="flex items-center gap-0.5 text-navy" title="امتیاز {{ number_format((float) $product->rating_avg, 1) }} از ۵">
-                    <svg class="size-3.5 text-caramel" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.8l2.5 5.2 5.7.8-4.1 4 1 5.7L10 14.8l-5.1 2.7 1-5.7-4.1-4 5.7-.8L10 1.8Z"/></svg>
+                    <svg class="size-3.5 text-caramel" aria-hidden="true"><use href="#i-star"/></svg>
                     {{ \App\Core\Support\PersianText::toPersianDigits(number_format((float) $product->rating_avg, 1)) }}
                 </span>
             @endif

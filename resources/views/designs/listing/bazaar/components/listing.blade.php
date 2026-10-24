@@ -9,7 +9,8 @@
 @endphp
 
 <div class="grid gap-4 lg:grid-cols-[17rem_1fr] [&>*]:min-w-0" x-data="{ sheet: false }" @keydown.escape.window="sheet = false">
-    <aside :class="sheet ? 'max-lg:fixed max-lg:inset-0 max-lg:z-[60] max-lg:flex' : 'max-lg:hidden'">
+    {{-- hidden on phones from the first paint (not only once Alpine runs): no layout shift --}}
+    <aside class="max-lg:hidden" :class="sheet ? 'max-lg:fixed max-lg:inset-0 max-lg:z-[60] max-lg:flex!' : ''">
         <div class="absolute inset-0 bg-black/40 lg:hidden" @click="sheet = false" aria-hidden="true"></div>
         <form method="get" action="{{ $action }}" x-data="autoSubmit" @change="if (window.innerWidth >= 1024) submit()"
               class="relative w-[20rem] max-w-[88vw] space-y-6 overflow-y-auto border-line bg-surface p-5 max-lg:h-full lg:sticky lg:top-36 lg:w-auto lg:max-w-none lg:rounded-2xl lg:border [&_.rounded-2xl]:!rounded-lg [&_.rounded-xl]:!rounded-md">
@@ -17,7 +18,8 @@
         </form>
     </aside>
 
-    <section aria-label="محصولات" class="min-w-0 space-y-4">
+    <section aria-labelledby="listing-products" class="min-w-0 space-y-4">
+        <h2 id="listing-products" class="sr-only">محصولات</h2>
         <div class="flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-2.5 text-[13px]">
             <button type="button" @click="sheet = true" class="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 font-bold text-navy lg:hidden">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>

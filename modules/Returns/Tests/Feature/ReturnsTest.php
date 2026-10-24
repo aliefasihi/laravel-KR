@@ -46,11 +46,14 @@ class ReturnsTest extends ShopTestCase
 
     public function test_full_flow(): void
     {
-        $this->get(route('customer.orders.show', $this->order))->assertDontSee('درخواست مرجوعی');   // not delivered yet
+        $this->get(route('customer.orders.show', $this->order))->assertDontSee('درخواست مرجوعی')   // not delivered yet…
+            ->assertSee('مرجوعی پس از ارسال سفارش فعال می‌شود');                                    // …and the customer is told why
+        $this->get(route('customer.orders'))->assertDontSee(route('customer.returns.create', $this->order));
         $this->get(route('customer.returns.create', $this->order))->assertNotFound();
 
         $this->deliver();
         $this->get(route('customer.orders.show', $this->order))->assertSee('درخواست مرجوعی');
+        $this->get(route('customer.orders'))->assertSee(route('customer.returns.create', $this->order));   // right in «سفارش‌های من» too
         $pan = $this->order->items->firstWhere('sku', 'GK-7710-STD');
         $stockBefore = $this->variant('GK-7710')->stock;
 
@@ -92,5 +95,25 @@ class ReturnsTest extends ShopTestCase
         $this->travel(8)->days();
         $this->assertSame([], app(Returns::class)->returnable($this->order->refresh()));
         $this->get(route('customer.returns.create', $this->order))->assertNotFound();
+    }
+
+    public function test_expired_window_is_explained(): void
+    {
+        $this->deliver();
+        $this->travel(8)->days();
+
+        $this->get(route('customer.orders.show', $this->order))->assertSee('مهلت مرجوعی')->assertDontSee('درخواست مرجوعی');
+        $this->get(route('customer.orders'))->assertDontSee(route('customer.returns.create', $this->order));
+    }
+
+    public function test_order_without_delivery_dates_counts_from_its_date(): void
+    {
+        // imported from WordPress / status set by hand: completed, but no shipped_at / completed_at
+        $this->order->forceFill(['status' => 'completed', 'shipped_at' => null, 'completed_at' => null])->save();
+        $this->assertNotSame([], app(Returns::class)->returnable($this->order->refresh()));
+        $this->get(route('customer.returns.create', $this->order))->assertOk();
+
+        $this->order->forceFill(['created_at' => now()->subDays(30)])->save();
+        $this->assertSame('expired', app(Returns::class)->status($this->order->refresh())['state']);
     }
 }

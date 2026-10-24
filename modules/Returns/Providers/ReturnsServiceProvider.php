@@ -27,6 +27,7 @@ class ReturnsServiceProvider extends ModuleServiceProvider
 
         Livewire::component('returns.form', ReturnForm::class);
         StorefrontHooks::add('account.order.actions', 'returns::partials.order-actions');
+        StorefrontHooks::add('account.orders.row', 'returns::partials.order-row');
 
         Settings::section(new SettingsSection(
             key: 'returns',

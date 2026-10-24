@@ -16,6 +16,7 @@
                     <h1 id="blog-title" class="text-xl font-black text-navy sm:text-2xl">مجله {{ config('khaneh.store.name') }}</h1>
                     <p class="mt-1 text-sm text-muted">راهنمای خرید، چیدمان و نگهداری لوازم خانه و آشپزخانه</p>
                 </div>
+                <h2 class="sr-only">مطالب</h2>
                 @forelse ($posts as $post)
                     <x-post.card :post="$post" />
                 @empty

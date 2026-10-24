@@ -29,7 +29,8 @@
     </div>
 
     {{-- Filters --}}
-    <aside :class="sheet ? 'max-lg:fixed max-lg:inset-0 max-lg:z-[60] max-lg:flex max-lg:items-end' : 'max-lg:hidden'">
+    {{-- hidden on phones from the first paint (not only once Alpine runs): no layout shift --}}
+    <aside class="max-lg:hidden" :class="sheet ? 'max-lg:fixed max-lg:inset-0 max-lg:z-[60] max-lg:flex! max-lg:items-end' : ''">
         <div class="absolute inset-0 bg-deep/30 backdrop-blur-sm lg:hidden" @click="sheet = false" aria-hidden="true"></div>
         <form method="get" action="{{ $action }}" x-data="autoSubmit" @change="if (window.innerWidth >= 1024) submit()"
               class="glass-strong relative max-h-[85vh] w-full space-y-6 overflow-y-auto rounded-t-[1.75rem] p-5 lg:sticky lg:top-40 lg:max-h-none lg:rounded-[var(--radius-glass)] lg:bg-surface/60">
@@ -38,7 +39,8 @@
     </aside>
 
     {{-- Results --}}
-    <section aria-label="محصولات" class="space-y-8">
+    <section aria-labelledby="listing-products" class="space-y-8">
+        <h2 id="listing-products" class="sr-only">محصولات</h2>
         @if ($products->isEmpty())
             <div class="glass flex flex-col items-center gap-4 rounded-[var(--radius-glass)] px-6 py-16 text-center">
                 <span class="grid size-16 place-items-center rounded-full bg-gradient-to-br from-rose-100 to-cream text-rose">

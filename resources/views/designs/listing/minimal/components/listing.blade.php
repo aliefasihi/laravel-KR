@@ -63,7 +63,8 @@
     </div>
 
     {{-- Results --}}
-    <section aria-label="محصولات" class="space-y-10">
+    <section aria-labelledby="listing-products" class="space-y-10">
+        <h2 id="listing-products" class="sr-only">محصولات</h2>
         @if ($products->isEmpty())
             <div class="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-line px-6 py-16 text-center">
                 <p class="font-bold text-navy">با این فیلترها محصولی پیدا نشد</p>

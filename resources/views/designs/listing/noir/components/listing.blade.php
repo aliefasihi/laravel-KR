@@ -47,7 +47,8 @@
         <input type="hidden" name="sort" value="{{ $filters['sort'] }}">
     </form>
 
-    <section aria-label="محصولات" class="space-y-14">
+    <section aria-labelledby="listing-products" class="space-y-14">
+        <h2 id="listing-products" class="sr-only">محصولات</h2>
         @if ($products->isEmpty())
             <div class="flex flex-col items-center gap-5 border border-line px-6 py-20 text-center">
                 <p class="font-display text-3xl font-semibold text-navy">چیزی با این فیلترها پیدا نشد</p>

@@ -98,7 +98,7 @@
                     <li>
                         <a href="{{ $category->url() }}" class="group flex flex-col items-center gap-3 text-center">
                             <span class="pop-frame block aspect-square w-full overflow-hidden rounded-full transition group-hover:-translate-y-1.5 group-hover:rotate-3 {{ $tiles[$loop->index % count($tiles)] }}">
-                                <x-media.picture :media="$category->media->first()" :alt="$category->name" sizes="160px" class="size-full object-cover" />
+                                <x-media.picture :media="$category->media->first()" alt="" sizes="160px" class="size-full object-cover" />
                             </span>
                             <span class="rounded-full border-2 border-[var(--pop-ink)] bg-surface px-3 py-1 text-sm font-black text-navy {{ $tilts[$loop->index % count($tilts)] }}">{{ $category->name }}</span>
                         </a>
@@ -190,11 +190,14 @@
                 </div>
             </div>
             @foreach ($showcase as $item)
-                <div x-show="tab === {{ $loop->index }}" @if (! $loop->first) x-cloak @endif role="tabpanel" class="grid grid-cols-2 gap-4 md:grid-cols-4">
+                {{-- other brands' products join the page only when their tab is opened (lighter first load) --}}
+                @if (! $loop->first)<template x-if="tab === {{ $loop->index }}">@endif
+                <div @if ($loop->first) x-show="tab === 0" @endif role="tabpanel" class="grid grid-cols-2 gap-4 md:grid-cols-4">
                     @foreach ($item['products'] as $product)
                         <x-product.card :product="$product" />
                     @endforeach
                 </div>
+                @if (! $loop->first)</template>@endif
             @endforeach
         </section>
     @endif

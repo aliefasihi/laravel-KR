@@ -8,7 +8,21 @@
 @section('account')
     <section class="glass rounded-[var(--radius-glass)] p-5 sm:p-7" aria-labelledby="returns-title">
         <h1 id="returns-title" class="text-xl font-black text-navy">مرجوعی‌ها</h1>
-        <p class="mt-1 text-sm text-muted">برای مرجوع کردن، از «سفارش‌ها» سفارش را باز کنید و «درخواست مرجوعی» را بزنید.</p>
+        <p class="mt-1 text-sm leading-7 text-muted">کالا را تا {{ PersianText::toPersianDigits(\Modules\Returns\Support\Returns::windowDays()) }} روز پس از تحویل می‌توانید مرجوع کنید.</p>
+        @if ($eligible->isNotEmpty())
+            <div class="mt-5 rounded-2xl bg-cream/60 p-4">
+                <p class="text-sm font-bold text-navy">سفارش‌هایی که الان می‌توانید مرجوع کنید</p>
+                <ul class="mt-3 space-y-2">
+                    @foreach ($eligible as $order)
+                        <li class="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface/80 px-3 py-2 ring-1 ring-line">
+                            <span class="text-sm text-navy">سفارش {{ $order->displayNumber() }}
+                                <span class="text-xs text-muted">· تا {{ Jalali::format(\Modules\Returns\Support\Returns::deadline($order)) }}</span></span>
+                            <a href="{{ route('customer.returns.create', $order) }}" class="btn-glass !px-4 !py-2 text-xs">درخواست مرجوعی</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         @forelse ($requests as $r)
             <article class="mt-5 rounded-2xl p-4 ring-1 ring-line">
                 <div class="flex flex-wrap items-center justify-between gap-2">

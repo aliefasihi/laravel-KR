@@ -18,6 +18,7 @@
         @if ($posts->isEmpty())
             <p class="py-16 text-center text-muted">هنوز مطلبی منتشر نشده است.</p>
         @else
+            <h2 class="sr-only">مطالب</h2>
             @php($lead = $posts->currentPage() === 1 ? $posts->first() : null)
             @if ($lead)
                 <a href="{{ $lead->url() }}" class="group grid items-center gap-6 md:grid-cols-[1.3fr_1fr] md:gap-10">
