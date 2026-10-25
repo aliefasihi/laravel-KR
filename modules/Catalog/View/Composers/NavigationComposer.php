@@ -19,11 +19,11 @@ class NavigationComposer
         // (StoreCache is flushed by model events), and resolved once per request for header + footer.
         $view->with('navCategories', once(fn () => StoreCache::remember('navigation', fn () => Category::query()
             ->whereNull('parent_id')
-            ->where('is_active', true)
+            ->visible()   // only categories with a published product (in them or below them)
             ->with([
                 'media',
-                'children' => fn ($q) => $q->where('is_active', true)->orderBy('sort')
-                    ->with(['children' => fn ($q) => $q->where('is_active', true)->orderBy('sort')]),
+                'children' => fn ($q) => $q->visible()->orderBy('sort')
+                    ->with(['children' => fn ($q) => $q->visible()->orderBy('sort')]),
             ])
             ->orderBy('sort')
             ->get(), maxTtl: 3600)));

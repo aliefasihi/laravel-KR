@@ -61,7 +61,7 @@ class SitemapController
     {
         $xml = StoreCache::remember('seo.sitemap.'.$type.'.'.($page ?? 0), fn () => match ($type) {
             'pages' => $this->urlset($this->pages()),
-            'categories' => $this->urlset(Category::query()->where('is_active', true)->orderBy('id')->get()
+            'categories' => $this->urlset(Category::query()->visible()->orderBy('id')->get()
                 ->map(fn (Category $c) => ['loc' => $c->url(), 'lastmod' => $c->updated_at])),
             'brands' => $this->urlset(Brand::query()->whereHas('products', fn ($q) => $q->active())->orderBy('id')->get()
                 ->map(fn (Brand $b) => ['loc' => $b->url(), 'lastmod' => $b->updated_at])),

@@ -65,9 +65,11 @@ class CategoryResource extends Resource
                         ->label('مسیر آدرس')
                         ->required()
                         ->unique(ignoreRecord: true)
-                        ->prefix('/'.config('khaneh.urls.category_prefix').'/')
-                        ->suffix('/')
-                        ->helperText('دقیقاً همان مسیر سایت فعلی (مثلاً ظروف-آشپزخانه/قابلمه). اگر بعداً عوضش کنی، آدرس قبلی خودکار ۳۰۱ می‌شود.'),
+                        ->regex('#^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$#')
+                        ->validationMessages(['regex' => 'فقط حروف کوچک انگلیسی، عدد و خط تیره؛ هر سطح با «/» (مثلاً tableware/servingware/nut-bowls).'])
+                        ->prefix(rtrim('/'.config('khaneh.urls.category_prefix'), '/').'/')
+                        ->extraInputAttributes(['dir' => 'ltr'])
+                        ->helperText('انگلیسی و کوتاه، با مسیر دسته‌ی والد (مثلاً tableware/servingware/nut-bowls). اگر بعداً عوضش کنی، آدرس قبلی خودکار ۳۰۱ می‌شود.'),
                     RichEditor::make('description')->label('توضیحات پایین صفحه')->columnSpanFull(),
                 ])->columns(2),
                 ...(Modules::enabled('Attributes') ? [CategoryAttributesSection::make()] : []),

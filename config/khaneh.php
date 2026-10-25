@@ -10,8 +10,9 @@
 return [
 
     'urls' => [
-        // Preserved 1:1 from WordPress (incl. trailing slash). Change only if the live site differs.
-        'category_prefix' => env('KHANEH_CATEGORY_PREFIX', 'product-category'),
+        // Categories live at the site root: /tableware/servingware/nut-bowls (empty prefix). Any other
+        // route wins over a category; a top-level category can't take a route's name (Category::saving).
+        'category_prefix' => trim((string) env('KHANEH_CATEGORY_PREFIX', ''), '/'),
 
         // New, ASCII-only URLs.
         'product_prefix' => 'p',     // /p/{brand}-{sku}

@@ -30,7 +30,7 @@ class DesignsTest extends SearchTestCase
         return [
             'home' => $this->get('/')->assertOk()->getContent(),
             'shop' => $this->get('/shop')->assertOk()->getContent(),
-            'category' => $this->getRaw('/product-category/kitchen/')->assertOk()->getContent(),
+            'category' => $this->get('/kitchen')->assertOk()->getContent(),
             'search' => $this->get('/search?q=ماهیتابه')->assertOk()->getContent(),
             'blog' => $this->get('/blog')->assertOk()->getContent(),
             'post' => $this->get('/blog/table-setting')->assertOk()->getContent(),

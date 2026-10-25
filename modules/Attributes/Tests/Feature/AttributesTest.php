@@ -106,26 +106,26 @@ class AttributesTest extends SearchTestCase
         $grey = $this->valueId($this->color, 'طوسی');
 
         // the kitchen page shows its template's filterable attributes (not «تعداد پارچه»), with counts
-        $this->getRaw('/product-category/kitchen/')->assertOk()
+        $this->get('/kitchen')->assertOk()
             ->assertSee('name="attr[material][]" value="'.$granite.'"', false)
             ->assertSee('name="attr[color][]" value="'.$grey.'"', false)
             ->assertDontSee('name="attr[pieces][]"', false)
             ->assertDontSee('value="'.$this->valueId($this->material, 'فلز').'"', false) // no product has it
             ->assertSeeInOrder(['گرانیت', '۲', 'سنگ', '۱']);
 
-        $this->getRaw('/product-category/kitchen/?attr[material][]='.$granite)->assertOk()
+        $this->get('/kitchen?attr[material][]='.$granite)->assertOk()
             ->assertSee('سرویس قابلمه ۱۰ پارچه گرانیتی')
             ->assertSee('تابه گرانیتی سایز ۲۸')
             ->assertDontSee('قندان سنگی طوسی مدل بلوط')
             ->assertSeeInOrder(['سنگ', '۱']); // other values of the same attribute keep their counts (OR within one attribute)
 
         // values of one attribute = OR, different attributes = AND
-        $this->getRaw('/product-category/kitchen/?attr[material][]='.$granite.'&attr[material][]='.$stone.'&attr[color][]='.$grey)->assertOk()
+        $this->get('/kitchen?attr[material][]='.$granite.'&attr[material][]='.$stone.'&attr[color][]='.$grey)->assertOk()
             ->assertSee('قندان سنگی طوسی مدل بلوط')
             ->assertDontSee('سرویس قابلمه ۱۰ پارچه گرانیتی');
 
         // values of another attribute or unknown slugs are ignored
-        $this->getRaw('/product-category/kitchen/?attr[material][]='.$grey.'&attr[nope][]=1')->assertOk()
+        $this->get('/kitchen?attr[material][]='.$grey.'&attr[nope][]=1')->assertOk()
             ->assertSee('سرویس قابلمه ۱۰ پارچه گرانیتی')
             ->assertSee('قندان سنگی طوسی مدل بلوط');
 

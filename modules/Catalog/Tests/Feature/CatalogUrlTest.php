@@ -37,22 +37,31 @@ class CatalogUrlTest extends TestCase
         ]);
     }
 
-    public function test_category_keeps_the_exact_wordpress_url(): void
+    public function test_categories_live_at_the_site_root(): void
     {
-        $category = Category::create(['name' => 'ظروف آشپزخانه', 'path' => 'ظروف-آشپزخانه']);
+        $parent = Category::create(['name' => 'سرو و پذیرایی', 'path' => 'tableware']);
+        $category = Category::create(['name' => 'آجیل‌خوری', 'path' => 'tableware/nut-bowls', 'parent_id' => $parent->id]);
 
-        $this->assertSame(url('product-category/%d8%b8%d8%b1%d9%88%d9%81-%d8%a2%d8%b4%d9%be%d8%b2%d8%ae%d8%a7%d9%86%d9%87').'/', $category->url());
-
-        $this->getRaw('/product-category/'.rawurlencode('ظروف-آشپزخانه').'/')->assertOk()->assertSee('ظروف آشپزخانه');
+        $this->assertSame(url('tableware/nut-bowls'), $category->url());
+        $this->get('/tableware/nut-bowls')->assertOk()->assertSee('آجیل‌خوری');
+        $this->get('/shop')->assertOk();                                 // the site's own routes come first
+        $this->get('/no-such-category')->assertNotFound();
     }
 
-    public function test_category_without_trailing_slash_redirects_once(): void
+    public function test_category_with_trailing_slash_redirects_once(): void
     {
-        $category = Category::create(['name' => 'قابلمه', 'path' => 'قابلمه']);
+        $category = Category::create(['name' => 'قابلمه', 'path' => 'kitchen']);
 
-        $this->getRaw('/product-category/'.rawurlencode('قابلمه'))
+        $this->getRaw('/kitchen/?sort=price')
             ->assertStatus(301)
-            ->assertHeader('Location', $category->url());
+            ->assertHeader('Location', $category->url().'?sort=price');
+    }
+
+    public function test_a_top_level_category_cannot_take_a_page_address(): void
+    {
+        $this->expectException(ValidationException::class);
+
+        Category::create(['name' => 'فروشگاه', 'path' => 'shop']);
     }
 
     public function test_changing_category_path_redirects_old_url_in_one_hop(): void

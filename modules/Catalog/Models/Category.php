@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Khaneh Romantic — Category (URL preserved 1:1 from WordPress)
+ * Khaneh Romantic — Category (URL: /{path} at the site root, e.g. /tableware/servingware/nut-bowls)
  * نویسنده: علی فصیحی (Ali Fasihi)
  */
 
@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Modules\Catalog\Events\CategoryUrlChanged;
 use Modules\Media\Concerns\HasMedia;
 
@@ -34,6 +36,11 @@ class Category extends Model
         static::saving(function (Category $category) {
             $category->path = trim($category->path, '/');
             $category->path_hash = UrlPath::hash($category->path);
+
+            $first = strtolower(explode('/', $category->path)[0]);
+            if (config('khaneh.urls.category_prefix') === '' && in_array($first, self::reservedSegments(), true)) {
+                throw ValidationException::withMessages(['path' => "«{$first}» نشانی یکی از صفحه‌های سایت است؛ نامک دیگری برای دسته انتخاب کنید."]);
+            }
         });
 
         static::updated(function (Category $category) {
@@ -110,15 +117,56 @@ class Category extends Model
         return $query->where('path_hash', UrlPath::hash($path));
     }
 
-    /** Site-relative path: /product-category/{encoded-path}/ */
+    /** Site-relative path: /{path} (or /{prefix}/{path} when a prefix is configured), no trailing slash. */
     public static function pathFor(string $path): string
     {
-        return '/'.config('khaneh.urls.category_prefix').'/'.UrlPath::encode($path).'/';
+        $prefix = (string) config('khaneh.urls.category_prefix');
+
+        return '/'.($prefix !== '' ? $prefix.'/' : '').UrlPath::encode($path);
     }
 
-    /** Exact WordPress URL: /product-category/{encoded-path}/ (trailing slash kept). */
     public function url(): string
     {
-        return url(config('khaneh.urls.category_prefix').'/'.UrlPath::encode($this->path)).'/';
+        return url(self::pathFor($this->path));
+    }
+
+    /**
+     * Ids of the active categories with a published product in them or below them: menus, the home page
+     * and the sitemap show only these (an empty category appears by itself once it gets a product).
+     */
+    public static function populatedIds(): array
+    {
+        return StoreCache::remember('categories.populated', function () {
+            $parents = self::query()->where('is_active', true)->pluck('parent_id', 'id')->all();
+            $direct = DB::table('category_product')
+                ->join('products', 'products.id', '=', 'category_product.product_id')
+                ->where('products.status', Product::STATUS_ACTIVE)->whereNull('products.deleted_at')
+                ->distinct()->pluck('category_product.category_id');
+
+            $ids = [];
+            foreach ($direct as $id) {
+                for ($node = $id; $node !== null && array_key_exists($node, $parents) && ! isset($ids[$node]); $node = $parents[$node]) {
+                    $ids[$node] = true;
+                }
+            }
+
+            return array_keys($ids);
+        });
+    }
+
+    public function scopeVisible(Builder $query): Builder
+    {
+        return $query->where('is_active', true)->whereIn('id', self::populatedIds());
+    }
+
+    /** First URL segments the site's own routes use (shop, blog, p, account…): no top-level category may take one. */
+    public static function reservedSegments(): array
+    {
+        return collect(app('router')->getRoutes()->getRoutes())
+            ->reject(fn ($route) => $route->isFallback)
+            ->map(fn ($route) => strtolower(explode('/', trim($route->uri(), '/'))[0]))
+            ->reject(fn (string $segment) => $segment === '' || str_starts_with($segment, '{'))
+            ->merge(['build', 'storage', 'vendor', 'livewire', 'filament', 'pwa', 'images', 'fonts', 'css', 'js'])
+            ->unique()->values()->all();
     }
 }

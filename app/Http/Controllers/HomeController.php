@@ -107,7 +107,7 @@ class HomeController
             'wideBanners' => Placement::liveFor('home.wide'),
             'special' => $special,
             'specialVariant' => $specialVariant,
-            'categories' => Category::query()->whereNull('parent_id')->where('is_active', true)
+            'categories' => Category::query()->whereNull('parent_id')->visible()
                 ->with('media')->orderBy('sort')->limit(8)->get(),
             'amazing' => $amazing,
             'hasSale' => $specialVariant !== null, // «تخفیف‌های امروز» button

@@ -103,7 +103,7 @@ class ReviewsTest extends ShopTestCase
         $this->assertStringContainsString('"aggregateRating":{"@type":"AggregateRating","ratingValue":4,"reviewCount":1', $html);
 
         // the stars on product cards (cached pages are refreshed)
-        $this->getRaw('/product-category/kitchen/')->assertSee('امتیاز 4.0 از ۵', false);
+        $this->get('/kitchen')->assertSee('امتیاز 4.0 از ۵', false);
     }
 
     public function test_verified_buyers_can_be_published_automatically(): void

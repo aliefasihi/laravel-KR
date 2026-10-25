@@ -83,7 +83,7 @@ class SearchPagesTest extends SearchTestCase
 
     public function test_category_page_shows_brand_counts(): void
     {
-        $this->getRaw('/product-category/kitchen/')
+        $this->get('/kitchen')
             ->assertOk()
             ->assertSee('سرویس قابلمه ۱۰ پارچه گرانیتی')
             ->assertSee('قندان سنگی طوسی مدل بلوط')
