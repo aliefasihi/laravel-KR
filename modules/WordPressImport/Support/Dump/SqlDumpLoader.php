@@ -403,8 +403,10 @@ class SqlDumpLoader
             default => $e[1],
         }, $body);
 
+        // NUL can't sit in an SQLite literal, and joining pieces with ||char(0)|| nests one expression
+        // per NUL (Elementor's log holds hundreds: «Expression tree is too large»): hex text instead
         return str_contains($text, "\0")
-            ? "'".str_replace("\0", "'||char(0)||'", $text)."'"
+            ? "CAST(X'".bin2hex(str_replace("''", "'", $text))."' AS TEXT)"
             : "'".$text."'";
     }
 

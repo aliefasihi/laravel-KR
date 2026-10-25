@@ -132,6 +132,23 @@ SQL;
         $this->assertSame('https://old.example', $source->fresh()->detected['site']['home']);
     }
 
+    public function test_values_with_hundreds_of_nul_bytes_load(): void
+    {
+        // Elementor's log: serialized objects whose protected properties are \0*\0name, hundreds per value
+        $value = str_repeat('s:10:"\\0*\\0level";', 1500);
+        $source = $this->source("CREATE TABLE `kr_options` (`option_id` bigint(20), `option_name` varchar(191), `option_value` longtext);\n"
+            ."INSERT INTO `kr_options` VALUES (1,'elementor_log','$value'),(2,'quoted','it\\'s a\\0b ''ok''');\n"
+            ."CREATE TABLE `kr_posts` (`ID` bigint(20), `post_title` text);\n");
+
+        Sources::load($source);
+        $this->assertTrue($source->fresh()->isReady(), (string) $source->fresh()->error);
+
+        $options = (new \PDO('sqlite:'.$source->fresh()->databasePath()))
+            ->query('SELECT option_name, option_value FROM kr_options')->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $this->assertSame(str_repeat("s:10:\"\0*\0level\";", 1500), $options['elementor_log']);
+        $this->assertSame("it's a\0b 'ok'", $options['quoted']);
+    }
+
     public function test_upload_detect_adjust_settings_and_import(): void
     {
         $wp = $this->site();
