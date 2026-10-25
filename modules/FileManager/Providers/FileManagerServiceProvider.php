@@ -45,8 +45,16 @@ class FileManagerServiceProvider extends ModuleServiceProvider
         );
 
         // Every saved product has its folder (and the folder knows its product).
+        // A product without a SKU has no address and so no folder yet; its first SKU files its images.
         Product::saved(function (Product $product) {
-            rescue(fn () => $this->app->make(FolderManager::class)->forProductModel($product), report: false);
+            if ($product->slug === null) {
+                return;
+            }
+            $folders = $this->app->make(FolderManager::class);
+            $folder = rescue(fn () => $folders->forProductModel($product), report: false);
+            if ($folder && $product->wasChanged('slug') && $product->getOriginal('slug') === null) {
+                $folders->fileImages($product, $folder);
+            }
         });
 
         // New SKU or brand → new slug → the folder follows (files moved, names kept).

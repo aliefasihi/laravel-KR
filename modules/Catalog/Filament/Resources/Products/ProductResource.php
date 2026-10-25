@@ -23,6 +23,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Icons\Heroicon;
@@ -74,12 +75,14 @@ class ProductResource extends Resource
                             ->preload(),
                         TextInput::make('sku')
                             ->label('کد کالا (SKU)')
-                            ->required()
+                            ->required(fn (Get $get) => $get('status') === Product::STATUS_ACTIVE)
+                            ->validationMessages(['required' => 'بدون کد کالا (SKU) محصول منتشر نمی‌شود.'])
                             ->maxLength(64)
                             ->regex('/[A-Za-z0-9]/')
                             ->unique(ignoreRecord: true)
+                            ->live(onBlur: true)
                             ->extraInputAttributes(['dir' => 'ltr'])
-                            ->helperText('آدرس محصول از برند + SKU ساخته می‌شود. SKU باید حرف یا عدد انگلیسی داشته باشد.'),
+                            ->helperText('آدرس محصول از برند + SKU ساخته می‌شود. SKU باید حرف یا عدد انگلیسی داشته باشد. تا SKU وارد نشود، محصول فقط پیش‌نویس می‌ماند.'),
                     ]),
                     Textarea::make('short_description')->label('خلاصه (کنار قیمت)')->rows(3),
                     RichEditor::make('description')->label('معرفی کامل'),
@@ -90,10 +93,11 @@ class ProductResource extends Resource
 
             Group::make([
                 Section::make('انتشار')->schema([
-                    Select::make('status')->label('وضعیت')->options(Product::STATUSES)->default(Product::STATUS_DRAFT)->required()->native(false),
+                    Select::make('status')->label('وضعیت')->options(Product::STATUSES)->default(Product::STATUS_DRAFT)->required()->native(false)->live(),
                     TextInput::make('slug')
                         ->label('آدرس')
                         ->prefix('/p/')
+                        ->placeholder('با واردکردن SKU ساخته می‌شود')
                         ->disabled()
                         ->dehydrated(false)
                         ->extraInputAttributes(['dir' => 'ltr'])

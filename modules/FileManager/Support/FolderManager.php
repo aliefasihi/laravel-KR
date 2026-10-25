@@ -72,6 +72,30 @@ class FolderManager
      * The product's slug changed (new SKU or brand): rename/move its folder and files so the
      * folder name always equals the product address.
      */
+    /**
+     * The product's images that are in no folder yet (imported, or uploaded before it had a SKU)
+     * join its folder; with $move the files go into it too, named {slug}-1.jpg, -2… Returns how many.
+     */
+    public function fileImages(Product $product, MediaFolder $folder, bool $move = true): int
+    {
+        $disk = Storage::disk(self::DISK);
+        $filed = 0;
+        foreach ($product->media()->whereNull('folder_id')->get() as $media) {
+            $update = ['folder_id' => $folder->id];
+            if ($move && $disk->exists($media->path)) {
+                $ext = pathinfo($media->path, PATHINFO_EXTENSION) ?: 'jpg';
+                for ($n = 1; $disk->exists($to = $folder->directory().'/'.basename($folder->path)."-{$n}.{$ext}"); $n++);
+                $disk->move($media->path, $to);
+                $update['path'] = $to;
+            }
+            // plain update: the file is the same, its WebP versions stay valid
+            Media::query()->whereKey($media->id)->update($update);
+            $filed++;
+        }
+
+        return $filed;
+    }
+
     public function relocateProduct(Product $product, string $oldSlug): void
     {
         $old = MediaFolder::query()

@@ -109,11 +109,16 @@ class ProductsStep extends Step
             return;
         }
         $report->count('products', $existing ? 'updated' : 'created');
+        if (trim((string) ($meta['_sku'] ?? '')) === '' && ! $existing?->sku) {
+            $report->count('products', 'no_sku');
+        }
         if ($report->dryRun) {
             return;
         }
 
-        $sku = $this->uniqueProductSku(trim((string) ($meta['_sku'] ?? '')) ?: 'WP'.$id, $existing?->id);
+        // no SKU in WooCommerce: a draft without an address until one is entered (never a made-up code)
+        $wpSku = trim((string) ($meta['_sku'] ?? ''));
+        $sku = $wpSku !== '' ? $this->uniqueProductSku($wpSku, $existing?->id) : null;
 
         DB::transaction(function () use ($post, $meta, $type, $variations, $variationMeta, $catTermIds, $brandId, $categories, $existing, $sku, $id, $report) {
             $product = $existing ?? new Product;
@@ -123,7 +128,7 @@ class ProductsStep extends Step
                 'name' => html_entity_decode($post->post_title),
                 'short_description' => $post->post_excerpt ?: null,
                 'description' => $post->post_content ?: null,
-                'status' => $post->post_status === 'publish' ? Product::STATUS_ACTIVE : Product::STATUS_DRAFT,
+                'status' => $post->post_status === 'publish' && ($existing?->sku ?: $sku) !== null ? Product::STATUS_ACTIVE : Product::STATUS_DRAFT,
                 'meta_title' => $this->seoText($meta['rank_math_title'] ?? $meta['_yoast_wpseo_title'] ?? null),
                 'meta_description' => ($d = $this->seoText($meta['rank_math_description'] ?? $meta['_yoast_wpseo_metadesc'] ?? null)) ? Str::limit($d, 490, '') : null,
             ]);
@@ -188,8 +193,9 @@ class ProductsStep extends Step
         $manage = ($meta['_manage_stock'] ?? 'no') === 'yes';
         $inStock = ($meta['_stock_status'] ?? 'instock') !== 'outofstock';
 
-        $sku = trim((string) ($meta['_sku'] ?? ''));
-        $sku = $variant->sku ?: $this->uniqueVariantSku($sku !== '' ? $sku : $meta['_parent_sku'].'-'.$legacyId, $variant->id);
+        // own SKU, else the product's (made unique: SKU, SKU-2…); a product without one leaves it empty
+        $sku = trim((string) ($meta['_sku'] ?? '')) ?: (string) ($meta['_parent_sku'] ?? '');
+        $sku = $variant->sku ?: ($sku !== '' ? $this->uniqueVariantSku($sku, $variant->id) : null);
 
         $variant->fill([
             'product_id' => $product->id,

@@ -68,7 +68,12 @@ class WordPressImportTest extends TestCase
 
         // variable product: options from pa_color, unmanaged stock
         $pan = Product::query()->where('legacy_post_id', 101)->with('variants')->sole();
-        $this->assertSame('goldkish-wp101', $pan->slug);
+        // no SKU in WooCommerce: a draft without an address, never a made-up code
+        $this->assertNull($pan->sku);
+        $this->assertNull($pan->slug);
+        $this->assertNull($pan->url());
+        $this->assertSame(Product::STATUS_DRAFT, $pan->status);
+        $this->assertSame(['GK-7710-G', null], $pan->variants->sortBy('legacy_post_id')->pluck('sku')->values()->all()); // a model keeps its own SKU
         $gold = $pan->variants->firstWhere('legacy_post_id', 102);
         $this->assertSame(['رنگ' => 'طلایی'], $gold->options);
         $this->assertSame(50, $gold->stock);
@@ -150,7 +155,7 @@ class WordPressImportTest extends TestCase
 
         // content links rewritten, old srcset removed
         $html = $simple->fresh()->description;
-        $this->assertStringContainsString('href="/p/goldkish-wp101"', $html);
+        $this->assertStringContainsString('href="'.parse_url($pan->primaryCategory()->url(), PHP_URL_PATH).'"', $html); // no address yet: its category
         $this->assertStringContainsString('src="'.$imagePath.'"', $html);
         $this->assertStringNotContainsString('srcset', $html);
         $this->assertStringContainsString('href="/p/goldkish-gk-1024"', Post::query()->where('legacy_post_id', 200)->value('body_html'));

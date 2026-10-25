@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Validation\ValidationException;
 use Modules\Catalog\Events\ProductUrlChanged;
 use Modules\Catalog\Support\ProductSlug;
 use Modules\Media\Concerns\HasMedia;
@@ -43,8 +44,19 @@ class Product extends Model
 
     protected static function booted(): void
     {
-        // The slug is always derived from brand + SKU; it is never set by hand.
+        // The slug is always derived from brand + SKU; it is never set by hand. No SKU: a draft
+        // without an address, which can't be published until the SKU is entered.
         static::saving(function (Product $product) {
+            $product->sku = filled($product->sku) ? trim((string) $product->sku) : null;
+            if ($product->sku === null) {
+                if ($product->status === self::STATUS_ACTIVE) {
+                    throw ValidationException::withMessages(['sku' => 'بدون کد کالا (SKU) محصول منتشر نمی‌شود؛ اول SKU را وارد کنید.']);
+                }
+                $product->slug = null;
+
+                return;
+            }
+
             $brand = $product->relationLoaded('brand') && $product->brand?->getKey() == $product->brand_id
                 ? $product->brand
                 : Brand::query()->findOrFail($product->brand_id);
@@ -52,8 +64,23 @@ class Product extends Model
             $product->slug = ProductSlug::make($brand->slug, $product->sku);
         });
 
+        // models saved before the product had a SKU take it now (first model = the product's SKU)
+        static::saved(function (Product $product) {
+            if ($product->sku !== null && $product->wasChanged('sku')) {
+                $product->variants()->whereNull('sku')->orderBy('id')->get()->each(function (ProductVariant $variant, int $i) use ($product) {
+                    $base = $i === 0 ? $product->sku : $product->sku.'-'.($i + 1);
+                    $sku = $base;
+                    for ($n = 2; ProductVariant::query()->where('sku', $sku)->exists(); $n++) {
+                        $sku = $base.'-'.$n;
+                    }
+                    $variant->update(['sku' => $sku]);
+                });
+            }
+        });
+
         static::updated(function (Product $product) {
-            if ($product->wasChanged('slug')) {
+            // a first SKU gives the product its first address: nothing to redirect from
+            if ($product->wasChanged('slug') && $product->getOriginal('slug') !== null && $product->slug !== null) {
                 ProductUrlChanged::dispatch(
                     $product->getKey(),
                     self::pathFor($product->getOriginal('slug')),
@@ -93,9 +120,10 @@ class Product extends Model
         return $query->where('status', self::STATUS_ACTIVE);
     }
 
-    public function url(): string
+    /** null while the product has no SKU (and so no address) */
+    public function url(): ?string
     {
-        return route('catalog.product', $this->slug);
+        return $this->slug === null ? null : route('catalog.product', $this->slug);
     }
 
     /**

@@ -44,7 +44,7 @@ final class Report
 
     public function summary(string $step): string
     {
-        $labels = ['created' => 'تازه', 'updated' => 'به‌روز', 'skipped' => 'رد شد', 'failed' => 'خطا'];
+        $labels = ['created' => 'تازه', 'updated' => 'به‌روز', 'skipped' => 'رد شد', 'failed' => 'خطا', 'no_sku' => 'بدون SKU (پیش‌نویس تا واردکردن SKU)'];
 
         return collect($this->counts[$step] ?? [])->map(fn ($n, $k) => ($labels[$k] ?? $k).': '.$n)->implode(' · ') ?: 'چیزی نبود';
     }

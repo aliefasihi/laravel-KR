@@ -14,10 +14,8 @@ namespace Modules\FileManager\Console;
 
 use App\Core\Support\StoreCache;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 use Modules\Catalog\Models\Product;
 use Modules\FileManager\Support\FolderManager;
-use Modules\Media\Models\Media;
 
 class FileManagerSyncCommand extends Command
 {
@@ -30,33 +28,14 @@ class FileManagerSyncCommand extends Command
         $count = 0;
         $filed = 0;
 
-        $this->withProgressBar(Product::query()->with(['brand', 'media'])->lazyById(100), function (Product $product) use ($folders, &$count, &$filed) {
+        $this->withProgressBar(Product::query()->whereNotNull('slug')->with(['brand', 'media'])->lazyById(100), function (Product $product) use ($folders, &$count, &$filed) {
             try {
                 $folder = $folders->forProductModel($product);
             } catch (\Throwable) {
                 return; // SKU without ASCII characters — fix the product first
             }
             $count++;
-
-            foreach ($product->media->whereNull('folder_id') as $media) {
-                $update = ['folder_id' => $folder->id];
-
-                if ($this->option('move')) {
-                    $disk = Storage::disk($media->disk);
-                    $n = 1;
-                    $ext = pathinfo($media->path, PATHINFO_EXTENSION) ?: 'jpg';
-                    while ($disk->exists($to = $folder->directory().'/'.basename($folder->path)."-{$n}.{$ext}")) {
-                        $n++;
-                    }
-                    if ($disk->exists($media->path)) {
-                        $disk->move($media->path, $to);
-                        $update['path'] = $to;
-                    }
-                }
-
-                Media::query()->whereKey($media->id)->update($update);
-                $filed++;
-            }
+            $filed += $folders->fileImages($product, $folder, $this->option('move'));
         });
 
         StoreCache::flush();

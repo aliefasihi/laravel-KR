@@ -103,7 +103,12 @@ class RedirectsStep extends Step
                 $posts = $this->wp->table('posts')->whereIn('ID', $products->pluck('legacy_post_id')->all())->get(['ID', 'post_name'])->keyBy('ID');
                 $terms = $withCategory ? $this->wp->objectTerms('product_cat', $products->pluck('legacy_post_id')->all()) : [];
                 foreach ($products as $product) {
-                    $to = $product->trashed() ? '/shop' : Product::pathFor($product->slug);
+                    // no SKU yet = no address: its category for now; run this step again once SKUs are in
+                    $to = match (true) {
+                        $product->trashed() => '/shop',
+                        $product->slug !== null => Product::pathFor($product->slug),
+                        default => parse_url((string) $product->primaryCategory()?->url(), PHP_URL_PATH) ?: '/shop',
+                    };
                     $name = rawurldecode((string) ($posts[$product->legacy_post_id]->post_name ?? ''));
                     if ($name !== '') {
                         if ($withCategory) {

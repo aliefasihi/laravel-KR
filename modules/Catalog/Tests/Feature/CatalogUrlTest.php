@@ -7,9 +7,11 @@
 namespace Modules\Catalog\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Modules\Catalog\Models\Brand;
 use Modules\Catalog\Models\Category;
 use Modules\Catalog\Models\Product;
+use Modules\Seo\Models\Redirect;
 use Tests\TestCase;
 
 class CatalogUrlTest extends TestCase
@@ -105,5 +107,29 @@ class CatalogUrlTest extends TestCase
         $this->product()->update(['status' => Product::STATUS_DRAFT]);
 
         $this->get('/p/goldkish-gk-1024')->assertNotFound();
+    }
+
+    public function test_without_a_sku_a_product_stays_a_draft_without_an_address(): void
+    {
+        $draft = Product::create(['brand_id' => $this->brand->id, 'sku' => ' ', 'name' => 'بشقاب', 'status' => Product::STATUS_DRAFT]);
+        $draft->variants()->createMany([['price' => 1000, 'stock' => 1], ['price' => 2000, 'stock' => 1]]);
+        $this->assertNull($draft->sku);
+        $this->assertNull($draft->slug);
+        $this->assertNull($draft->url());
+
+        try {
+            $draft->update(['status' => Product::STATUS_ACTIVE]);
+            $this->fail('published without a SKU');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('sku', $e->errors());
+        }
+        $this->assertSame(Product::STATUS_DRAFT, $draft->fresh()->status);
+
+        // the first SKU gives the address (by the same brand + SKU rule) and fills the models' SKUs
+        $draft->update(['sku' => 'GK-77', 'status' => Product::STATUS_ACTIVE]);
+        $this->assertSame('goldkish-gk-77', $draft->slug);
+        $this->assertSame(['GK-77', 'GK-77-2'], $draft->variants()->orderBy('id')->pluck('sku')->all());
+        $this->assertSame(0, Redirect::query()->count()); // nothing existed before: nothing to redirect
+        $this->get('/p/goldkish-gk-77')->assertOk();
     }
 }
