@@ -29,7 +29,7 @@
                 </span>
                 <span class="min-w-0">
                     <span class="block text-xs text-muted">{{ $card['label'] }}</span>
-                    <span class="mt-1 block truncate text-lg font-black text-navy group-hover:text-rose" @if ($card['ltr']) dir="ltr" style="text-align: right" @endif>{{ $card['value'] }}</span>
+                    <span @class(["mt-1 block font-black [overflow-wrap:anywhere] text-navy group-hover:text-rose", "text-[15px]" => mb_strlen($card['value']) > 18, "text-base sm:text-lg" => mb_strlen($card['value']) <= 18]) @if ($card['ltr']) dir="ltr" style="text-align: right" @endif>{{ $card['value'] }}</span>
                 </span>
             </{{ $tag }}>
         @endforeach

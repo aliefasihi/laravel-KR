@@ -3,8 +3,8 @@
     <x-site.lotus :stroke="0.6" class="pointer-events-none absolute -bottom-10 -start-8 -z-10 size-48 text-rose/15" />
     <div class="relative flex flex-wrap items-center justify-between gap-6">
         <div class="max-w-2xl">
-            <h2 class="text-2xl font-black text-[#23284f]">{{ $data['title'] ?? '' }}</h2>
-            @if (! empty($data['text']))<p class="mt-2 leading-8 text-[#4a4f6a]">{{ $data['text'] }}</p>@endif
+            <h2 class="text-2xl font-black text-navy">{{ $data['title'] ?? '' }}</h2>
+            @if (! empty($data['text']))<p class="mt-2 leading-8 text-muted">{{ $data['text'] }}</p>@endif
         </div>
         @if (! empty($data['button_url']))
             <a href="{{ $data['button_url'] }}" class="btn-rose">{{ $data['button_label'] ?: 'ادامه' }}</a>
