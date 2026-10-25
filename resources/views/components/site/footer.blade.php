@@ -49,7 +49,7 @@
             <div class="blob -top-24 end-1/4 size-72 text-rose/20" aria-hidden="true"></div>
             <div class="relative grid gap-10 px-6 py-10 sm:px-10 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
                 <div>
-                    <x-site.logo light />
+                    <x-site.logo light large />
                     <p class="mt-5 text-sm leading-7 text-white/70">{{ $store['about'] }}</p>
                     <div class="mt-5 flex text-white/80"><x-site.socials class="hover:!bg-white/10 hover:!text-caramel" /></div>
                 </div>

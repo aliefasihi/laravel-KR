@@ -36,7 +36,7 @@
         <div class="pop-frame overflow-hidden rounded-2xl bg-[#141414] text-[#fff4df]">
             <div class="grid gap-10 px-6 py-10 sm:px-10 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
                 <div>
-                    <x-site.logo light />
+                    <x-site.logo light large />
                     <p class="mt-5 text-sm leading-7 text-white/70">{{ $store['about'] }}</p>
                     <div class="mt-4 flex text-white"><x-site.socials class="hover:!bg-caramel hover:!text-[#141414]" /></div>
                 </div>

@@ -60,7 +60,7 @@
 
         <div class="grid items-center gap-6 rounded-2xl bg-cream p-5 sm:p-6 lg:grid-cols-[1fr_auto]">
             <div>
-                <x-site.logo />
+                <x-site.logo large />
                 <p class="mt-3 max-w-3xl text-[13px] leading-7 text-muted">{{ $store['about'] }}</p>
                 <p class="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[13px] text-muted">
                     <span>تلفن: <a href="tel:{{ $store['phone'] }}" class="font-bold text-navy" dir="ltr">{{ PersianText::toPersianDigits($store['phone']) }}</a></span>

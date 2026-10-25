@@ -37,7 +37,7 @@
 
         <div class="mx-auto grid max-w-7xl gap-10 px-4 pb-12 sm:px-6 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
             <div>
-                <x-site.logo light />
+                <x-site.logo light large />
                 <p class="mt-5 text-sm leading-7 text-white/65">{{ $store['about'] }}</p>
                 <div class="mt-4 flex text-white/75"><x-site.socials class="hover:!bg-white/10 hover:!text-white" /></div>
             </div>

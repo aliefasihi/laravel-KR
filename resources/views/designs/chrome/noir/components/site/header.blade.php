@@ -18,7 +18,7 @@
         @mouseleave="mega = false">
     {{-- the blur sits on its own layer: a backdrop-filter on <header> would trap the fixed overlays below inside the bar --}}
     <div class="absolute inset-0 -z-10 bg-page/85 frost" aria-hidden="true"></div>
-    <div class="mx-auto grid h-[4.5rem] max-w-[90rem] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-8">
+    <div class="mx-auto grid h-20 max-w-[90rem] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-8">
         {{-- start: menu --}}
         <div class="flex items-center gap-1">
             <button type="button" class="btn-icon -ms-2 text-navy lg:hidden" @click="menu = true" aria-label="باز کردن منو">

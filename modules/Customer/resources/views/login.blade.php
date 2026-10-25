@@ -8,7 +8,7 @@
 
 @section('content')
     <div class="mx-auto flex max-w-5xl items-center justify-between px-4 pt-5 sm:pt-8">
-        <x-site.logo class="lg:invisible" />
+        <x-site.logo large class="lg:invisible" />
         <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-bold text-muted transition hover:bg-surface/70 hover:text-rose">
             بازگشت به فروشگاه
             <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M12.8 15.8a.75.75 0 0 0 0-1.06L8.06 10l4.74-4.74a.75.75 0 1 0-1.06-1.06l-5.27 5.27a.75.75 0 0 0 0 1.06l5.27 5.27a.75.75 0 0 0 1.06 0Z"/></svg>
@@ -25,7 +25,7 @@
         <aside class="glass-navy relative hidden overflow-hidden rounded-[2rem] p-10 lg:flex lg:flex-col lg:justify-between" aria-hidden="true">
             <div class="blob -top-24 -start-20 size-80 text-rose/40"></div>
             <div class="blob -bottom-28 -end-16 size-96 text-caramel/30"></div>
-            <x-site.logo light class="relative" />
+            <x-site.logo light large class="relative" />
             <div class="relative space-y-4">
                 <p class="text-3xl leading-[1.5] font-black">یک حساب، برای <span class="text-caramel">همه‌ی خریدها</span></p>
                 <ul class="space-y-3 text-sm text-white/75">

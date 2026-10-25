@@ -22,7 +22,7 @@
 
         <div class="grid gap-12 py-14 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.3fr]">
             <div>
-                <x-site.logo light />
+                <x-site.logo light large />
                 <p class="mt-6 max-w-sm text-sm leading-7 text-muted">{{ $store['about'] }}</p>
                 <div class="mt-5 flex text-muted"><x-site.socials class="hover:!text-caramel" /></div>
             </div>
