@@ -30,6 +30,8 @@
                 <ul class="mt-4 space-y-3 text-[13px] text-muted">
                     <li><a href="{{ route('pages.about') }}" class="hover:text-deep">درباره ما</a></li>
                     <li><a href="{{ route('pages.contact') }}" class="hover:text-deep">تماس با ما</a></li>
+                    <li><a href="{{ route('pages.returns') }}" class="hover:text-deep">شرایط مرجوعی</a></li>
+                    <li><a href="{{ route('pages.privacy') }}" class="hover:text-deep">حریم خصوصی</a></li>
                     <li><a href="{{ route('content.blog') }}" class="hover:text-deep">مجله</a></li>
                 </ul>
             </div>

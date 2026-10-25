@@ -5,7 +5,7 @@
  * نویسنده: علی فصیحی (Ali Fasihi)
  *
  *   /sitemap.xml                 index → submit this one in Search Console / Bing Webmaster
- *   /sitemap-pages.xml           home, shop, blog, about, contact
+ *   /sitemap-pages.xml           home, shop, blog, about, contact, privacy, returns
  *   /sitemap-categories.xml      active product categories
  *   /sitemap-brands.xml          brands with products
  *   /sitemap-products-{n}.xml    published products, 1000 per file, with their main image
@@ -104,7 +104,7 @@ class SitemapController
     /** @return list<array{loc: string}> */
     private function pages(): array
     {
-        $routes = ['home', 'catalog.shop', 'content.blog', 'pages.about', 'pages.contact'];
+        $routes = ['home', 'catalog.shop', 'content.blog', 'pages.about', 'pages.contact', 'pages.privacy', 'pages.returns'];
 
         return array_values(array_filter(array_map(fn ($name) => app('router')->has($name) ? ['loc' => route($name)] : null, $routes)));
     }

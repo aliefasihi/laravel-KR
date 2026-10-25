@@ -160,6 +160,6 @@
             <span wire:loading.remove wire:target="place">ثبت سفارش و پرداخت</span>
             <span wire:loading wire:target="place">در حال ثبت…</span>
         </button>
-        <p class="text-center text-[11px] leading-5 text-subtle">با ثبت سفارش، <a href="{{ route('pages.about') }}" class="underline">قوانین فروشگاه</a> را می‌پذیرید.</p>
+        <p class="text-center text-[11px] leading-5 text-subtle">با ثبت سفارش، <a href="{{ route('pages.returns') }}" class="underline">شرایط خرید و مرجوعی</a> را می‌پذیرید.</p>
     </aside>
 </div>

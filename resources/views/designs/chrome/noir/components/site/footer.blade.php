@@ -41,6 +41,8 @@
                     <li><a href="{{ route('content.blog') }}" class="transition hover:text-navy">مجله</a></li>
                     <li><a href="{{ route('pages.about') }}" class="transition hover:text-navy">درباره ما</a></li>
                     <li><a href="{{ route('pages.contact') }}" class="transition hover:text-navy">تماس با ما</a></li>
+                    <li><a href="{{ route('pages.returns') }}" class="transition hover:text-navy">شرایط مرجوعی</a></li>
+                    <li><a href="{{ route('pages.privacy') }}" class="transition hover:text-navy">حریم خصوصی</a></li>
                     <li><a href="{{ route('checkout.cart') }}" class="transition hover:text-navy">سبد خرید</a></li>
                 </ul>
             </div>

@@ -59,6 +59,7 @@ return [
         'about-us' => '/aboutus', 'درباره-ما' => '/aboutus', 'contact-us' => '/contact-us', 'تماس-با-ما' => '/contact-us',
         'blog' => '/blog', 'مجله' => '/blog',
         'home' => '/', 'newsletter' => '/', 'account-security' => '/account', 'wishlist' => '/account/wishlist',
+        'returen-policy' => '/return-policy', 'privacy-policy' => '/privacy-policy',
         'compare' => '/compare', 'compare-2' => '/compare', 'yith-compare' => '/compare', 'ever-compare' => '/compare',
     ],
 

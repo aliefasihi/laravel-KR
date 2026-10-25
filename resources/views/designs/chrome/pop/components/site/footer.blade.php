@@ -55,6 +55,8 @@
                         <li><a href="{{ route('content.blog') }}" class="hover:text-caramel">مجله</a></li>
                         <li><a href="{{ route('pages.about') }}" class="hover:text-caramel">درباره ما</a></li>
                         <li><a href="{{ route('pages.contact') }}" class="hover:text-caramel">تماس با ما</a></li>
+                        <li><a href="{{ route('pages.returns') }}" class="hover:text-caramel">شرایط مرجوعی</a></li>
+                        <li><a href="{{ route('pages.privacy') }}" class="hover:text-caramel">حریم خصوصی</a></li>
                         <li><a href="{{ route('checkout.cart') }}" class="hover:text-caramel">سبد خرید</a></li>
                     </ul>
                 </div>

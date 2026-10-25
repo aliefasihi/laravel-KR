@@ -21,6 +21,8 @@ Route::get($prefix.'/{slug}', [PostController::class, 'show'])
 // Same slugs as the WordPress site (/aboutus/, /contact-us/ → one 301 to the slash-less form).
 Route::get('aboutus', [PageController::class, 'about'])->name('pages.about');
 Route::get('contact-us', [PageController::class, 'contact'])->name('pages.contact');
+Route::get('privacy-policy', [PageController::class, 'privacy'])->name('pages.privacy');
+Route::get('return-policy', [PageController::class, 'returns'])->name('pages.returns');
 
 Route::post('newsletter', NewsletterController::class)
     ->middleware('throttle:5,1')

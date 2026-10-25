@@ -22,7 +22,10 @@ class PagesEditorTest extends TestCase
 
     public function test_pages_start_with_the_old_content_and_are_edited_with_blocks(): void
     {
-        $this->get('/aboutus')->assertOk()->assertSee('درباره خانه رمانتیک')->assertSee('کالای اصل با ضمانت اصالت');
+        $this->get('/aboutus')->assertOk()->assertSee('بیش از ۲۰ سال همراه خانه‌های شیک و گرم')->assertSee('داستان ما')->assertSee('کالای اصل با ضمانت اصالت');
+        $this->get('/privacy-policy')->assertOk()->assertSee('حریم خصوصی شما')->assertSee('چه اطلاعاتی نگه می‌داریم');
+        $this->get('/return-policy')->assertOk()->assertSee('شرایط مرجوعی و بازگشت کالا')->assertSee('۷ روز')->assertSee('مراحل مرجوعی')
+            ->assertSee(route('pages.privacy'))->assertSee(route('pages.returns')); // footer links
         $this->get('/contact-us')->assertOk()->assertSee(config('khaneh.store.email'))->assertSee(config('khaneh.store.address'))->assertSee('پیام بگذارید');
 
         $this->actingAs(User::factory()->create(['is_admin' => true]));

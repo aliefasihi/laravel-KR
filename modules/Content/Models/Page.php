@@ -19,6 +19,8 @@ class Page extends Model
     public const SYSTEM = [
         'about' => ['pages.about', 'درباره ما'],
         'contact' => ['pages.contact', 'تماس با ما'],
+        'privacy' => ['pages.privacy', 'حریم خصوصی'],
+        'returns' => ['pages.returns', 'شرایط مرجوعی'],
     ];
 
     protected $guarded = ['id'];

@@ -1,4 +1,4 @@
-{{-- Editable page (About /aboutus, Contact /contact-us) | نویسنده: علی فصیحی (Ali Fasihi) --}}
+{{-- Editable page (About /aboutus, Contact /contact-us, Privacy /privacy-policy, Returns /return-policy) | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @extends('layouts.app')
 
 @php
@@ -26,7 +26,7 @@
 @endif
 
 @section('content')
-    <div class="mx-auto max-w-5xl space-y-6 px-3 pt-5 sm:px-4 sm:pt-6">
+    <div class="mx-auto max-w-5xl space-y-8 px-3 pt-5 sm:px-4 sm:pt-6">
         <x-breadcrumbs :items="[$page->title => null]" />
 
         @foreach ($blocks as $index => $block)

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Khaneh Romantic — Editable pages (URLs kept from WordPress: /aboutus, /contact-us)
+ * Khaneh Romantic — Editable pages: /aboutus, /contact-us (as on the old site), /privacy-policy, /return-policy
  * نویسنده: علی فصیحی (Ali Fasihi)
  */
 
@@ -20,5 +20,15 @@ class PageController
     public function contact(): View
     {
         return view('content::pages.show', ['page' => Page::forKey('contact')]);
+    }
+
+    public function privacy(): View
+    {
+        return view('content::pages.show', ['page' => Page::forKey('privacy')]);
+    }
+
+    public function returns(): View
+    {
+        return view('content::pages.show', ['page' => Page::forKey('returns')]);
     }
 }
