@@ -169,13 +169,16 @@ class ProductsStep extends Step
                 [(int) ($meta['_thumbnail_id'] ?? 0)],
                 array_map('intval', explode(',', (string) ($meta['_product_image_gallery'] ?? ''))),
             ))));
-            if ($attachmentIds && $product->media()->doesntExist()) {
+            // a re-run fills in images that failed to download last time (downloaded ones are reused)
+            $imported = $product->media()->whereNotNull('legacy_url_hash')->count();
+            if ($attachmentIds && ($imported < count($attachmentIds) || $product->media()->doesntExist())) {
                 $this->media->warm($attachmentIds);
                 $position = 0;
                 foreach ($attachmentIds as $attachmentId) {
                     if ($media = $this->media->fromAttachment($attachmentId, $report, $product->name)) {
-                        $product->media()->syncWithoutDetaching([$media->id => ['collection' => 'gallery', 'position' => $position++]]);
+                        $product->media()->syncWithoutDetaching([$media->id => ['collection' => 'gallery', 'position' => $position]]);
                     }
+                    $position++;
                 }
             }
 
