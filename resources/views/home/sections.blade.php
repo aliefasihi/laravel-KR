@@ -5,8 +5,9 @@
         {{-- ── Hero: full-width banner slider ────────────────────────────── --}}
         {{-- the old «پیشنهاد ویژه» card beside it is gone: it repeated the «شگفت‌انگیز» band below, was taller than
              the 12:5 banner (white gap under it) and pushed the banner down on phones (slower LCP) --}}
-        {{-- hero and category circles share the first screen: a small gap between them, not the page's section gap --}}
-        <div class="space-y-4 sm:space-y-5">
+        {{-- hero and category circles share the first screen: a small gap between them, not the page's section gap;
+             the next section (the «شگفت‌انگیز» band) sits the same distance below (the rail's pb-4 + this margin) --}}
+        <div class="mb-0 space-y-4 sm:mb-1 sm:space-y-5">
         <section aria-label="پیشنهادهای ویژه">
             @if ($heroBanners->isNotEmpty())
                 <div x-data="slider({{ $heroBanners->count() }})" @mouseenter="stop()" @mouseleave="play()" @focusin="stop()"
