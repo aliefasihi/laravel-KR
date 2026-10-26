@@ -1,0 +1,26 @@
+# Khaneh Romantic — MariaDB for a 4 GB server. /etc/mysql/mariadb.conf.d/60-khaneh.cnf
+# نویسنده: علی فصیحی (Ali Fasihi)
+[mysqld]
+# only this server can connect (no port open to the internet)
+bind-address = 127.0.0.1
+skip-name-resolve
+
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+# memory: the shop's data fits in the buffer pool many times over
+innodb_buffer_pool_size = 512M
+innodb_log_file_size = 128M
+innodb_flush_method = O_DIRECT
+innodb_flush_log_at_trx_commit = 1
+innodb_file_per_table = 1
+max_connections = 60
+tmp_table_size = 32M
+max_heap_table_size = 32M
+max_allowed_packet = 64M
+performance_schema = OFF
+
+# queries slower than 1 s are written here (look at it now and then)
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/slow.log
+long_query_time = 1

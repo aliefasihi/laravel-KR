@@ -1,0 +1,11 @@
+# Khaneh Romantic — PHP error/slow logs of the site's pool. /etc/logrotate.d/khaneh | نویسنده: علی فصیحی (Ali Fasihi)
+# (nginx's own logrotate already covers /var/log/nginx/*.log; Laravel keeps 14 daily files by itself)
+/var/log/php8.3-fpm-khaneh.*.log {
+    weekly
+    rotate 6
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}

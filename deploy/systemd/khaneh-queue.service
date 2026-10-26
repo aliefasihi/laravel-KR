@@ -1,0 +1,27 @@
+# Khaneh Romantic — queue worker (search index, WebP images, SMS, notifications…). /etc/systemd/system/khaneh-queue.service
+# نویسنده: علی فصیحی (Ali Fasihi)
+# After each deploy `php artisan queue:restart` makes it exit; systemd starts it again in the new release.
+[Unit]
+Description=Khaneh Romantic queue worker
+After=network-online.target mariadb.service redis-server.service
+Wants=network-online.target
+Requires=redis-server.service
+
+[Service]
+User=khaneh
+Group=khaneh
+WorkingDirectory=/srv/khanehromantic/current
+ExecStart=/usr/bin/php artisan queue:work redis --sleep=1 --tries=3 --timeout=240 --max-time=3600 --memory=192
+Restart=always
+RestartSec=3
+KillSignal=SIGTERM
+TimeoutStopSec=300
+MemoryMax=512M
+Nice=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

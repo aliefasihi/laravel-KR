@@ -1,0 +1,23 @@
+# Khaneh Romantic — scheduler (unpaid orders, price updates in search, OTP clean-up, bot, push…). Replaces the cron line.
+# /etc/systemd/system/khaneh-scheduler.service | نویسنده: علی فصیحی (Ali Fasihi)
+[Unit]
+Description=Khaneh Romantic scheduler
+After=network-online.target mariadb.service redis-server.service
+Wants=network-online.target
+
+[Service]
+User=khaneh
+Group=khaneh
+WorkingDirectory=/srv/khanehromantic/current
+ExecStart=/usr/bin/php artisan schedule:work
+Restart=always
+RestartSec=5
+MemoryMax=384M
+Nice=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+# Khaneh Romantic — fail2ban: block IPs that keep guessing SSH. /etc/fail2ban/jail.local
+# نویسنده: علی فصیحی (Ali Fasihi)
+[DEFAULT]
+bantime  = 1h
+findtime = 10m
+maxretry = 5
+backend  = systemd
+banaction = ufw
+
+[sshd]
+enabled = true
+port    = __SSH_PORT__
+
+# an IP banned 3 times in a day is banned for a week
+[recidive]
+enabled  = true
+backend  = auto
+logpath  = /var/log/fail2ban.log
+bantime  = 1w
+findtime = 1d
+maxretry = 3

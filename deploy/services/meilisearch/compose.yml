@@ -1,0 +1,19 @@
+# Meilisearch (search engine) on this server, later (guide, section 18). /srv/services/meilisearch/compose.yml
+# نویسنده: علی فصیحی (Ali Fasihi)
+# Reachable only from this server (127.0.0.1:7700); the shop talks to it directly. Pin the version on purpose.
+name: meilisearch
+
+services:
+  meilisearch:
+    image: getmeili/meilisearch:${MEILI_VERSION:-v1.15}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7700:7700"
+    environment:
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_MAX_INDEXING_MEMORY: 256Mb
+    volumes:
+      - ./data:/meili_data
+    mem_limit: 512m

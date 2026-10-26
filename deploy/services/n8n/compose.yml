@@ -1,0 +1,37 @@
+# n8n on this server, later (guide, section 18). /srv/services/n8n/compose.yml | نویسنده: علی فصیحی (Ali Fasihi)
+#
+#   cd /srv/services/n8n && docker compose up -d
+#
+# Reachable only from this server (127.0.0.1:5678); nginx puts it on https://n8n.khanehromantic.com.
+# Its data lives in ./data, its own SQLite database — nothing shared with the shop.
+name: n8n
+
+services:
+  n8n:
+    # pin a version (https://github.com/n8n-io/n8n/releases) instead of «latest», and change it on purpose
+    image: n8nio/n8n:${N8N_VERSION:-latest}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      N8N_HOST: ${N8N_DOMAIN}
+      N8N_PROTOCOL: https
+      N8N_PORT: "5678"
+      WEBHOOK_URL: https://${N8N_DOMAIN}/
+      N8N_PROXY_HOPS: "1"
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_RUNNERS_ENABLED: "true"
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: "168"
+      GENERIC_TIMEZONE: Asia/Tehran
+      TZ: Asia/Tehran
+    volumes:
+      - ./data:/home/node/.n8n
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5

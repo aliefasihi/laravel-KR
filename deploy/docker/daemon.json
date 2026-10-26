@@ -1,0 +1,13 @@
+{
+  "registry-mirrors": [
+    "https://docker.arvancloud.ir",
+    "https://docker-mirror.liara.ir",
+    "https://docker.mobinhost.com",
+    "https://docker.iranserver.com"
+  ],
+  "ip": "127.0.0.1",
+  "log-driver": "local",
+  "log-opts": { "max-size": "10m", "max-file": "3" },
+  "live-restore": true,
+  "default-address-pools": [ { "base": "172.30.0.0/16", "size": 24 } ]
+}

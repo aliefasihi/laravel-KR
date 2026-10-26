@@ -1,0 +1,11 @@
+# Khaneh Romantic — runs khaneh-backup.service every night at about 03:30 (server time). | نویسنده: علی فصیحی (Ali Fasihi)
+[Unit]
+Description=Nightly Khaneh Romantic backup
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

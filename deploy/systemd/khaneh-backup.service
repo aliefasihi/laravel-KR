@@ -1,0 +1,11 @@
+# Khaneh Romantic — nightly backup (database + uploads + .env). /etc/systemd/system/khaneh-backup.service
+# نویسنده: علی فصیحی (Ali Fasihi)
+[Unit]
+Description=Khaneh Romantic backup
+After=mariadb.service
+
+[Service]
+Type=oneshot
+ExecStart=/srv/khanehromantic/bin/backup.sh
+Nice=10
+IOSchedulingClass=idle
