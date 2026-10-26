@@ -1,18 +1,19 @@
 {{-- Content: journal index | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @extends('layouts.app')
 
-@section('title', 'مجله '.config('khaneh.store.name'))
-@section('meta_description', 'راهنمای خرید، نگهداری و ایده‌های چیدمان لوازم آشپزخانه، سرو و پذیرایی و دکوراسیون خانه.')
-@section('canonical', route('content.blog').($posts->currentPage() > 1 ? '?page='.$posts->currentPage() : ''))
+@section('title', $blogTitle)
+@section('meta_description', $blogDescription)
+@section('canonical', $blogUrl)
 
 @section('content')
     <div class="mx-auto max-w-7xl space-y-8 px-3 pt-5 sm:px-4 sm:pt-6">
-        <x-breadcrumbs :items="['مجله' => null]" />
+        <x-breadcrumbs :items="$blogCrumbs" />
+        @include('content::post.categories')
 
         <header class="glass relative isolate overflow-hidden rounded-[var(--radius-glass)] px-6 py-10 text-center sm:px-10">
             <div class="blob-duo -top-24 start-1/3 -z-10 size-80" aria-hidden="true"></div>
             <p class="font-latin text-xs font-bold tracking-[0.3em] text-caramel-600 uppercase" dir="ltr">Romantic Journal</p>
-            <h1 class="mt-3 text-3xl font-black text-navy sm:text-4xl">مجله {{ config('khaneh.store.name') }}</h1>
+            <h1 class="mt-3 text-3xl font-black text-navy sm:text-4xl">@if ($category) {{ $category->name }} @else مجله {{ config('khaneh.store.name') }} @endif</h1>
             <p class="mx-auto mt-3 max-w-xl leading-8 text-muted">ایده‌های چیدمان، راهنمای خرید و نکته‌های نگهداری برای خانه‌ای گرم‌تر.</p>
         </header>
 

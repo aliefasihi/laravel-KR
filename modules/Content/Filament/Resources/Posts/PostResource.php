@@ -71,6 +71,7 @@ class PostResource extends Resource
             Group::make([
                 Section::make('انتشار')->schema([
                     Select::make('status')->label('وضعیت')->options(self::STATUSES)->default(Post::STATUS_DRAFT)->required()->native(false),
+                    Select::make('post_category_id')->label('دسته‌ی مجله')->relationship('category', 'name')->preload()->native(false),
                     DateTimePicker::make('published_at')->label('زمان انتشار')->default(now())
                         ->helperText('مقاله‌ی منتشرشده تا این زمان روی سایت نمایش داده نمی‌شود.'),
                 ]),

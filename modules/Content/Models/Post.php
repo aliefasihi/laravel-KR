@@ -10,6 +10,7 @@ namespace Modules\Content\Models;
 use App\Core\Concerns\FlushesStoreCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Media\Concerns\HasMedia;
 
 class Post extends Model
@@ -30,6 +31,11 @@ class Post extends Model
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_PUBLISHED)->where('published_at', '<=', now());
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(PostCategory::class, 'post_category_id');
     }
 
     public function url(): string

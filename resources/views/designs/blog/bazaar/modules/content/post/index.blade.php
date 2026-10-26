@@ -2,18 +2,19 @@
      a shop box) | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @extends('layouts.app')
 
-@section('title', 'مجله '.config('khaneh.store.name'))
-@section('meta_description', 'راهنمای خرید، نگهداری و ایده‌های چیدمان لوازم آشپزخانه، سرو و پذیرایی و دکوراسیون خانه.')
-@section('canonical', route('content.blog').($posts->currentPage() > 1 ? '?page='.$posts->currentPage() : ''))
+@section('title', $blogTitle)
+@section('meta_description', $blogDescription)
+@section('canonical', $blogUrl)
 
 @section('content')
     <div class="mx-auto max-w-[88rem] space-y-4 px-3 pt-4 sm:px-5">
-        <x-breadcrumbs :items="['مجله' => null]" class="[&_ol]:!border-0 [&_ol]:!bg-transparent [&_ol]:!px-0 [&_ol]:!shadow-none" />
+        <x-breadcrumbs :items="$blogCrumbs" class="[&_ol]:!border-0 [&_ol]:!bg-transparent [&_ol]:!px-0 [&_ol]:!shadow-none" />
+        @include('content::post.categories')
 
         <div class="grid gap-4 lg:grid-cols-[1fr_20rem] [&>*]:min-w-0">
             <section class="space-y-3" aria-labelledby="blog-title">
                 <div class="rounded-2xl border border-line bg-surface p-4 sm:p-5">
-                    <h1 id="blog-title" class="text-xl font-black text-navy sm:text-2xl">مجله {{ config('khaneh.store.name') }}</h1>
+                    <h1 id="blog-title" class="text-xl font-black text-navy sm:text-2xl">@if ($category) {{ $category->name }} @else مجله {{ config('khaneh.store.name') }} @endif</h1>
                     <p class="mt-1 text-sm text-muted">راهنمای خرید، چیدمان و نگهداری لوازم خانه و آشپزخانه</p>
                 </div>
                 <h2 class="sr-only">مطالب</h2>

@@ -14,6 +14,10 @@ $prefix = config('khaneh.urls.blog_prefix');
 
 Route::get($prefix, [PostController::class, 'index'])->name('content.blog');
 
+Route::get($prefix.'/category/{slug}', [PostController::class, 'category'])
+    ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')
+    ->name('content.blog.category');
+
 Route::get($prefix.'/{slug}', [PostController::class, 'show'])
     ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')
     ->name('content.post');

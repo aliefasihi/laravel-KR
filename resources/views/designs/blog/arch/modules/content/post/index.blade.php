@@ -1,17 +1,18 @@
 {{-- Content: journal index — «طاق»: alternating rows, an arch photo beside each story | نویسنده: علی فصیحی (Ali Fasihi) --}}
 @extends('layouts.app')
 
-@section('title', 'مجله '.config('khaneh.store.name'))
-@section('meta_description', 'راهنمای خرید، نگهداری و ایده‌های چیدمان لوازم آشپزخانه، سرو و پذیرایی و دکوراسیون خانه.')
-@section('canonical', route('content.blog').($posts->currentPage() > 1 ? '?page='.$posts->currentPage() : ''))
+@section('title', $blogTitle)
+@section('meta_description', $blogDescription)
+@section('canonical', $blogUrl)
 
 @section('content')
     <div class="mx-auto max-w-5xl px-4 pt-6 sm:px-6">
-        <x-breadcrumbs :items="['مجله' => null]" class="[&_ol]:!border-0 [&_ol]:!bg-transparent [&_ol]:!px-0" />
+        <x-breadcrumbs :items="$blogCrumbs" class="[&_ol]:!border-0 [&_ol]:!bg-transparent [&_ol]:!px-0" />
+        @include('content::post.categories')
 
         <header class="py-14 text-center">
             <p class="text-sm text-sage">مجله‌ی {{ config('khaneh.store.name') }}</p>
-            <h1 class="mt-4 text-5xl font-extralight text-navy sm:text-6xl">یادداشت‌هایی از خانه</h1>
+            <h1 class="mt-4 text-5xl font-extralight text-navy sm:text-6xl">@if ($category) {{ $category->name }} @else یادداشت‌هایی از خانه @endif</h1>
             <p class="mx-auto mt-5 max-w-lg leading-8 text-muted">ایده‌های چیدمان، راهنمای خرید و نکته‌های نگهداری؛ آرام و بی‌عجله.</p>
         </header>
 

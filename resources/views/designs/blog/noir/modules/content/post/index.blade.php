@@ -7,17 +7,18 @@
     $offset = ($posts->currentPage() - 1) * $posts->perPage();
 @endphp
 
-@section('title', 'مجله '.config('khaneh.store.name'))
-@section('meta_description', 'راهنمای خرید، نگهداری و ایده‌های چیدمان لوازم آشپزخانه، سرو و پذیرایی و دکوراسیون خانه.')
-@section('canonical', route('content.blog').($posts->currentPage() > 1 ? '?page='.$posts->currentPage() : ''))
+@section('title', $blogTitle)
+@section('meta_description', $blogDescription)
+@section('canonical', $blogUrl)
 
 @section('content')
     <div class="mx-auto max-w-6xl px-5 pt-8 sm:px-8">
-        <x-breadcrumbs :items="['مجله' => null]" class="[&_ol]:!border-0 [&_ol]:!bg-transparent [&_ol]:!px-0" />
+        <x-breadcrumbs :items="$blogCrumbs" class="[&_ol]:!border-0 [&_ol]:!bg-transparent [&_ol]:!px-0" />
+        @include('content::post.categories')
 
         <header class="py-16 text-center">
             <p class="font-latin text-[11px] tracking-[0.5em] text-caramel uppercase" dir="ltr">The Journal</p>
-            <h1 class="mt-4 font-display text-6xl font-semibold text-navy sm:text-7xl">مجله</h1>
+            <h1 class="mt-4 font-display text-6xl font-semibold text-navy sm:text-7xl">@if ($category) {{ $category->name }} @else مجله @endif</h1>
             <div class="noir-rule mx-auto my-7 w-56" aria-hidden="true"><span class="size-1.5 rotate-45 bg-caramel"></span></div>
             <p class="mx-auto max-w-lg leading-8 text-muted">ایده‌های چیدمان، راهنمای خرید و نکته‌های نگهداری؛ برای خانه‌ای که با سلیقه چیده می‌شود.</p>
         </header>

@@ -25,6 +25,7 @@ use Modules\Catalog\Models\Brand;
 use Modules\Catalog\Models\Category;
 use Modules\Catalog\Models\Product;
 use Modules\Content\Models\Post;
+use Modules\Content\Models\PostCategory;
 
 class SitemapController
 {
@@ -106,7 +107,16 @@ class SitemapController
     {
         $routes = ['home', 'catalog.shop', 'content.blog', 'pages.about', 'pages.contact', 'pages.privacy', 'pages.returns'];
 
-        return array_values(array_filter(array_map(fn ($name) => app('router')->has($name) ? ['loc' => route($name)] : null, $routes)));
+        $pages = array_values(array_filter(array_map(fn ($name) => app('router')->has($name) ? ['loc' => route($name)] : null, $routes)));
+
+        // magazine categories that have a published article
+        if (class_exists(PostCategory::class) && app('router')->has('content.blog.category')) {
+            foreach (PostCategory::query()->whereHas('posts', fn ($q) => $q->published())->orderBy('sort')->get() as $category) {
+                $pages[] = ['loc' => $category->url(), 'lastmod' => $category->updated_at];
+            }
+        }
+
+        return $pages;
     }
 
     private function urlset(iterable $urls): string
