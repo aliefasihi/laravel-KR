@@ -10,6 +10,7 @@ use Modules\Bundles\Providers\BundlesServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
 use Modules\Chat\Providers\ChatServiceProvider;
 use Modules\Checkout\Providers\CheckoutServiceProvider;
+use Modules\Collections\Providers\CollectionsServiceProvider;
 use Modules\Comments\Providers\CommentsServiceProvider;
 use Modules\Compare\Providers\CompareServiceProvider;
 use Modules\Content\Providers\ContentServiceProvider;
@@ -87,6 +88,7 @@ return [
         TrackingServiceProvider::class,
         BulkEditServiceProvider::class,
         CompareServiceProvider::class,
+        CollectionsServiceProvider::class,
         QuestionsServiceProvider::class,
         ReturnsServiceProvider::class,
         WholesaleServiceProvider::class,

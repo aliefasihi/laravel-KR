@@ -5,6 +5,7 @@
     $store = config('khaneh.store');
     $links = [
         ['label' => 'فروشگاه', 'url' => route('catalog.shop'), 'active' => request()->routeIs('catalog.shop')],
+        ...(\App\Core\Modules\Modules::enabled('Collections') ? [['label' => 'کالکشن‌ها', 'url' => route('collections.index'), 'active' => request()->routeIs('collections.*')]] : []),
         ['label' => 'مجله', 'url' => route('content.blog'), 'active' => request()->routeIs('content.*')],
         ['label' => 'درباره ما', 'url' => route('pages.about'), 'active' => request()->routeIs('pages.about')],
         ['label' => 'تماس', 'url' => route('pages.contact'), 'active' => request()->routeIs('pages.contact')],

@@ -8,6 +8,7 @@
         ['label' => 'خانه', 'url' => route('home'), 'active' => request()->routeIs('home')],
         ['label' => 'فروشگاه', 'url' => route('catalog.shop'), 'active' => request()->routeIs('catalog.shop')],
         ['label' => 'تخفیف‌ها', 'url' => route('catalog.shop', ['sale' => 1]), 'active' => false],
+        ...(\App\Core\Modules\Modules::enabled('Collections') ? [['label' => 'کالکشن‌ها', 'url' => route('collections.index'), 'active' => request()->routeIs('collections.*')]] : []),
         ['label' => 'مجله', 'url' => route('content.blog'), 'active' => request()->routeIs('content.*')],
         ['label' => 'تماس', 'url' => route('pages.contact'), 'active' => request()->routeIs('pages.contact')],
     ];

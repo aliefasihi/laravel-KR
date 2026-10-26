@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
 use Modules\Catalog\Models\Brand;
 use Modules\Catalog\Models\Category;
 use Modules\Catalog\Models\Product;
+use Modules\Collections\Models\Collection;
 use Modules\Content\Models\Post;
 use Modules\Content\Models\PostCategory;
 
@@ -113,6 +114,12 @@ class SitemapController
         if (class_exists(PostCategory::class) && app('router')->has('content.blog.category')) {
             foreach (PostCategory::query()->whereHas('posts', fn ($q) => $q->published())->orderBy('sort')->get() as $category) {
                 $pages[] = ['loc' => $category->url(), 'lastmod' => $category->updated_at];
+            }
+        }
+
+        if (app('router')->has('collections.show')) {
+            foreach (Collection::query()->visible()->orderBy('sort')->get() as $collection) {
+                $pages[] = ['loc' => $collection->url(), 'lastmod' => $collection->updated_at];
             }
         }
 
