@@ -1,5 +1,9 @@
 {{-- Home sections (rendered once, served from StoreCache) | نویسنده: علی فصیحی (Ali Fasihi) --}}
 {{-- Nothing per-visitor may go in here: no CSRF fields, no session, no Livewire components. --}}
+    {{-- full-width hero (تنظیمات ← طرح‌های سایت ← بنر اصلی): edge to edge, outside the page container --}}
+    @php($wideHero = ($heroStyle ?? 'card') === 'wide' && $heroBanners->isNotEmpty())
+    @includeWhen($wideHero, 'home.partials.hero-wide')
+
     <div class="mx-auto max-w-7xl space-y-20 px-3 pt-4 sm:px-4 sm:pt-5">
 
         {{-- ── Hero: full-width banner slider ────────────────────────────── --}}
@@ -8,6 +12,7 @@
         {{-- hero and category circles share the first screen: a small gap between them, not the page's section gap;
              the next section (the «شگفت‌انگیز» band) sits the same distance below (the rail's pb-4 + this margin) --}}
         <div class="mb-0 space-y-4 sm:mb-1 sm:space-y-5">
+        @unless ($wideHero)
         <section aria-label="پیشنهادهای ویژه">
             @if ($heroBanners->isNotEmpty())
                 <div x-data="slider({{ $heroBanners->count() }})" @mouseenter="stop()" @mouseleave="play()" @focusin="stop()"
@@ -54,6 +59,7 @@
             @endif
 
         </section>
+        @endunless
 
         @storefrontHook('home.after_hero')
 

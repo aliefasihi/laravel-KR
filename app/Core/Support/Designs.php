@@ -53,6 +53,9 @@ final class Designs
         'demo6' => ['label' => 'دمو ۶ — بازار', 'description' => 'فروشگاهی و پرمحصول: جستجوی بزرگ، منوی دسته‌ها کنار اسلایدر، شبکه‌ی فشرده؛ برای کاتالوگ بزرگ.', 'slots' => ['theme' => 'bazaar', 'chrome' => 'bazaar', 'home' => 'bazaar', 'listing' => 'bazaar', 'card' => 'bazaar', 'product' => 'bazaar', 'blog' => 'bazaar']],
     ];
 
+    /** hero banner of the glass home page (demo 1): the framed glass card, or full width like Digikala */
+    public const HEROES = ['card' => 'قاب‌دار شیشه‌ای', 'wide' => 'تمام‌عرض (شبیه دیجی‌کالا)'];
+
     /** browser bar colour on phones, per palette: [light, dark mode] */
     public const THEME_COLORS = [
         'classic' => ['#23284f', '#101226'],
@@ -185,6 +188,19 @@ final class Designs
         }
 
         return null;
+    }
+
+    /** The saved hero style; an admin can try the other one with ?hero=wide / ?hero=card (that request only). */
+    public static function hero(?Request $request = null): string
+    {
+        $request ??= request();
+        $asked = $request->query('hero');
+        if (is_string($asked) && array_key_exists($asked, self::HEROES) && $request->user('web')?->is_admin) {
+            return $asked;
+        }
+        $saved = (string) Settings::get('design.hero', 'card');
+
+        return array_key_exists($saved, self::HEROES) ? $saved : 'card';
     }
 
     /** ?design=demo2 (admins only) starts a preview kept in the session; ?design=off ends it. */

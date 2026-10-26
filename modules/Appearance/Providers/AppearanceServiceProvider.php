@@ -61,7 +61,7 @@ class AppearanceServiceProvider extends ModuleServiceProvider
             title: 'طرح‌های سایت',
             icon: 'heroicon-o-swatch',
             sort: 11,
-            defaults: ['demo' => 'demo1', 'disabled' => []] + array_fill_keys(array_keys(Designs::SLOTS), 'classic'),
+            defaults: ['demo' => 'demo1', 'disabled' => [], 'hero' => 'card'] + array_fill_keys(array_keys(Designs::SLOTS), 'classic'),
             schema: fn () => [
                 Radio::make('demo')->label('دمو')
                     ->options(array_map(fn (array $demo) => $demo['label'], Designs::enabledDemos()) + ['custom' => 'ترکیبی (هر بخش جدا)'])
@@ -83,6 +83,9 @@ class AppearanceServiceProvider extends ModuleServiceProvider
                         ) ?? 'custom')),
                     array_keys(Designs::SLOTS), Designs::SLOTS,
                 ))),
+                Radio::make('hero')->label('بنر اصلی صفحه‌ی اول (طرح شیشه‌ای)')->options(Designs::HEROES)->inline()->required()
+                    ->descriptions(['card' => 'بنر در قاب شیشه‌ای با گوشه‌های گرد؛ عکس دسکتاپ ۲۴۰۰×۱۰۰۰.', 'wide' => 'بنر از لبه تا لبه‌ی صفحه و کوتاه‌تر؛ بنر، دسته‌بندی‌ها و نیمی از شگفت‌انگیزها با هم در صفحه‌ی اول. عکس دسکتاپ ۱۹۲۰×۴۰۰ (متن وسط تصویر).'])
+                    ->helperText(new HtmlString('پیش‌نمایش (فقط برای شما): <a href="'.e(url('/').'?hero=card').'" target="_blank" class="font-bold text-primary-600 underline">قاب‌دار</a> · <a href="'.e(url('/').'?hero=wide').'" target="_blank" class="font-bold text-primary-600 underline">تمام‌عرض</a>')),
                 CheckboxList::make('disabled')->label('دموهای خاموش')
                     ->options(array_map(fn (array $demo) => $demo['label'], array_diff_key(Designs::DEMOS, ['demo1' => true])))
                     ->columns(3)

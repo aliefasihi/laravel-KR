@@ -1,33 +1,42 @@
 <?php
 
 /**
- * Demo 1's home: the banner slider takes the full width (no «پیشنهاد ویژه» card beside it, which made the
- * row taller than the 12:5 banner and left a white gap under it).
+ * Home hero: the framed glass banner by default, the full-width one when chosen (admins can preview with ?hero=).
  * نویسنده: علی فصیحی (Ali Fasihi)
  */
 
 namespace Tests\Feature;
 
+use App\Core\Settings\Settings;
+use App\Models\User;
+use Database\Seeders\PlacementSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Catalog\Models\Brand;
-use Modules\Catalog\Models\Product;
-use Modules\Catalog\Models\ProductVariant;
+use Modules\Media\Models\Media;
+use Modules\Placement\Models\Banner;
+use Modules\Placement\Models\Placement;
 use Tests\TestCase;
 
 class HomeHeroTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_hero_is_full_width_without_the_special_offer_card(): void
+    private const WIDE = 'lg:h-[clamp(15rem,calc(100svh_-_36rem),25rem)]';
+
+    public function test_hero_style_switch_and_admin_preview(): void
     {
-        $brand = Brand::create(['name_fa' => 'ریتون', 'name_en' => 'Riton', 'slug' => 'riton']);
-        $product = Product::create(['brand_id' => $brand->id, 'sku' => 'RT-1', 'name' => 'ماهیتابه حراجی', 'status' => Product::STATUS_ACTIVE]);
-        ProductVariant::create(['product_id' => $product->id, 'sku' => 'RT-1-28', 'price' => 2_000_000, 'sale_price' => 1_500_000, 'sale_ends_at' => now()->addDay(), 'stock' => 3]);
+        $this->seed(PlacementSeeder::class);
+        $media = Media::query()->create(['disk' => 'public', 'path' => 'media/banners/hero.webp', 'mime' => 'image/webp', 'title' => 'hero', 'width' => 1920, 'height' => 400]);
+        Banner::query()->create(['placement_id' => Placement::query()->where('key', 'home.hero')->value('id'), 'title' => 'سارینا', 'alt' => 'سرویس سارینا',
+            'link_url' => '/sarina', 'desktop_media_id' => $media->id, 'status' => 'approved']);
 
-        $html = $this->get('/')->assertOk()->getContent();
+        $this->get('/')->assertOk()->assertSee('alt="سرویس سارینا"', false)->assertDontSee(self::WIDE, false);
+        $this->get('/?hero=wide')->assertOk()->assertDontSee(self::WIDE, false);    // visitors can't switch it
 
-        $this->assertStringNotContainsString('پیشنهاد ویژه</span>', $html);
-        $this->assertStringNotContainsString('lg:grid-cols-[1fr_20rem]', $html);
-        $this->assertStringContainsString('تخفیف‌های امروز', $html);   // the typographic hero still links to the sales
+        $admin = User::factory()->create(['is_admin' => true]);
+        $this->actingAs($admin)->get('/?hero=wide')->assertOk()->assertSee(self::WIDE, false);
+
+        Settings::set(['design.hero' => 'wide']);
+        $this->get('/')->assertOk()->assertSee(self::WIDE, false)->assertSee('alt="سرویس سارینا"', false);
+        $this->actingAs($admin)->get('/?hero=card')->assertOk()->assertDontSee(self::WIDE, false);
     }
 }
