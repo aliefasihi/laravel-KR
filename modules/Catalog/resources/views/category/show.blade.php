@@ -10,7 +10,8 @@
 @section('title', ($category->meta_title ?: 'خرید '.$category->name).($page > 1 ? ' — صفحه '.PersianText::toPersianDigits($page) : ''))
 @section('meta_description', $category->meta_description ?: 'خرید اینترنتی '.$category->name.' از برندهای معتبر با ضمانت اصالت کالا و ارسال به سراسر ایران؛ فروشگاه '.config('khaneh.store.name').'.')
 @section('canonical', $filtered ? $category->url() : $canonical)
-@if ($filtered)
+{{-- filtered views, and a category with no published product yet (hidden from menus and the sitemap too) --}}
+@if ($filtered || ! in_array($category->id, \Modules\Catalog\Models\Category::populatedIds(), true))
     @section('robots', 'noindex, follow')
 @endif
 

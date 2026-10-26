@@ -22,17 +22,18 @@ class CategoryController
 {
     public function show(Request $request, string $path, ProductListing $listing, ProductFinder $finder): View|RedirectResponse
     {
+        // unknown path: 404 → the redirects table and the old-URL matcher get their turn (SeoServiceProvider),
+        // so an old /product-category/…/ URL reaches its target in one hop
+        $category = Category::query()->byPath(rtrim($path, '/'))->where('is_active', true)
+            ->with(['parent', 'media', 'children' => fn ($q) => $q->visible()->orderBy('sort')->with('media')])
+            ->firstOrFail();
+
         // the canonical address has no trailing slash (one 301; a fallback route skips CanonicalTrailingSlash)
         if (str_ends_with($request->getPathInfo(), '/')) {
             $query = $request->getQueryString();
 
-            return redirect()->to(rtrim($request->url(), '/').($query ? '?'.$query : ''), 301);
+            return redirect()->to($category->url().($query ? '?'.$query : ''), 301);
         }
-
-        // unknown path: 404 → the redirects table and the old-URL matcher get their turn (SeoServiceProvider)
-        $category = Category::query()->byPath($path)->where('is_active', true)
-            ->with(['parent', 'media', 'children' => fn ($q) => $q->visible()->orderBy('sort')->with('media')])
-            ->firstOrFail();
 
         $filters = $listing->filters($request);
 
