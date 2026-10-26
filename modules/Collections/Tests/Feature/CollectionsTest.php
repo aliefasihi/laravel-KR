@@ -27,7 +27,8 @@ class CollectionsTest extends SearchTestCase
         $this->get('/collections/acorn')->assertOk()->assertSee('قندان بلوط طلایی')->assertDontSee('شکلات‌خوری بلوط')
             ->assertSee('<link rel="canonical" href="'.url('collections/acorn').'"', false);
         $this->get($acorn->url())->assertOk()->assertSee('از کالکشن')->assertSee(url('collections/acorn'));
-        $this->get('/')->assertOk()->assertSee(route('collections.index'));
+        // on the home page right under the newest-products slider
+        $this->get('/')->assertOk()->assertSeeInOrder(['id="home-slider-2"', 'id="home-collections"', url('collections/acorn')], false);
         $this->get('/sitemap-pages.xml')->assertSee(url('collections/acorn'))->assertDontSee(url('collections/tiana'));
         $this->get('/collections/no-such')->assertNotFound();
     }

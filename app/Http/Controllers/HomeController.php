@@ -86,20 +86,23 @@ class HomeController
             ->orderByDesc('products_count')
             ->get();
 
-        // the newest 8 of each of the top 4 brands — one query for all four (window function)
+        // the newest 12 of each of the top 4 brands — one query for all four (window function)
         $top = $brands->where('products_count', '>', 0)->take(4);
         $newestPerBrand = Product::query()->active()->whereIn('brand_id', $top->modelKeys())
             ->select('products.*')->selectRaw('ROW_NUMBER() OVER (PARTITION BY brand_id ORDER BY id DESC) AS brand_rank');
-        $byBrand = Product::query()->fromSub($newestPerBrand, 'products')->where('brand_rank', '<=', 8)
+        $byBrand = Product::query()->fromSub($newestPerBrand, 'products')->where('brand_rank', '<=', 12)
             ->with(['variants', 'media'])->orderByDesc('id')->get()->groupBy('brand_id');
 
-        $showcase = $top->map(fn (Brand $brand) => [
-            'brand' => $brand,
-            'products' => $byBrand->get($brand->id, collect())
-                ->each(fn (Product $product) => $product->setRelation('brand', $brand))
-                // full rows only in the 4-column grid (no orphan card on a second row)
-                ->pipe(fn ($c) => $c->count() > 4 ? $c->take(intdiv($c->count(), 4) * 4) : $c),
-        ])->values();
+        $showcase = $top->map(function (Brand $brand) use ($byBrand) {
+            $all = $byBrand->get($brand->id, collect())->each(fn (Product $product) => $product->setRelation('brand', $brand));
+
+            return [
+                'brand' => $brand,
+                'rail' => $all, // one sliding row (default design)
+                // full rows only in the 4-column grids of the other designs (no orphan card on a second row)
+                'products' => $all->take(8)->pipe(fn ($c) => $c->count() > 4 ? $c->take(intdiv($c->count(), 4) * 4) : $c),
+            ];
+        })->values();
 
         return [
             'heroBanners' => Placement::liveFor('home.hero'),

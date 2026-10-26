@@ -1,10 +1,12 @@
 {{-- Home sections (rendered once, served from StoreCache) | نویسنده: علی فصیحی (Ali Fasihi) --}}
 {{-- Nothing per-visitor may go in here: no CSRF fields, no session, no Livewire components. --}}
-    <div class="mx-auto max-w-7xl space-y-20 px-3 pt-5 sm:px-4 sm:pt-6">
+    <div class="mx-auto max-w-7xl space-y-20 px-3 pt-4 sm:px-4 sm:pt-5">
 
         {{-- ── Hero: full-width banner slider ────────────────────────────── --}}
         {{-- the old «پیشنهاد ویژه» card beside it is gone: it repeated the «شگفت‌انگیز» band below, was taller than
              the 12:5 banner (white gap under it) and pushed the banner down on phones (slower LCP) --}}
+        {{-- hero and category circles share the first screen: a small gap between them, not the page's section gap --}}
+        <div class="space-y-4 sm:space-y-5">
         <section aria-label="پیشنهادهای ویژه">
             @if ($heroBanners->isNotEmpty())
                 <div x-data="slider({{ $heroBanners->count() }})" @mouseenter="stop()" @mouseleave="play()" @focusin="stop()"
@@ -15,7 +17,7 @@
                                x-transition:enter="transition duration-700 ease-out" x-transition:enter-start="opacity-0 scale-[1.02]"
                                class="block" aria-roledescription="slide" aria-label="{{ $loop->iteration }} از {{ $loop->count }}">
                                 <x-media.banner :desktop="$banner->desktopMedia" :mobile="$banner->mobileMedia" :alt="$banner->alt" :eager="$loop->first"
-                                                sizes="(min-width: 1280px) 1260px, 100vw" class="aspect-[4/5] w-full object-cover sm:aspect-[12/5]" />
+                                                sizes="(min-width: 1280px) 1260px, 100vw" class="aspect-[4/5] w-full object-cover sm:aspect-[12/5] lg:aspect-[11/4]" />
                             </a>
                         @endforeach
                     </div>
@@ -60,19 +62,20 @@
                 <h2 id="cats-title" class="sr-only">دسته‌بندی‌ها</h2>
                 <ul class="rail sm:justify-center">
                     @foreach ($categories as $category)
-                        <li class="w-24 shrink-0 sm:w-28">
-                            <a href="{{ $category->url() }}" class="group flex flex-col items-center gap-3 text-center">
-                                <span class="glass relative grid size-24 place-items-center overflow-hidden rounded-full p-1.5 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_18px_34px_-18px_rgb(204_51_102/0.6)] sm:size-28">
+                        <li class="w-20 shrink-0 sm:w-24">
+                            <a href="{{ $category->url() }}" class="group flex flex-col items-center gap-2 text-center">
+                                <span class="glass relative grid size-20 place-items-center overflow-hidden rounded-full p-1.5 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_18px_34px_-18px_rgb(204_51_102/0.6)] sm:size-24">
                                     <span class="absolute inset-1.5 rounded-full bg-gradient-to-br from-cream to-rose-100"></span>
-                                    <x-media.picture :media="$category->media->first()" alt="" sizes="128px" class="relative size-full rounded-full object-cover transition duration-500 group-hover:scale-110" />
+                                    <x-media.picture :media="$category->media->first()" alt="" sizes="96px" class="relative size-full rounded-full object-cover transition duration-500 group-hover:scale-110" />
                                 </span>
-                                <span class="text-[13px] leading-5 font-bold text-navy transition group-hover:text-rose">{{ $category->name }}</span>
+                                <span class="text-xs leading-5 sm:text-[13px] font-bold text-navy transition group-hover:text-rose">{{ $category->name }}</span>
                             </a>
                         </li>
                     @endforeach
                 </ul>
             </section>
         @endif
+        </div>
 
         @storefrontHook('home.after_categories')
 
@@ -165,15 +168,15 @@
 
         @storefrontHook('home.after_brands')
 
-        {{-- ── Brand showcase tabs ──────────────────────────────────────── --}}
+        {{-- ── Products by brand: a tab per brand, one sliding row each (phones too) ── --}}
         @if ($showcase->isNotEmpty())
             <section aria-labelledby="showcase-title" class="space-y-7" x-data="{ tab: 0 }">
                 <div class="flex flex-wrap items-end justify-between gap-4">
-                    <x-section-title id="showcase-title" accent="برندهای" title="ویژه" ghost="Featured" />
-                    <div class="glass flex gap-1 rounded-full p-1" role="tablist" aria-label="برندها">
+                    <x-section-title id="showcase-title" accent="محصولات" title="بر اساس برند" ghost="By Brand" />
+                    <div class="glass -mx-1 flex max-w-full gap-1 overflow-x-auto rounded-full p-1 [scrollbar-width:none]" role="tablist" aria-label="برندها">
                         @foreach ($showcase as $item)
                             <button type="button" role="tab" @click="tab = {{ $loop->index }}" :aria-selected="tab === {{ $loop->index }}"
-                                    class="rounded-full px-4 py-2 text-sm font-bold transition"
+                                    class="shrink-0 rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap transition"
                                     :class="tab === {{ $loop->index }} ? 'bg-deep text-white shadow' : 'text-muted hover:text-navy'">{{ $item['brand']->name_fa }}</button>
                         @endforeach
                     </div>
@@ -181,11 +184,17 @@
                 @foreach ($showcase as $item)
                     {{-- other brands' products join the page only when their tab is opened (lighter first load) --}}
                     @if (! $loop->first)<template x-if="tab === {{ $loop->index }}">@endif
-                    <div @if ($loop->first) x-show="tab === 0" @endif role="tabpanel" class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-                        @foreach ($item['products'] as $product)
-                            <x-product.card :product="$product" />
-                        @endforeach
-                        <a href="{{ $item['brand']->url() }}" class="col-span-full mx-auto mt-2 btn-glass">همه‌ی محصولات {{ $item['brand']->name_fa }}</a>
+                    <div @if ($loop->first) x-show="tab === 0" @endif role="tabpanel" class="space-y-4">
+                        <div x-data="loopRail(4000, true)" @mouseenter="pause()" @mouseleave="resume()" @focusin="pause()" @focusout="resume()" aria-roledescription="carousel">
+                            <ul class="rail" x-ref="track">
+                                @foreach ($item['rail'] as $product)
+                                    <li class="w-[46%] shrink-0 sm:w-[31%] md:w-[23.5%] lg:w-[18.6%]" aria-roledescription="slide">
+                                        <x-product.card :product="$product" class="h-full" />
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <div class="text-center"><a href="{{ $item['brand']->url() }}" class="btn-glass">همه‌ی محصولات {{ $item['brand']->name_fa }}</a></div>
                     </div>
                     @if (! $loop->first)</template>@endif
                 @endforeach

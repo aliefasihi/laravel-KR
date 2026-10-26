@@ -11,6 +11,7 @@
 namespace Modules\HomeSliders\Support;
 
 use App\Core\Support\StoreCache;
+use App\Core\Support\StorefrontHooks;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
@@ -34,6 +35,7 @@ class HomeSliderRenderer
         }
 
         $html = '';
+        $afterNewest = false;
         foreach ($this->bySlot->get($slot, collect()) as $slider) {
             $products = $slider->products();
             if ($products->count() < 2) {
@@ -44,6 +46,17 @@ class HomeSliderRenderer
                 'products' => $products,
                 'dealsEnd' => $slider->style === 'band' ? $this->dealsEnd($products->modelKeys()) : null,
             ])->render();
+
+            // other modules (Collections) sit right under the newest-products slider
+            if ($slider->source === 'newest' && ! $afterNewest) {
+                $html .= StorefrontHooks::render('home.after_newest')->toHtml();
+                $afterNewest = true;
+            }
+        }
+
+        // no newest slider here: the main slot still carries them
+        if ($slot === 'after_categories' && ! $afterNewest && ! $this->bySlot->collapse()->contains(fn ($s) => $s->source === 'newest' && $s->slot !== $slot)) {
+            $html .= StorefrontHooks::render('home.after_newest')->toHtml();
         }
 
         return new HtmlString($html);

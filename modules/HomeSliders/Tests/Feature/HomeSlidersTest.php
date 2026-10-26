@@ -26,7 +26,7 @@ class HomeSlidersTest extends SearchTestCase
         $html = $this->get('/')->assertOk()->getContent();
 
         // the migration's two sliders: offers band (sale, by discount) and newest
-        $this->assertSame(2, substr_count($html, 'x-data="loopRail('));
+        $this->assertSame(2, substr_count($html, 'aria-labelledby="home-slider-')); // (the brand tabs have rails of their own)
         $this->assertStringContainsString('محصولات<br class="max-lg:hidden"> شگفت‌انگیز', $html);
         $this->assertStringContainsString('id="home-slider-2"', $html);
         $this->assertStringNotContainsString('id="amazing-title"', $html); // built-in band gone

@@ -8,6 +8,7 @@
 namespace Modules\Collections\Providers;
 
 use App\Core\Modules\ModuleServiceProvider;
+use App\Core\Modules\Modules;
 use App\Core\Support\StorefrontHooks;
 use Modules\Catalog\Models\Product;
 use Modules\Collections\Models\Collection;
@@ -21,6 +22,7 @@ class CollectionsServiceProvider extends ModuleServiceProvider
         Product::resolveRelationUsing('collections', fn (Product $product) => $product->belongsToMany(Collection::class));
 
         StorefrontHooks::add('product.buybox', 'collections::partials.product-link', 5);
-        StorefrontHooks::add('home.after_categories', 'collections::partials.home', 20);
+        // under the newest-products slider (HomeSliders); without that module, under the category circles
+        StorefrontHooks::add(Modules::enabled('HomeSliders') ? 'home.after_newest' : 'home.after_categories', 'collections::partials.home', 20);
     }
 }
